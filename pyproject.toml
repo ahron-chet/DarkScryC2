@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "darkscryc2server"
+version = "0.1.0"
+description = ""
+authors = ["Aahron Chetrit <105120555+ahron-chet@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+cryptography = "^44.0.0"
+redis = "^5.2.1"
+pydantic = "^2.10.4"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
