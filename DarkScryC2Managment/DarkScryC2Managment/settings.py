@@ -78,14 +78,16 @@ ASGI_APPLICATION = 'DarkScryC2Managment.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+from os import getenv
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'darkscryc2managment',
-        'USER': 'postgres',
-        'PASSWORD': 'DarkScry2025!',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': getenv('DB_NAME', 'default_db_name'),
+        'USER': getenv('DB_USER', 'default_user'),
+        'PASSWORD': getenv('DB_PASSWORD', 'default_password'),
+        'HOST': getenv('DB_HOST', 'localhost'),
+        'PORT': getenv('DB_PORT', '5432')
     }
 }
 
