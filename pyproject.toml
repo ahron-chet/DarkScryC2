@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "darkscryc2django"
+version = "0.1.0"
+description = ""
+authors = ["Aahron Chetrit <105120555+ahron-chet@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+django = "^5.1.4"
+psycopg = "^3.2.3"
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.36"}
+pydantic = "^2.10.4"
+uvicorn = "^0.34.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Scrollable Client Cards</title>
+
+  <!-- Animate.css for flip effect -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+  />
+
+  <style>
+    :root {
+      --sidebar-width: 280px;
+      --sidebar-collapsed-width: 70px;
+
+      --sidebar-bg-start: #0c0f14;
+      --sidebar-bg-end: #10131a;
+      --accent-color: #497ea5;
+      --text-color: #ffffff;
+      --border-radius: 16px;
+      --font-body: 'Rajdhani', sans-serif;
+      --font-heading: 'Orbitron', sans-serif;
+    }
+
+    /* Emphasize "All Clients" tab */
+    #allClients {
+      font-weight: bold;
+    }
+
+    /* Modules buttons styling, as you had before */
+    .dropdown.modules button {
+      color: black;
+      background-color: var(--accent-color);
+      font-weight: normal;
+      transition: all 0.3s ease;
+    }
+    .dropdown.modules button.active {
+      color: white;
+      background-color: #006fa1;
+      font-weight: bold;
+    }
+
+    /* The active-client-tab container */
+    .active-client-tab {
+      position: relative; /* So we can position chat panel absolutely */
+      display: none;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--border-radius);
+      margin-top: 20px;
+    }
+    .active-client-tab.active {
+      display: block;
+    }
+
+    /* Chat panel: flip in/out, etc. */
+    .chat-slide-panel {
+      display: flex;
+      flex-direction: column;
+      background: #252525;
+      border-radius: var(--border-radius);
+      box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+      margin-top: 1rem;
+      overflow: hidden; /* Keep content contained */
+    }
+    .chat-slide-panel.open {
+      right: 0;
+    }
+    .chat-slide-header {
+      padding: 0.75rem 1rem;
+      font-family: var(--font-heading);
+      color: #fff;
+      border-top-left-radius: var(--border-radius);
+      border-top-right-radius: var(--border-radius);
+      background:
+        linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+        url("{{ url_for('static', filename='images/chat-shell-header.jpg') }}");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      box-shadow: inset 0 -1px 2px rgba(0, 0, 0, 0.4);
+      border-bottom: 1px solid grey;
+    }
+    .chat-slide-body {
+      height: 300px;
+      flex: 1;
+      padding: 0.75rem 1rem;
+      overflow-y: auto;
+      background:
+        linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+        url("{{ url_for('static', filename='images/chat-shell-body.jpg') }}");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    .chat-slide-footer {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      border-bottom-left-radius: var(--border-radius);
+      border-bottom-right-radius: var(--border-radius);
+    }
+    .message-row {
+      display: flex;
+      margin-bottom: 0.5rem;
+    }
+    .message-row.right {
+      justify-content: flex-end;
+    }
+    .message-row.left {
+      justify-content: flex-start;
+    }
+    .message-bubble {
+      background: #333;
+      color: #fff;
+      padding: 0.5rem 0.8rem;
+      border-radius: var(--border-radius);
+      max-width: 70%;
+      word-wrap: break-word;
+    }
+    .message-row.right .message-bubble {
+      background: var(--accent-color);
+      color: #000;
+    }
+    .chat-input {
+      flex: 1;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: var(--border-radius);
+      background: #1e1e1e;
+      color: #fff;
+      padding: 0.4rem 0.6rem;
+    }
+    .chat-send-btn {
+      background: var(--accent-color);
+      color: #000;
+      border: none;
+      border-radius: var(--border-radius);
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .chat-send-btn:hover {
+      background: #006fa1;
+      color: #fff;
+    }
+
+    /* The mini navbar in .active-client-tab */
+    .active-client-tab .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 0.75rem 1rem;
+      border-radius: var(--border-radius);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .active-client-tab .navbar h3 {
+      margin: 0;
+      font-family: var(--font-heading);
+      font-size: 1.2rem;
+      color: var(--accent-color);
+    }
+    .active-client-tab .modules {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .active-client-tab p {
+      color: #ccc;
+      margin-bottom: 0.5rem;
+    }
+
+    /* The main content area, tabs, container, etc. */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      padding: 2rem;
+      transition: margin-left 0.4s ease;
+      overflow-y: auto;
+    }
+    .tabs-container {
+      display: flex;
+      background-color: #1a1d24;
+      padding: 10px;
+      border-radius: var(--border-radius);
+      margin-bottom: 20px;
+    }
+    .tab {
+      padding: 10px 20px;
+      margin-right: 10px;
+      background-color: var(--accent-color);
+      color: var(--text-color);
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+    .tab.active {
+      background-color: #006fa1;
+    }
+    .tab-close {
+      font-size: 1.2em;
+      margin-left: 10px;
+      cursor: pointer;
+      color: #999;
+    }
+    .scrollable-container {
+      max-height: 80vh;
+      overflow-y: auto;
+      margin: 0 -20px;
+      padding: 0 20px;
+    }
+
+    /* The client cards themselves */
+    .client-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--border-radius);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      color: #fff;
+      margin: 10px 0;
+      padding: 16px;
+      text-align: center;
+      transition: transform 0.3s;
+      display: flex;
+    }
+    .client-card:hover {
+      transform: translateY(-5px);
+    }
+    .client-card h4 {
+      font-size: 1.1rem;
+      color: var(--accent-color);
+      margin-bottom: 10px;
+      font-family: var(--font-heading);
+    }
+    .client-card .client-icon {
+      width: 50px; height: 50px;
+      border-radius: var(--border-radius);
+      margin: 0 auto 0px auto;
+      display: flex; justify-content: center; align-items: center;
+      color: #000; font-size: 1.2em;
+    }
+
+    /* For the OS / Memory / Disk info block in card */
+    .client-info {
+      display: flex; justify-content: space-evenly; color: #ddd;
+      align-self: self-end; width: 50px; height: 50px;
+      border-radius: var(--border-radius); align-items: center;
+      font-size: 1.5em; margin: 10px auto;
+      background-size: contain; background-repeat: no-repeat; background-position: center;
+    }
+    .client-info div {
+      text-align: center;
+    }
+    .activate-btn {
+      padding: 6px 14px;
+      background-color: var(--accent-color);
+      color: #000; border-radius: var(--border-radius);
+      cursor: pointer; font-size: 0.85rem; border: none;
+      transition: background-color 0.3s; align-self: center; height: 42px;
+    }
+    .activate-btn:hover {
+      background-color: #006fa1;
+      color: #fff;
+    }
+
+    /* Optional custom scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #1c1f24;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #444;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+  </style>
+</head>
+<body>
+
+<main class="main-content">
+  <!-- Tabs Section -->
+  <div class="tabs-container" id="client-tabs-container">
+    <div class="tab active" data-tab="all-clients" id="allClients" onclick="showAllClients()">All Clients</div>
+  </div>
+
+  <!-- Dynamic Tab Content -->
+  <div id="client-tab-content"></div>
+
+  <!-- Scrollable container for client cards -->
+  <div class="scrollable-container">
+    <!-- Example Client Cards (Using partial JSON info: OS, Memory, Disk, etc.) -->
+    
+    <!-- 1) Machine 1 -->
+    <div class="row client-card" data-client-name="Machine1">
+      <div class="col-2 p-0 m-0">
+        <h4>Machine 1</h4>
+        <div class="client-icon">
+          <img src="{{ url_for('static', filename='images/windows.svg') }}" alt="Windows Icon">
+        </div>
+      </div>
+      <div class="col client-info" style="flex-direction: column;">
+        <div>
+          <strong>OS:</strong>
+          <p id="os-Machine1"></p>
+        </div>
+        <div>
+          <strong>Memory:</strong>
+          <p id="memory-Machine1"></p>
+        </div>
+        <div>
+          <strong>Disk:</strong>
+          <p id="disk-Machine1"></p>
+        </div>
+      </div>
+      <button class="col-1 activate-btn" onclick="activateClient('Machine1')">Activate</button>
+    </div>
+    
+    <!-- 2) Machine 2 -->
+    <div class="row client-card" data-client-name="Machine2">
+      <div class="col-2 p-0 m-0">
+        <h4>Machine 2</h4>
+        <div class="client-icon">
+          <img src="{{ url_for('static', filename='images/linux.png') }}" alt="Linux Icon">
+        </div>
+      </div>
+      <div class="col client-info" style="flex-direction: column;">
+        <div>
+          <strong>OS:</strong>
+          <p id="os-Machine2"></p>
+        </div>
+        <div>
+          <strong>Memory:</strong>
+          <p id="memory-Machine2"></p>
+        </div>
+        <div>
+          <strong>Disk:</strong>
+          <p id="disk-Machine2"></p>
+        </div>
+      </div>
+      <button class="col-1 activate-btn" onclick="activateClient('Machine2')">Activate</button>
+    </div>
+
+    <!-- 3) Machine 3 -->
+    <div class="row client-card" data-client-name="Machine3">
+      <div class="col-2 p-0 m-0">
+        <h4>Machine 3</h4>
+        <div class="client-icon">
+          <img src="{{ url_for('static', filename='images/apple.png') }}" alt="Mac Icon">
+        </div>
+      </div>
+      <div class="col client-info" style="flex-direction: column;">
+        <div>
+          <strong>OS:</strong>
+          <p id="os-Machine3"></p>
+        </div>
+        <div>
+          <strong>Memory:</strong>
+          <p id="memory-Machine3"></p>
+        </div>
+        <div>
+          <strong>Disk:</strong>
+          <p id="disk-Machine3"></p>
+        </div>
+      </div>
+      <button class="col-1 activate-btn" onclick="activateClient('Machine3')">Activate</button>
+    </div>
+  </div>
+</main>
+
+<script>
+  /* 
+    1) We store JSON for multiple machines: partial for card display, full for detail panel 
+       (You can expand these as needed.)
+  */
+  const clientJSON = {
+    "Machine1": {
+      "PartialInfo": {
+        "OS": "Windows 11",
+        "Memory": "8 GB",
+        "Disk": "256 GB"
+      },
+      "FullDetails": {
+        "Hostname": "WORKSTATION-BETA02",
+        "CPU": "AMD Ryzen 7 5800H @ 3.2GHz",
+        "RAM": "8 GB",
+        "DiskInfo": "256 GB SSD",
+        "PrimaryIP": "10.0.0.45",
+        "AgentStatus": "Active and Monitoring",
+        "OSVersion": "Windows 11 Pro (21H2)",
+        "GPU": "AMD Radeon Graphics",
+        "LastLogin": "2025-01-06T07:45:00Z"
+      }
+    },
+    "Machine2": {
+      "PartialInfo": {
+        "OS": "Linux Ubuntu 20.04",
+        "Memory": "16 GB",
+        "Disk": "512 GB"
+      },
+      "FullDetails": {
+        "Hostname": "DEV-LINUX01",
+        "CPU": "Intel Core i7-10700 @ 2.9GHz",
+        "RAM": "16 GB",
+        "DiskInfo": "512 GB NVMe",
+        "PrimaryIP": "192.168.0.100",
+        "AgentStatus": "Active",
+        "OSVersion": "Ubuntu 20.04 LTS",
+        "GPU": "Nvidia GTX 1660 Ti",
+        "LastLogin": "2025-01-06T09:22:00Z"
+      }
+    },
+    "Machine3": {
+      "PartialInfo": {
+        "OS": "macOS Monterey",
+        "Memory": "32 GB",
+        "Disk": "1 TB"
+      },
+      "FullDetails": {
+        "Hostname": "MAC-DEV-SYSTEM",
+        "CPU": "Apple M1 Max",
+        "RAM": "32 GB",
+        "DiskInfo": "1 TB SSD",
+        "PrimaryIP": "10.10.10.12",
+        "AgentStatus": "Active",
+        "OSVersion": "macOS Monterey (12.3)",
+        "GPU": "Apple M1 GPU",
+        "LastLogin": "2025-01-06T10:15:30Z"
+      }
+    }
+  };
+
+  /* 2) On page load, fill the partial info for each card from JSON */
+  window.addEventListener("DOMContentLoaded", () => {
+    Object.keys(clientJSON).forEach((key) => {
+      const partial = clientJSON[key].PartialInfo;
+      if (!partial) return;
+      const osEl = document.getElementById(`os-${key}`);
+      const memEl = document.getElementById(`memory-${key}`);
+      const diskEl = document.getElementById(`disk-${key}`);
+      if (osEl) osEl.textContent = partial.OS;
+      if (memEl) memEl.textContent = partial.Memory;
+      if (diskEl) diskEl.textContent = partial.Disk;
+    });
+  });
+
+  /* 3) Activate client => create tab + detail panel from JSON FullDetails */
+  function activateClient(clientName) {
+    const existingTab = document.querySelector(`.tab[data-tab="${clientName}"]`);
+    if (existingTab) { 
+      // Tab already exists, optionally open it
+      // openTab(clientName);
+      return;
+    }
+
+    // Create a new tab
+    const tabContainer = document.getElementById('client-tabs-container');
+    const newTab = document.createElement('div');
+    newTab.classList.add('tab');
+    newTab.setAttribute('data-tab', clientName);
+    newTab.textContent = clientName;
+    newTab.onclick = () => openTab(clientName);
+
+    // Close button
+    const closeBtn = document.createElement('span');
+    closeBtn.textContent = '×';
+    closeBtn.classList.add('tab-close');
+    closeBtn.onclick = (event) => {
+      event.stopPropagation();
+      closeTab(clientName);
+    };
+    newTab.appendChild(closeBtn);
+    tabContainer.appendChild(newTab);
+
+    // Build the detail panel from JSON
+    createClientDetails(clientName);
+    // Optionally: openTab(clientName);
+  }
+
+  /* 4) Build detail panel for the client from JSON FullDetails */
+  function createClientDetails(clientName) {
+    const contentContainer = document.getElementById('client-tab-content');
+    const detailDiv = document.createElement('div');
+    detailDiv.classList.add('active-client-tab');
+    detailDiv.setAttribute('data-client', clientName);
+
+    const details = clientJSON[clientName].FullDetails;
+    if (!details) return;
+
+    // Prepare an HTML snippet for the full JSON
+    // You can refine or format this as needed to display everything
+    const fullJSON = `
+      <p><strong>Hostname:</strong> ${details.Hostname}</p>
+      <p><strong>Operating System:</strong> ${details.OSVersion}</p>
+      <p><strong>CPU:</strong> ${details.CPU}</p>
+      <p><strong>RAM:</strong> ${details.RAM}</p>
+      <p><strong>Disk:</strong> ${details.DiskInfo}</p>
+      <p><strong>Primary IP:</strong> ${details.PrimaryIP}</p>
+      <p><strong>Agent Status:</strong> ${details.AgentStatus}</p>
+      <p><strong>GPU:</strong> ${details.GPU}</p>
+      <p><strong>Last Login:</strong> ${details.LastLogin}</p>
+    `;
+
+    detailDiv.innerHTML = `
+      <div class="navbar">
+        <h3>${clientName} Details</h3>
+        <div class="dropdown modules">
+          <button onclick="toggleChat('${clientName}')">Remote Shell</button>
+          <button>Machine Info</button>
+          <button>Browser Passwowrds</button>
+          <button>Injections</button>
+          <button>Processes</button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <!-- FULL JSON details -->
+          ${fullJSON}
+        </div>
+        <div class="col">
+          <!-- The chat panel -->
+          <div class="chat-slide-panel" id="chatPanel-${clientName}" style="display: none;">
+            <div class="chat-slide-header">
+              <strong>${clientName} - Remote Shell</strong>
+            </div>
+            <div class="chat-slide-body" id="chatBody-${clientName}"></div>
+            <div class="chat-slide-footer">
+              <input
+                type="text"
+                class="chat-input"
+                placeholder="Type a command..."
+                id="chatInput-${clientName}"
+              />
+              <button
+                class="chat-send-btn"
+                onclick="sendCommand('${clientName}')"
+              >
+                Send
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    contentContainer.appendChild(detailDiv);
+  }
+
+  /* 5) Show All Clients => revert to original card view */
+  function showAllClients() {
+    document.querySelectorAll('.tab').forEach((tab) => tab.classList.remove('active'));
+    document.querySelectorAll('.active-client-tab').forEach((p) => p.classList.remove('active'));
+    const allClientsTab = document.querySelector('.tab[data-tab="all-clients"]');
+    if (allClientsTab) allClientsTab.classList.add('active');
+
+    // Show all client cards again
+    document.querySelectorAll('.client-card').forEach((card) => {
+      card.style.display = 'flex';
+      card.style.border = '';
+    });
+  }
+
+  /* 6) Open a specific client tab => hide cards, show detail */
+  function openTab(clientName) {
+    document.querySelectorAll('.client-card').forEach((c) => (c.style.display = 'none'));
+    document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
+    document.querySelectorAll('.active-client-tab').forEach((p) => p.classList.remove('active'));
+
+    const selectedTab = document.querySelector(`.tab[data-tab="${clientName}"]`);
+    if (selectedTab) selectedTab.classList.add('active');
+
+    const selectedPanel = document.querySelector(`.active-client-tab[data-client="${clientName}"]`);
+    if (selectedPanel) selectedPanel.classList.add('active');
+  }
+
+  /* 7) Close the tab */
+  function closeTab(clientName) {
+    const tabToRemove = document.querySelector(`.tab[data-tab="${clientName}"]`);
+    if (tabToRemove) tabToRemove.remove();
+
+    const panelToRemove = document.querySelector(`.active-client-tab[data-client="${clientName}"]`);
+    if (panelToRemove) panelToRemove.remove();
+
+    showAllClients();
+  }
+
+  /* 8) Flip in/out the chat container */
+  function toggleChat(clientName) {
+    const chatPanel = document.getElementById(`chatPanel-${clientName}`);
+    if (!chatPanel) return;
+
+    if (chatPanel.style.display === 'none' || chatPanel.style.display === '') {
+      chatPanel.style.display = 'block';
+      chatPanel.classList.remove('animate__flipOutX');
+      chatPanel.classList.add('animate__animated', 'animate__flipInX');
+    } else {
+      chatPanel.classList.remove('animate__flipInX');
+      chatPanel.classList.add('animate__flipOutX');
+      chatPanel.addEventListener('animationend', function handleFlipOut(e) {
+        if (e.animationName === 'flipOutX') chatPanel.style.display = 'none';
+        chatPanel.classList.remove('animate__animated','animate__flipOutX');
+        chatPanel.removeEventListener('animationend', handleFlipOut);
+      });
+    }
+  }
+
+  /* 9) Send command => user msg (right), 'Hello World' (left) */
+  function sendCommand(clientName) {
+    const input = document.getElementById(`chatInput-${clientName}`);
+    const chatBody = document.getElementById(`chatBody-${clientName}`);
+    if (!input || !chatBody) return;
+
+    const userCmd = input.value.trim();
+    if (!userCmd) return;
+
+    const userDiv = document.createElement('div');
+    userDiv.classList.add('message-row','right');
+    userDiv.innerHTML = `<div class="message-bubble">${userCmd}</div>`;
+    chatBody.appendChild(userDiv);
+
+    input.value = '';
+
+    const respDiv = document.createElement('div');
+    respDiv.classList.add('message-row','left');
+    respDiv.innerHTML = `<div class="message-bubble">Hello World</div>`;
+    chatBody.appendChild(respDiv);
+
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+</script>
+</body>
+</html>

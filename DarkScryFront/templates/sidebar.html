@@ -1,0 +1,118 @@
+<nav id="sidebarMenu" class="sidebar">
+   <div class="sidebar-content d-flex flex-column">
+      <!-- LOGO AREA -->
+      <div class="logo-area">
+         <img
+            src="{{ url_for('static', filename='images/logo.png') }}"
+            alt="DarkSCRY Logo"
+            class="logo-img"
+            />
+         <!-- TOGGLE BUTTON -->
+         <button class="toggle-btn" id="toggleSidebar">
+         <i class="bi bi-list"></i>
+         </button>
+      </div>
+      <!-- SEARCH BAR -->
+      <div class="sidebar-search">
+         <i class="bi bi-search"></i>
+         <input type="text" placeholder="Search..." />
+      </div>
+      <!-- NAV LINKS -->
+      <div class="nav-list">
+         <ul class="nav flex-column mb-auto">
+            <li class="nav-item" id="dashboard">
+               <a href="/index/views/dashboard" class="nav-link active">
+               <i class="bi bi-speedometer2"></i>
+               <span>Dashboard</span>
+               </a>
+            </li>
+            <li class="nav-item" id="alerts">
+               <a href="/index/views/alerts" class="nav-link">
+               <i class="bi bi-exclamation-triangle"></i>
+               <span>Alerts</span>
+               </a>
+            </li>
+            <li class="nav-item" id="clients">
+               <a href="/index/views/clients" class="nav-link">
+                  <i class="bi bi-laptop"></i>
+                  <span>Clients</span>
+               </a>
+            </li>
+            
+            <li class="nav-item" id="assets">
+               <!-- Parent link toggles the submenu -->
+               <a
+                  href="#assetsSubmenu"
+                  class="nav-link d-flex justify-content-between align-items-center"
+                  data-bs-toggle="collapse"
+                  >
+                  <div>
+                     <i class="bi bi-box-seam"></i>
+                     <span>Assets</span>
+                  </div>
+                  <i class="bi bi-chevron-down"></i>
+               </a>
+               <ul class="submenu collapse list-unstyled" id="assetsSubmenu">
+                  <li>
+                     <a href="#" class="nav-link">Discovery</a>
+                  </li>
+                  <li>
+                     <a href="#" class="nav-link">ASM</a>
+                  </li>
+               </ul>
+            </li>
+            <li class="nav-item" id="integrations">
+               <a href="/index/Integrations" class="nav-link">
+               <i class="bi bi-puzzle"></i>
+               <span>Integrations</span>
+               </a>
+            </li>
+            <li class="nav-item" id="accounts">
+              <a href="#" class="nav-link">
+              <i class="bi bi-people"></i>
+              <span>Accounts</span>
+              </a>
+           </li>
+         </ul>
+      </div>
+      <!-- USER SECTION -->
+      <div class="user-section" id="side-bar-user-section">
+         <div class="profile-pic-container">
+            <img
+               src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+               alt="User"
+               class="profile-pic"
+               />
+         </div>
+         <div class="user-info dropdown dropup">
+            <h6 class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+               Jane Doe
+            </h6>
+            <small>Administrator</small>
+            <ul class="dropdown-menu dropdown-menu-dark">
+               <li>  <a class="dropdown-item" href="#"><i class="bi bi-gear"></i> Settings</a></li>
+               <li><a class="dropdown-item" href="#"><i class="bi bi-person"></i> Profile</a></li>
+               <li><a class="dropdown-item" href="/auth/logout"><i class="bi bi-box-arrow-right"></i> Sign out</a></li>
+            </ul>
+         </div>
+      </div>
+   </div>
+</nav>
+
+<script>
+   const url = window.location.href;
+
+   const parts = url.split('/').filter(part => part !== ''); // Remove empty parts
+   const lastSegment = parts[parts.length - 1]; // Get the last meaningful segment
+
+   const sideBar = document.querySelector(".nav-list");
+   const sideBarLinks = sideBar.querySelectorAll(".nav-item");
+
+   sideBarLinks.forEach( link => {
+      link.querySelector("a").classList.remove("active");
+      if(link.id == lastSegment){
+         link.querySelector("a").classList.add("active");
+      }
+   })
+   
+</script>
