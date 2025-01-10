@@ -1,11 +1,10 @@
-import redis
+import redis.asyncio as redis
 from typing import Any, Optional
-
 
 class RedisManager:
     def __init__(self, redis_url: str) -> None:
         """
-        Initialize the RedisManager instance with a Redis connection.
+        Initialize the AsyncRedisManager instance with a Redis connection URL.
 
         Args:
             redis_url (str): The URL of the Redis server (e.g., "redis://localhost:6379/0").
@@ -13,19 +12,25 @@ class RedisManager:
         self.redis_url = redis_url
         self._connection: Optional[redis.Redis] = None
 
-    def connect(self) -> None:
+    async def connect(self) -> None:
         """
-        Establish a connection to the Redis server.
+        Establish an asynchronous connection to the Redis server.
         """
         try:
+            # Create an async Redis instance
             self._connection = redis.Redis.from_url(self.redis_url)
-            # Test connection
-            self._connection.ping()
-            print(f"Connected to Redis at {self.redis_url}")
+            
+            # Test connection asynchronously
+            await self._connection.ping()
         except redis.ConnectionError as e:
             raise RuntimeError(f"Failed to connect to Redis: {e}")
 
-    def set(self, key: str, value: Any, expire: Optional[int] = None) -> None:
+    async def set(
+        self, 
+        key: str, 
+        value: Any, 
+        expire: Optional[int] = None
+    ) -> None:
         """
         Set a key-value pair in Redis with an optional expiration time.
 
@@ -36,9 +41,11 @@ class RedisManager:
         """
         if not self._connection:
             raise RuntimeError("Redis connection is not established.")
-        self._connection.set(key, value, ex=expire)
 
-    def get(self, key: str) -> Optional[Any]:
+        # Use await with the async Redis methods
+        await self._connection.set(key, value, ex=expire)
+
+    async def get(self, key: str) -> Optional[Any]:
         """
         Retrieve a value from Redis by key.
 
@@ -50,10 +57,11 @@ class RedisManager:
         """
         if not self._connection:
             raise RuntimeError("Redis connection is not established.")
-        value = self._connection.get(key)
+
+        value = await self._connection.get(key)
         return value.decode() if value else None
 
-    def delete(self, key: str) -> None:
+    async def delete(self, key: str) -> None:
         """
         Delete a key-value pair from Redis.
 
@@ -62,17 +70,19 @@ class RedisManager:
         """
         if not self._connection:
             raise RuntimeError("Redis connection is not established.")
-        self._connection.delete(key)
 
-    def close(self) -> None:
+        await self._connection.delete(key)
+
+    async def close(self) -> None:
         """
         Close the connection to the Redis server.
         """
         if self._connection:
-            self._connection.close()
+            # Close the underlying connection pool
+            await self._connection.close()
             print("Redis connection closed.")
 
-    def exists(self, key: str) -> bool:
+    async def exists(self, key: str) -> bool:
         """
         Check if a key exists in Redis.
 
@@ -84,9 +94,11 @@ class RedisManager:
         """
         if not self._connection:
             raise RuntimeError("Redis connection is not established.")
-        return self._connection.exists(key) > 0
 
-    def keys(self, pattern: str = "*") -> list:
+        result = await self._connection.exists(key)
+        return result > 0
+
+    async def keys(self, pattern: str = "*") -> list[str]:
         """
         Retrieve a list of keys matching a pattern.
 
@@ -94,17 +106,19 @@ class RedisManager:
             pattern (str): The pattern to match (default is "*").
 
         Returns:
-            list: A list of matching keys.
+            list[str]: A list of matching keys.
         """
         if not self._connection:
             raise RuntimeError("Redis connection is not established.")
-        return [key.decode() for key in self._connection.keys(pattern)]
 
-    def flushdb(self) -> None:
+        raw_keys = await self._connection.keys(pattern)
+        return [key.decode() for key in raw_keys]
+
+    async def flushdb(self) -> None:
         """
         Remove all keys from the current Redis database.
         """
         if not self._connection:
             raise RuntimeError("Redis connection is not established.")
-        self._connection.flushdb()
-        print("Current Redis database flushed.")
+
+        await self._connection.flushdb()
