@@ -17,4 +17,4 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-run-manager = "DarkScryC2Server.run_with_remote_manager:main"
+run-manager = "darkscryc2server.run_with_remote_manager:main"
