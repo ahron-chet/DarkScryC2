@@ -3,6 +3,7 @@ import asyncio
 import json
 from ..tools import pack_base_header, unpack_base_header
 from ...Models.protocols import SOCKET_BASE_MESSAGE_HEADER, SIZE_OF_SOCKET_BASE_MESSAGE_HEADER
+from ...Models.remote_tools_schemas import ManagerResponse
 
 async def _send_manager_request(host, port, data_dict: dict) -> dict:
     """
@@ -37,9 +38,9 @@ async def _send_manager_request(host, port, data_dict: dict) -> dict:
 async def remote_get_connections(host="127.0.0.1", port=9100):
     req = {"action": "get_connections"}
     resp = await _send_manager_request(host, port, req)
-    return resp
+    return ManagerResponse(**resp)
 
 async def remote_send_command(conn_id: str, command: str, host="127.0.0.1", port=9100):
     req = {"action": "send_command", "conn_id": conn_id, "command": command}
     resp = await _send_manager_request(host, port, req)
-    return resp
+    return ManagerResponse(**resp)
