@@ -6,9 +6,10 @@ import queue
 from logging.handlers import QueueHandler, QueueListener
 from os.path import join as path_join
 
-APP_NAME = 'DarkScryC2'
+APP_NAME = 'DarkScryC2Server'
 CONFIG_DIR = f'/etc/{APP_NAME}'
 CONFIG_FILE = path_join(CONFIG_DIR, 'config.ini')
+
 
 #
 # 1. Create a logger, but don't attach normal handlers directly.
@@ -44,9 +45,10 @@ internalapplogger.info("Starting configuration retrieval.")
 def check_default_config():
     if not os.path.exists(CONFIG_DIR):
         internalapplogger.error(f"Default configuration directory {CONFIG_DIR} does not exist.")
+        print(f"Default configuration directory {CONFIG_DIR} does not exist.")
         sys.exit(1)
     if not os.path.isfile(CONFIG_FILE):
-        internalapplogger.error(f"Configuration file {CONFIG_FILE} does not exist.")
+        print(f"Configuration file {CONFIG_FILE} does not exist.")
         sys.exit(1)
 
 check_default_config()

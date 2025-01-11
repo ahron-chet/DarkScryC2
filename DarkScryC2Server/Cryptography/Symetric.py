@@ -78,3 +78,4 @@ class AesCrypto:
         Asynchronously decrypt 'data' by offloading to a worker thread.
         """
         return await asyncio.to_thread(self._decrypt_sync, data)
+
