@@ -13,6 +13,8 @@ import os
 from pathlib import Path
 
 import environ
+import mimetypes
+mimetypes.add_type("text/css", ".css", True)
 
 
 

