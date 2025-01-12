@@ -1,5 +1,4 @@
 from django.shortcuts import render, redirect
-from django.http import HttpRequest
 from django.core.handlers.asgi import ASGIRequest
 from application.services.view_base import BaseAsyncView
 

@@ -69,6 +69,3 @@ def create_user_if_not_exists(username, password, first_name, last_name, company
         country=country
     )
 
-# async def authenticate_user(username, password):
-#     user = await sync_to_async(authenticate)(username=username, password=password)
-#     return user
