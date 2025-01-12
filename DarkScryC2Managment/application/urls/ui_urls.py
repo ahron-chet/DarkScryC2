@@ -1,8 +1,8 @@
 from django.urls import path
 from application.Utils.urlutils import create_path, SlashBehavior
 from application.views.ui.login import LoginPage, Logout
-from DarkScryC2Managment.application.views.ui.index.clients.clients import ShowClients
-from DarkScryC2Managment.application.views.ui.index.index import IndexView
+from application.views.ui.index.clients.clients import ShowClients
+from application.views.ui.index.index import IndexView
 
 urlpatterns = []
 
