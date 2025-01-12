@@ -73,7 +73,6 @@ async def manager_handle(reader: asyncio.StreamReader, writer: asyncio.StreamWri
     - dispatch based on request.action
     - send back a manager response (4-byte header + JSON)
     """
-    conn_mgr: ConnectionManager = server.connection_manager
 
     while True:
         try:
@@ -90,7 +89,7 @@ async def manager_handle(reader: asyncio.StreamReader, writer: asyncio.StreamWri
         # We have a valid ManagerRequest -> dispatch
         if req.action == ManagerAction.GET_CONNECTIONS:
             # Return list of connection IDs
-            all_conns = list(conn_mgr.get_all_connections().keys())
+            all_conns = list(server.connection_manager.get_all_connections().keys())
             resp = ManagerResponse(success=True, data={"connections": all_conns})
             await write_manager_response(writer, resp)
 
@@ -100,7 +99,7 @@ async def manager_handle(reader: asyncio.StreamReader, writer: asyncio.StreamWri
                 await write_manager_response(writer, resp)
                 continue
 
-            conn_obj = conn_mgr.get_connection(req.conn_id)
+            conn_obj = server.connection_manager.get_connection(req.conn_id)
             if not conn_obj:
                 resp = ManagerResponse(success=False, error="No such connection")
                 await write_manager_response(writer, resp)

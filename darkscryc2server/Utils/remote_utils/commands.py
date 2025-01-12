@@ -1,6 +1,7 @@
 # manager_client.py
 import asyncio
 import json
+from pydantic import ValidationError
 from ..tools import pack_base_header, unpack_base_header
 from ...Models.protocols import SOCKET_BASE_MESSAGE_HEADER, SIZE_OF_SOCKET_BASE_MESSAGE_HEADER
 from ...Models.remote_tools_schemas import ManagerResponse
@@ -35,12 +36,37 @@ async def _send_manager_request(host, port, data_dict: dict) -> dict:
 
 
 # Then you define convenience methods:
-async def remote_get_connections(host="127.0.0.1", port=9100):
-    req = {"action": "get_connections"}
-    resp = await _send_manager_request(host, port, req)
-    return ManagerResponse(**resp)
 
-async def remote_send_command(conn_id: str, command: str, host="127.0.0.1", port=9100):
-    req = {"action": "send_command", "conn_id": conn_id, "command": command}
-    resp = await _send_manager_request(host, port, req)
-    return ManagerResponse(**resp)
+async def remote_get_connections(host: str = "127.0.0.1", port: int = 9100) -> ManagerResponse:
+    """
+    Retrieve the list of connections. Return a ManagerResponse object.
+    Raise exceptions for network or parse errors.
+    """
+    req = {"action": "get_connections"}
+    resp_dict = await _send_manager_request(host, port, req)
+
+    # Now parse into a ManagerResponse
+    try:
+        mgr_resp = ManagerResponse(**resp_dict)
+        return mgr_resp
+    except ValidationError as ve:
+        return ManagerResponse(success=False, error=ve.json())
+
+
+async def remote_send_command(conn_id: str, command: str, host: str = "127.0.0.1", port: int = 9100) -> ManagerResponse:
+    """
+    Instruct a specific connection to run 'command'.
+    Return a ManagerResponse object (with success/data/error).
+    """
+    req = {
+        "action": "send_command",
+        "conn_id": conn_id,
+        "command": command,
+    }
+    resp_dict = await _send_manager_request(host, port, req)
+
+    try:
+        mgr_resp = ManagerResponse(**resp_dict)
+        return mgr_resp
+    except ValidationError as ve:
+        return ManagerResponse(success=False, error=ve.json())

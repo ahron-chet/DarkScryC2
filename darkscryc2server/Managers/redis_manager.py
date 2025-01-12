@@ -80,7 +80,7 @@ class RedisManager:
         if self._connection:
             # Close the underlying connection pool
             await self._connection.close()
-            print("Redis connection closed.")
+
 
     async def exists(self, key: str) -> bool:
         """
