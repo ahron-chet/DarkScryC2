@@ -28,7 +28,7 @@ env = environ.Env(
 )
 
 # Assuming your .env is in the project root
-ENV_FILE = os.path.join(BASE_DIR, '.env')
+ENV_FILE = os.path.join(BASE_DIR.parent, '.env')
 if os.path.exists(ENV_FILE):
     env.read_env(ENV_FILE)
 
