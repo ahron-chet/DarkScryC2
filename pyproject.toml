@@ -13,6 +13,7 @@ sqlalchemy = {extras = ["asyncio"], version = "^2.0.36"}
 pydantic = "^2.10.4"
 uvicorn = "^0.34.0"
 darkscryc2server = {git = "https://github.com/ahron-chet/DarkScryC2Server.git"}
+django-environ = "^0.11.2"
 
 
 [build-system]

@@ -9,8 +9,12 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-from os import getenv
+import os
 from pathlib import Path
+
+import environ
+
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -18,6 +22,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 FRONT_DIR = BASE_DIR.parent / "DarkScryFront"  
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
+
+env = environ.Env(
+    DEBUG=(bool, False)
+)
+
+# Assuming your .env is in the project root
+ENV_FILE = os.path.join(BASE_DIR, '.env')
+if os.path.exists(ENV_FILE):
+    env.read_env(ENV_FILE)
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '7srtjwTeXj69tIbITp_AOC3q-5X5Ou9sQdTud9K6qvOXYDhyfne6ysGipkn4ZjZyooXA0WO1Hgx468GQfthPi2vsMLQuyAupt1FWUcc8V0kSfxpZwae_tI'
@@ -82,11 +95,11 @@ ASGI_APPLICATION = 'DarkScryC2Managment.asgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': getenv('DB_NAME', 'default_db_name'),
-        'USER': getenv('DB_USER', 'default_user'),
-        'PASSWORD': getenv('DB_PASSWORD', 'default_password'),
-        'HOST': getenv('DB_HOST', 'localhost'),
-        'PORT': getenv('DB_PORT', '5432')
+        'NAME': env('DB_NAME', default='default_db_name'),
+        'USER': env('DB_USER', default='default_user'),
+        'PASSWORD': env('DB_PASSWORD', default='default_password'),
+        'HOST': env('DB_HOST', default='localhost'),
+        'PORT': env('DB_PORT', default='5432')
     }
 }
 
