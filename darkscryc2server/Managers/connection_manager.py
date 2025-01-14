@@ -1,20 +1,29 @@
 import asyncio
 import uuid
-from typing import Dict, Optional
-import struct
+import time
+from typing import Dict, Optional, Union
 
-from ..settings.config import internalapplogger as logger
-from ..Models.protocols import SOCKET_BASE_MESSAGE_HEADER, SIZE_OF_SOCKET_BASE_MESSAGE_HEADER
-from ..Utils.tools import pack_base_header, unpack_base_header
 from .redis_manager import RedisManager
+from .wsbased_connection import WsConnection
 from ..Cryptography.Symetric import AesCrypto
-
+from ..settings.config import internalapplogger as logger
+from json import dumps
 
 _MAX_LENGTH_FOR_SYNC = 65536
 
-# Example opcodes
-OPCODE_CMD_REQUEST  = 3
-OPCODE_CMD_RESPONSE = 4
+# Suppose these come from your "protocols.py" or similar
+from ..Models.protocols import (
+    OPCODE_KEEPALIVE,
+    OPCODE_CMD_REQUEST,
+    OPCODE_CMD_RESPONSE,
+    pack_message,
+    SOCKET_BASE_MESSAGE_HEADER,
+    SIZE_OF_SOCKET_BASE_MESSAGE_HEADER,
+    compute_header_checksum,
+    SIZE_OF_SUM,
+    PADDED_SUM_SIZE
+)
+
 
 class Connection:
     def __init__(
@@ -22,171 +31,204 @@ class Connection:
         reader: asyncio.StreamReader,
         writer: asyncio.StreamWriter,
         aes_manager: AesCrypto,
-        uid: uuid.UUID
-    ) -> None:
+        uid: uuid.UUID,
+        keepalive_timeout: float = 900.0
+    ):
         self.id = str(uid)
         self.reader = reader
         self.writer = writer
-        self.address = writer.get_extra_info("peername")
         self.aes_manager = aes_manager
+        self.address = writer.get_extra_info("peername")
 
-        # For concurrency: Store pending requests by request_id -> Future
-        self._pending_requests: Dict[int, asyncio.Future] = {}
-        # We'll just keep a small 16-bit auto-increment
-        self._next_request_id: int = 1
-
-        # A running flag for the read loop
         self._running = True
+        self._pending_requests: Dict[int, asyncio.Future] = {}
+        self._next_request_id = 1
 
-    # ------------------------------------------------------
-    # 1) The base send/receive for the "outer" message
-    # ------------------------------------------------------
-    async def send(self, message: bytes, _enc: bool = True) -> None:
+        self.keepalive_timeout = keepalive_timeout
+        self.last_keepalive_recv = time.time()
+
+    async def start(self):
         """
-        1) Possibly encrypt
-        2) Build a SOCKET_BASE_MESSAGE_HEADER w/ payload_length
-        3) pack_base_header => writer.write => drain
+        Main read loop: 
+          1) read header
+          2) read body_length
+          3) if opcode == KEEPALIVE => skip decrypt
+          4) else decrypt => parse sum => dispatch
         """
-        if not message:
-            return
-
-        use_async_enc = (len(message) > _MAX_LENGTH_FOR_SYNC)
-        if _enc:
-            message = await self.aes_manager.encrypt(message, use_async_enc)
-
-        # Build the 'outer' header (c_uint32 for length)
-        headers = SOCKET_BASE_MESSAGE_HEADER()
-        headers.payload_length = len(message)
-        self.writer.write(pack_base_header(headers))
-        self.writer.write(message)
-        await self.writer.drain()
-
-    async def receive(self, _enc: bool = True) -> Optional[bytes]:
-        """
-        1) Read 4 bytes => length
-        2) Read that many => decrypt => return plaintext
-        Returns None if incomplete or EOF
-        """
-        try:
-            header_data = await self.reader.readexactly(SIZE_OF_SOCKET_BASE_MESSAGE_HEADER)
-        except asyncio.IncompleteReadError:
-            return None
-
-        headers = unpack_base_header(header_data)
-        try:
-            msg = await self.reader.readexactly(headers.payload_length)
-        except asyncio.IncompleteReadError:
-            return None
-
-        if not _enc:
-            return msg
-
-        use_async = (headers.payload_length > _MAX_LENGTH_FOR_SYNC)
-        plaintext = await self.aes_manager.decrypt(msg, use_async)
-        return plaintext
-
-    # ------------------------------------------------------
-    # 2) The single read loop in start()
-    # ------------------------------------------------------
-    async def start(self) -> None:
-        """
-        A single read loop that repeatedly calls `receive()`,
-        then parses the 'inner' message => [opcode(1), request_id(2), body_len(4), body].
-        If it's a response, we set the correct future's result.
-        Otherwise we handle or ignore.
-        """
+        asyncio.create_task(self._keep_alive())
         logger.debug(f"[Connection {self.id}] Starting read loop.")
         try:
             while self._running and not self.writer.is_closing():
-                plaintext = await self.receive(_enc=True)
-                if not plaintext:
-                    logger.debug(f"[Connection {self.id}] EOF or partial read => exit.")
+                header, body_data = await self._receive_message()
+                if header is None:
+                    # Possibly partial read => break
                     break
 
-                # parse [1 byte opcode, 2 bytes request_id, 4 bytes body_len, body]
-                if len(plaintext) < 1 + 2 + 4:
-                    logger.debug("Malformed internal message (too short).")
+                if header.opcode == OPCODE_KEEPALIVE:
+                    # For keepalive => assume body_length=0, so no decryption.
+                    logger.debug(f"[{self.id}] KEEPALIVE => update last_keepalive_recv")
+                    self.last_keepalive_recv = time.time()
+                    # If you want to handle keepalive further, do it here or in dispatch
                     continue
 
-                opcode = plaintext[0]
-                # request_id = 2 bytes => we assume big-endian or little-endian. Let's do big-endian:
-                request_id = int.from_bytes(plaintext[1:3], 'big')
-                body_len = int.from_bytes(plaintext[3:7], 'big')
+                # else => normal message => decode & pass to dispatch
+                await self._dispatch_message(header, body_data)
 
-                if len(plaintext) < (7 + body_len):
-                    logger.debug("Truncated body => ignoring.")
-                    continue
-
-                body = plaintext[7:7+body_len]
-
-                if opcode == OPCODE_CMD_RESPONSE:
-                    # This is presumably the response for a previously sent command
-                    fut = self._pending_requests.pop(request_id, None)
-                    if fut and not fut.done():
-                        fut.set_result(body)
-                else:
-                    # Possibly a request from the client, or a ping, or something else
-                    logger.debug(f"Received unsolicited opcode={opcode} req_id={request_id} len={body_len}")
-                    # You can handle if needed
         except asyncio.CancelledError:
-            logger.debug(f"[Connection {self.id}] Task canceled.")
-        except Exception as e:
-            logger.error(f"[Connection {self.id}] Read loop error: {e}")
+            logger.debug(f"[Connection {self.id}] Task cancelled.")
+        except Exception as exc:
+            logger.error(f"[Connection {self.id}] Read loop error: {exc}")
         finally:
-            logger.debug(f"[Connection {self.id}] Exiting read loop.")
             self._running = False
+            for _, fut in self._pending_requests.items():
+                if not fut.done():
+                    fut.set_exception(ConnectionError("Connection closed"))
+            self._pending_requests.clear()
             self.close()
 
-    # ------------------------------------------------------
-    # 3) Concurrency-safe send_command
-    # ------------------------------------------------------
-    async def send_command(self, command_data: bytes) -> Optional[bytes]:
+    async def _dispatch_message(self, header: SOCKET_BASE_MESSAGE_HEADER, ciphertext: bytes):
         """
-        1) We'll pick the next request_id
-        2) Build [opcode=OPCODE_CMD_REQUEST(3), request_id(2), body_len(4), body=command_data]
-        3) Send it with self.send
-        4) Create a Future, store in _pending_requests[request_id]
-        5) Wait for read loop to produce a response => fut result
+        Decrypt + parse sum + call _dispatch_opcode
         """
-        loop = asyncio.get_running_loop()
-        fut = loop.create_future()
+        use_async = (len(ciphertext) > _MAX_LENGTH_FOR_SYNC)
+        try:
+            plaintext = await self.aes_manager.decrypt(ciphertext, use_async=use_async)
+            logger.debug(plaintext)
+        except Exception as ex:
+            logger.error(f"[{self.id}] Decrypt error: {ex}")
+            self.close()
+            return
 
-        # simple approach: wrap if >65535
-        req_id = self._next_request_id
-        self._next_request_id = (self._next_request_id + 1) % 65536
+        if len(plaintext) < SIZE_OF_SUM:
+            logger.error(f"[{self.id}] Plaintext too short for sum => closing.")
+            self.close()
+            return
 
+        # The first 4 bytes => actual sum, the next (PAD_LEN) if you used random padding => skip
+        actual_sum = plaintext[:SIZE_OF_SUM]
+        # skip random pad => e.g. plaintext[4:16] if used
+        payload = plaintext[PADDED_SUM_SIZE:]  # the rest is the real body
+
+        # compute expected sum => no random pad
+        expected_sum = compute_header_checksum(header.opcode, header.request_id, add_random_pad=False)[:SIZE_OF_SUM]
+        if actual_sum != expected_sum:
+            logger.error(f"[{self.id}] Checksum mismatch => closing.")
+            self.close()
+            return
+
+        # Finally handle the opcode logic
+        await self._dispatch_opcode(header, payload)
+
+    async def _dispatch_opcode(self, header: SOCKET_BASE_MESSAGE_HEADER, payload: bytes):
+        """
+        Decide how to handle the final payload, after we verified
+        (opcode, request_id) with the sum. 
+        """
+        opcode = header.opcode
+        req_id = header.request_id
+
+        if opcode == OPCODE_CMD_RESPONSE:
+            logger.debug(f"[{self.id}] CMD_RESPONSE => reqId={req_id}, {len(payload)} bytes.")
+            fut = self._pending_requests.pop(req_id, None)
+            if fut and not fut.done():
+                fut.set_result(payload)
+
+        elif opcode == OPCODE_CMD_REQUEST:
+            logger.debug(f"[{self.id}] CMD_REQUEST => reqId={req_id}, {len(payload)} bytes.")
+            pass
+
+        else:
+            logger.debug(f"[{self.id}] Unhandled opcode {opcode}, reqId={req_id}, payloadLen={len(payload)}.")
+
+    async def _keep_alive(self):
+        while True:
+            await asyncio.sleep(600)
+            if not self.is_alive():
+                logger.debug("Client didnt sent keep alive for more than 20 minutes")
+                self.close()
+                return
+
+    def is_alive(self):
+        return time.time() < self.last_keepalive_recv + 1200
+
+    async def send_command(self, body_data: bytes) -> Optional[bytes]:
+        """
+        Send a CMD_REQUEST to the client, wait for CMD_RESPONSE.
+        """
+        if not body_data:
+            body_data = b''
+
+        req_id = self._allocate_request_id()
+        fut = asyncio.get_running_loop().create_future()
         self._pending_requests[req_id] = fut
 
-        body_len = len(command_data)
-        opcode = OPCODE_CMD_REQUEST
-        # Pack the 'inner' message
-        # opcode(1), request_id(2, big-endian), body_len(4, big-endian), body
-        header = bytearray(1 + 2 + 4)
-        header[0] = opcode
-        header[1:3] = req_id.to_bytes(2, 'big')
-        header[3:7] = body_len.to_bytes(4, 'big')
+        await self._send_encrypted(OPCODE_CMD_REQUEST, req_id, body_data)
+        return await fut
 
-        plaintext = header + command_data
-
-        # Send
-        await self.send(plaintext, _enc=True)
-
-        # Wait for the response
-        result = await fut
-        return result
-
-    def close(self) -> None:
-        """
-        Stop reading, close the writer if not closed.
-        """
+    def close(self):
+        if not self._running:
+            return
+        logger.debug(f"[{self.id}] Closing connection.")
         self._running = False
         if not self.writer.is_closing():
             self.writer.close()
+     
+
+    def _allocate_request_id(self) -> int:
+        r = self._next_request_id
+        self._next_request_id = (r + 1) % 65536
+        return r
+
+    async def _send_encrypted(self, opcode: int, request_id: int, body: bytes):
+        """
+        1) compute 4-byte sum (plus random pad)
+        2) combine => plaintext
+        3) encrypt => ciphertext
+        4) pack => 7-byte header
+        5) write to stream
+        """
+        # sum => 4 bytes + random pad => total PADDED_SUM_SIZE
+        chksum = compute_header_checksum(opcode, request_id, add_random_pad=True)
+        combined_plain = chksum + body
+
+        use_async = (len(combined_plain) > _MAX_LENGTH_FOR_SYNC)
+        ciphertext = await self.aes_manager.encrypt(combined_plain, use_async=use_async)
+
+        message = pack_message(opcode, request_id, ciphertext)
+        logger.debug(f"[{self.id}] Sending opcode={opcode}, reqId={request_id}, bodyLen={len(body)}, cipherLen={len(ciphertext)}.")
+        self.writer.write(message)
+        await self.writer.drain()
+
+    async def _receive_message(self):
+        """
+        Returns (header, body_data).
+        If opcode=KEEPALIVE => typically body_length=0 => read no data.
+        """
+        try:
+            raw_header = await self.reader.readexactly(SIZE_OF_SOCKET_BASE_MESSAGE_HEADER)
+        except asyncio.IncompleteReadError:
+            logger.error(f"[{self.id}] Failed to read header => likely closed.")
+            return None, None
+
+        header = SOCKET_BASE_MESSAGE_HEADER.from_buffer_copy(raw_header)
+
+        if header.payload_length < 0:
+            logger.error(f"[{self.id}] Negative body_length => corrupted header => closing.")
+            return None, None
+
+        try:
+            body_data = await self.reader.readexactly(header.payload_length)
+        except asyncio.IncompleteReadError:
+            logger.error(f"[{self.id}] Truncated ciphertext => closing.")
+            return None, None
+
+        logger.debug(f"[{self.id}] Received header(opcode={header.opcode}, reqId={header.request_id}, length={header.payload_length}).")
+        return header, body_data
 
 
 class ConnectionManager:
     def __init__(self, redis_url: str) -> None:
-        self.connections: Dict[str, Connection] = {}
+        self.connections: Dict[str, Union[Connection, WsConnection]] = {}
         self.redis_manager = RedisManager(redis_url)
         self._redis_connect_task = asyncio.create_task(self._async_connect())
 
@@ -207,18 +249,28 @@ class ConnectionManager:
         """
         await self._redis_connect_task
 
-    async def register(self, connection: Connection) -> None:
+    @staticmethod
+    def _connection_type(connection):
+        if isinstance(connection, Connection):
+            return "ACPROTO" 
+        elif isinstance(connection, WsConnection):
+            return "WSPROTO" 
+        raise TypeError("Unsupported connection type {}.".format(str(type(Connection))))
+
+    async def register(self, connection: Union[Connection, WsConnection]) -> None:
+        type = self._connection_type(connection)
         self.connections[connection.id] = connection
         logger.info(f"Registered connection {connection.id} from {connection.address}")
         try:
+            
             await self.redis_manager.set(
                 key=f"connection:{connection.id}",
-                value=str(connection.address)
+                value=dumps({"address": str(connection.address), "type":type})
             )
         except RuntimeError as e:
             logger.error(f"Redis set error: {e}")
 
-    async def unregister(self, connection: Connection) -> None:
+    async def unregister(self, connection: Union[Connection, WsConnection]) -> None:
         conn_id = connection.id
         if conn_id in self.connections:
             connection.close()
@@ -226,14 +278,14 @@ class ConnectionManager:
             logger.info(f"Unregistered connection {conn_id}")
             try:
                 await self.redis_manager.delete(key=f"connection:{conn_id}")
-                await self.redis_manager.delete(key=f"connection:{conn_id}:last_ping")
+                # await self.redis_manager.delete(key=f"connection:{conn_id}:last_ping")
             except RuntimeError as e:
                 logger.error(f"Redis delete error: {e}")
 
-    def get_connection(self, conn_id: str) -> Optional[Connection]:
+    def get_connection(self, conn_id: str) -> Optional[Union[Connection, WsConnection]]:
         return self.connections.get(conn_id)
 
-    def get_all_connections(self) -> Dict[str, Connection]:
+    def get_all_connections(self) -> Dict[str, Union[Connection, WsConnection]]:
         return  self.connections
 
     async def close_all_connections(self) -> None:

@@ -67,19 +67,19 @@ class AesCrypto:
         decrypted_data = self._decryptor.update(encrypted_data) + self._decryptor.finalize()
         return unpadder.update(decrypted_data) + unpadder.finalize()
 
-    async def encrypt(self, data: bytes, _use_async=False) -> bytes:
+    async def encrypt(self, data: bytes, use_async=False) -> bytes:
         """
         Asynchronously encrypt 'data' by offloading to a worker thread.
         """
-        if _use_async:
+        if use_async:
             return await asyncio.to_thread(self._encrypt_sync, data)
         return self._encrypt_sync(data)
 
-    async def decrypt(self, data: bytes,  _use_async=False) -> bytes:
+    async def decrypt(self, data: bytes,  use_async=False) -> bytes:
         """
         Asynchronously decrypt 'data' by offloading to a worker thread.
         """
-        if _use_async:
+        if use_async:
             return await asyncio.to_thread(self._decrypt_sync, data)
         return self._decrypt_sync(data)
 
