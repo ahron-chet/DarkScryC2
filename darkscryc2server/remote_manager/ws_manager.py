@@ -1,6 +1,6 @@
 import json
 from fastapi import WebSocket, WebSocketDisconnect
-from ..Models.remote_tools_schemas import ManagerAction, ManagerRequest, ManagerResponse
+from ..Models.remote_tools_schemas import ManagerAction, ManagerRequestWs, ManagerResponse
 from ..settings.config import internalapplogger as logger
 
 async def manager_ws_endpoint(websocket: WebSocket):
@@ -8,13 +8,13 @@ async def manager_ws_endpoint(websocket: WebSocket):
     The main WebSocket endpoint for manager requests.
     """
     await websocket.accept()
-    server = websocket.app.state.server  # the same server we attached in create_manager_app
+    server = websocket.app.state.server
     try:
         while True:
             raw = await websocket.receive_text()
             try:
                 data = json.loads(raw)
-                req = ManagerRequest(**data)
+                req = ManagerRequestWs(**data)
             except Exception as e:
                 error_resp = ManagerResponse(success=False, error=f"Invalid request: {e}")
                 await websocket.send_text(error_resp.model_dump_json())

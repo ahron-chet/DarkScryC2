@@ -7,7 +7,7 @@ from .remote_manager.remote_manager import create_manager_app
 
 import os
 
-if os.name == 'possix':
+if os.name == 'posix':
     def run():
         import uvloop
         # Set uvloop as default event loop policy (Linux only)
@@ -34,7 +34,6 @@ async def main():
         host="0.0.0.0", 
         port=9100,
         log_level="info",
-        loop="asyncio"
     )
     uvicorn_server = uvicorn.Server(config)
 
@@ -52,8 +51,7 @@ async def main():
         for p in pending:
             task.cancel()
 
-def run():
-    asyncio.run(main())
 
-if __name__ == "__main__":
-    run()
+
+# if __name__ == "__main__":
+#     run()

@@ -25,7 +25,7 @@ def create_manager_app(server: Server) -> FastAPI:
 
     # 3) Add a simple health-check route
     @app.get("/health", tags=["Health"])
-    def health_check():
+    async def health_check():
         return {"status": "ok"}
 
     # 4) Add a WebSocket endpoint

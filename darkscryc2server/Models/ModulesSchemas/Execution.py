@@ -2,7 +2,7 @@ from pydantic import Field
 from typing import Optional
 from ..schemas import Command, CommandIdentifiers
 
-        
+
 
 
 
@@ -19,12 +19,7 @@ class StartShellCommand(Command):
     )
 
 class RunCommand(Command):
-    action: CommandIdentifiers = Field(
-        CommandIdentifiers.RUN_COMMAND,
-        title="Action",
-        description="Execute a command on a running shell instance."
-    )
-
+    action: str = (CommandIdentifiers.RUN_COMMAND.value)
     command: str = Field(
         ...,
         title="Command",

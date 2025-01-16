@@ -43,10 +43,11 @@ class CommandIdentifiers(str, Enum):
 
 class Command(BaseModel):
 
-    action: CommandIdentifiers = Field(
+    action: str = Field(
         ...,
         title="Action",
-        description="The identifier of the action to perform."
+        description="The identifier of the action to perform.",
+        Literal=True
     )
 
 

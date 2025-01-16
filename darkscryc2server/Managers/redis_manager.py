@@ -59,7 +59,7 @@ class RedisManager:
             raise RuntimeError("Redis connection is not established.")
 
         value = await self._connection.get(key)
-        return value.decode() if value else None
+        return value
 
     async def delete(self, key: str) -> None:
         """

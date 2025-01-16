@@ -7,7 +7,7 @@ from .redis_manager import RedisManager
 from .wsbased_connection import WsConnection
 from ..Cryptography.Symetric import AesCrypto
 from ..settings.config import internalapplogger as logger
-from json import dumps
+from pickle import dumps, loads
 
 _MAX_LENGTH_FOR_SYNC = 65536
 
@@ -287,6 +287,9 @@ class ConnectionManager:
 
     def get_all_connections(self) -> Dict[str, Union[Connection, WsConnection]]:
         return  self.connections
+    
+    async def get_all_connections_redis(self) -> Dict[str, dict]:
+        return  {i: loads(await self.redis_manager.get(f"connection:{i}")) for i in self.connections}
 
     async def close_all_connections(self) -> None:
         for conn in list(self.connections.values()):
