@@ -31,5 +31,6 @@ class Agent(models.Model):
     LastTimeUpdate = models.DateTimeField(auto_now_add=True)
     OnboardedTime = models.DateTimeField(auto_now_add=True)
 
+
     def __str__(self):
         return self.HostName

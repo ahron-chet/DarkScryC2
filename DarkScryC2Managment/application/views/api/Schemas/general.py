@@ -12,3 +12,5 @@ class EditedSuccessfully(SuccessBase):
 
 class CreatedSuccessfully(SuccessBase):
     detail: str = "Created successfully"
+
+

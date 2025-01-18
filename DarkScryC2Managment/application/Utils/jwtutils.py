@@ -43,7 +43,7 @@ class TokenAuth(HttpBearer):
     async def __call__(self, request: HttpRequest):
         user = await request.auser()
         if user.is_authenticated:
-            return user 
+            return user
         headers = request.headers
         auth_value = headers.get(self.header)
         if not auth_value:

