@@ -2,19 +2,13 @@
 import json
 from django.views import View
 from django.http import JsonResponse
-from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from pydantic import ValidationError
 from .schema_manager import SchemaManager
-from django.views import View
-from django.http import JsonResponse
-from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
-import json
-from pydantic import ValidationError
-from .schema_manager import SchemaManager
 
+from functools import wraps
+from ..Utils.jwtutils import TokenAuth
 
 class BaseAsyncView(View):
     """
@@ -65,3 +59,62 @@ class BaseAsyncView(View):
 
         # Proceed with normal dispatch
         return await super().dispatch(request, *args, **kwargs)
+
+
+
+
+from typing import List, Callable, Any, Optional
+from ninja import Router
+from ..Utils.permmisionsutils import check_permissions
+
+class ApiRouteV2:
+    """
+    Base class that holds a Ninja Router and provides a method to register routes 
+    with multiple HTTP methods in one call.
+    """
+
+    def __init__(self, tags:List[str] = None):
+        self.router = Router()
+        self.tags = [] if tags is None else tags
+
+    def register_route(
+        self,
+        path: str,
+        methods: List[str],
+        view_func: Callable[..., Any],
+        response: Any = None,
+        permissions_req: List[str] = None,
+        **kwargs,
+    ):
+        """
+        - path: "/agents"
+        - methods: ["GET", "POST", ...]
+        - view_func: the single function that will handle all the methods
+        - response: Ninja's response schema (if any)
+        - tags: for Swagger grouping
+        - auth: if you want to attach an auth class/decorator
+        - kwargs: additional parameters (operation_id, summary, etc.)
+        """
+        if permissions_req is not None:
+            view_func = check_permissions(permissions=permissions_req)(view_func)
+        view_func = _foo()(view_func)
+        self.router.add_api_operation(
+            path=path,
+            methods=methods,
+            view_func=view_func,
+            response=response,
+            tags=self.tags,
+            auth=TokenAuth(),
+            **kwargs,
+        )
+
+
+def _foo():
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            return await func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+

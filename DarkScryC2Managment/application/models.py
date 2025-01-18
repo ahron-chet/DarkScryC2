@@ -24,36 +24,12 @@ class User(AbstractUser):
     def __str__(self):
         return f"{self.username} ({self.role})"
     
-
-class ChatMessage(models.Model):
-    """
-    Stores a single message in the chat. 
-    If your 'clientName' is something like 'Machine1', store it here as well.
-    """
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-
-    # Which user sent the message? 
-    # If your chat can also store bot messages, you can allow user to be null or create a 'role' field.
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, 
-        on_delete=models.SET_NULL,
-        null=True, 
-        blank=True,
-        related_name='messages'
-    )
-
-    # Alternatively, if you want to store name of the 'client' or 'machine':
-    client_name = models.CharField(max_length=100, null=True, blank=True)
-    
-    # 'role' could be 'user' or 'bot' or something
-    ROLE_CHOICES = (
-        ('user', 'User'),
-        ('bot', 'Bot'),
-    )
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='user')
-
-    message = models.TextField()  # The actual chat text or command
-    timestamp = models.DateTimeField(auto_now_add=True)
+class Agent(models.Model):
+    AgentId = models.UUIDField(primary_key=True, editable=False, unique=True)
+    HostName = models.CharField(max_length=255)
+    Os = models.CharField(max_length=100)
+    LastTimeUpdate = models.DateTimeField(auto_now_add=True)
+    OnboardedTime = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.client_name} - {self.role}: {self.message[:30]}"
+        return self.HostName

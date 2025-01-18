@@ -60,7 +60,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    "channels"
+    "channels",
+    "ninja"
 ]
 
 MIDDLEWARE = [
@@ -168,3 +169,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 
+JWT_SECRET = SECRET_KEY
+JWT_ALGORITHM = "HS256"
+JWT_EXPIRE_SECONDS = 3600

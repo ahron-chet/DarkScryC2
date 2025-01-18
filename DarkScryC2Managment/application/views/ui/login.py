@@ -8,6 +8,7 @@ class LoginPage(BaseAsyncView):
 
     async def get(self, request:ASGIRequest, *args, **kwargs):
         user = await request.auser()
+        print(request.auser)
         if user.is_authenticated:
             return redirect('/index/')
         return render(request, 'login.html')
