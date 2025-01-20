@@ -36,6 +36,7 @@ class AgentsApi(ApiRouteV2):
             raise HttpError(500, data.error)
 
         connections = data.data.get("connections", {})
+
         result = []
         for agent in agents:
             if not agent:
