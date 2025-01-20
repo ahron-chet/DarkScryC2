@@ -43,7 +43,7 @@ namespace DarkScryClient.Security.Protocols
 			// 3) build handshake object
 			var agent = new AgentConnection
 			{
-				AgentId = Info.agent_id,
+				AgentId = Config.agent_id,
 				Key = Security.Cryptography.Utils.BytesToHexDigest(key)
 			};
 
