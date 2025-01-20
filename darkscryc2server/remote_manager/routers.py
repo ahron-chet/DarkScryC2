@@ -3,6 +3,7 @@ from ..Models.remote_tools_schemas import ManagerSendCommand, ManagerResponse
 
 from ..Server import Server
 from ..settings.config import internalapplogger as logger
+from json import loads
 
 router = APIRouter()
 
@@ -37,7 +38,7 @@ async def send_command(
         result_bytes = await conn.send_command(ManagerRequest.command.encode("utf-8"))
         if result_bytes is None:
             raise HTTPException(status_code=400, detail="No response or connection closed")
-        return ManagerResponse(success=True, data={"result": result_bytes.decode("utf-8", "ignore")})
+        return ManagerResponse(success=True, data={"result": loads(result_bytes)})
     except Exception as e:
         logger.exception(f"Error sending command: {e}")
         raise HTTPException(status_code=500, detail=str(e))    

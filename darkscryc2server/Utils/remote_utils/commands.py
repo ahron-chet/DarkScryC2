@@ -2,15 +2,20 @@ import aiohttp
 from pydantic import ValidationError
 from ...Models.remote_tools_schemas import ManagerResponse
 
+_session = None
+def session():
+    global _session
+    if _session is None:
+        _session = aiohttp.ClientSession()
+    return _session
 
-_session = aiohttp.ClientSession()
 
 async def remote_get_connections(host: str = "127.0.0.1", port: int = 9100) -> ManagerResponse:
     """
     Retrieve the list of connections. Return a ManagerResponse object.
     Raise exceptions for network or parse errors.
     """
-    r = await _session.get(url="http://{}:{}/api/connections".format(host,port))
+    r = await session().get(url="http://{}:{}/api/connections".format(host,port))
     resp_dict = await r.json()
     # Now parse into a ManagerResponse
     try:
@@ -30,7 +35,7 @@ async def remote_send_command(conn_id: str, command: str, host: str = "127.0.0.1
         "conn_id": conn_id,
         "command": command,
     }
-    r = await _session.post(url="http://{}:{}/api/send_command".format(host,port), json=req)
+    r = await session().post(url="http://{}:{}/api/send_command".format(host,port), json=req)
     resp_dict = await r.json()
     try:
         mgr_resp = ManagerResponse(**resp_dict)

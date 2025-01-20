@@ -25,8 +25,10 @@ class AgentConnection(BaseModel):
 
 
 class CommandIdentifiers(str, Enum):
-    START_SHELL_INSTANCE = ("be425fd08e9ea24230bac47493228ada", "Start a shell instance on client")
-    RUN_COMMAND = ("58e129c7158b9fed8be5473640e54ae4", "Execute a command on a running shell instance")
+    START_SHELL_INSTANCE   = ("be425fd08e9ea24230bac47493228ada", "Start a shell instance on client")
+    RUN_COMMAND            = ("58e129c7158b9fed8be5473640e54ae4", "Execute a command on a running shell instance")
+    GET_BASIC_MACHINE_INFO = ("929cecb8e795d93306020c7f2e8682d2", "GET_BASIC_MACHINE_INFO")
+
 
     def __new__(cls, value, description):
         obj = str.__new__(cls, value)
@@ -38,7 +40,13 @@ class CommandIdentifiers(str, Enum):
     def desc(self):
         """Returns the description of the command."""
         return self.description
-    
+
+class CommandIdentifiersName(str, Enum):
+    pass
+CommandIdentifiersName = Enum(
+    "CommandIdentifiers", 
+    {name: name for name in CommandIdentifiers.__members__.keys()}
+)
 
 
 class Command(BaseModel):

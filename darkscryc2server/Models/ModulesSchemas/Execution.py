@@ -27,3 +27,7 @@ class RunCommand(Command):
     )
 
 
+class GenAction(Command):
+    action: CommandIdentifiers = Field(..., Literal=False, description="Action to prform basen on CommandIdentifiers enum")
+
+

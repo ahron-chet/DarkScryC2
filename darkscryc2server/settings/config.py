@@ -40,7 +40,7 @@ file_handler = None
 # We'll update it once we know the log path.
 listener = None
 
-internalapplogger.info("Starting configuration retrieval.")
+# internalapplogger.info("Starting configuration retrieval.")
 
 def check_default_config():
     if not os.path.exists(CONFIG_DIR):
@@ -145,7 +145,7 @@ REDIS_PASSWORD = config.get('redis', 'password', fallback=None)
 
 REDIS_URI = f"redis://{':'+REDIS_PASSWORD if REDIS_PASSWORD else ''}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"
 
-internalapplogger.info("Configuration loaded successfully.")
+# internalapplogger.info("Configuration loaded successfully.")
 
 # (Optional) on shutdown or right before your process ends:
 # listener.stop()
