@@ -34,6 +34,7 @@ namespace DarkScryClient.Security.Protocls
 
 		public static byte[] ComputeHeaderChecksum(DarkScryOpCode opcode, short requestId, bool _padd = true)
 		{
+			// System.Console.WriteLine($"sending opcode:{(int)opcode}, requestId:{(int)requestId} pad? {_padd}");
 			byte[] buffer = new byte[3];
 			buffer[0] = (byte)opcode;
 			BitConverter.GetBytes(requestId).CopyTo(buffer, 1);
