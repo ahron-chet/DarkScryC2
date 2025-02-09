@@ -1,0 +1,191 @@
+/********************************************
+ * clients.css - Final "Cyber" Consolidated Style
+ ********************************************/
+
+/* 1) Import Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@400;600&display=swap");
+
+/* 2) Root Variables */
+:root {
+  --accent-color: #497ea5;        /* Main accent color */
+  --text-color: #ffffff;          /* Base text color */
+  --border-radius: 16px;          /* Global border radius */
+  --font-heading: "Orbitron", sans-serif;  /* Futuristic heading font */
+  --font-body: "Rajdhani", sans-serif;     /* Body font */
+}
+
+/* 3) Base Body Styling */
+body {
+  background-color: #10131a;
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-body);
+}
+
+/* 4) Cards & Hover Effects */
+.card,
+.client-card {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius);
+  background-color: #1c1f24;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover,
+.client-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
+}
+
+/* Title styling within cards */
+.card-title {
+  font-family: var(--font-heading);
+  color: beige !important; /* If you want a contrasting color for titles */
+}
+
+/* OS icon styling (if used in client cards) */
+.os-icon img {
+  transition: transform 0.3s;
+}
+.os-icon img:hover {
+  transform: scale(1.1);
+}
+
+/* 5) Buttons */
+.btn {
+  border-radius: var(--border-radius);
+  transition: background-color 0.3s, color 0.3s;
+  font-family: var(--font-body);
+}
+.btn-primary {
+  background-color: var(--accent-color);
+  border: none;
+  color: #000; 
+}
+.btn-primary:hover {
+  background-color: #006fa1;
+  color: #fff;
+}
+.btn-secondary {
+  background-color: #3a3f48;
+  border: none;
+  color: #ccc;
+}
+.btn-secondary:hover {
+  background-color: #4a4f58;
+  color: #fff;
+}
+
+/* 6) Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #1c1f24;
+}
+::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* 7) Custom Loading Indicators */
+.custom-loader-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.pulsing-dot {
+  width: 12px;
+  height: 12px;
+  background-color: var(--accent-color);
+  border-radius: 50%;
+  animation: pulseAnim 1s infinite ease-in-out;
+}
+@keyframes pulseAnim {
+  0%   { transform: scale(1);   opacity: 1;   }
+  50%  { transform: scale(0.7); opacity: 0.5; }
+  100% { transform: scale(1);   opacity: 1;   }
+}
+
+/* 8) Agent View spacing (optional) */
+.agent-view {
+  margin-top: 1rem; /* Provide some top spacing if desired */
+}
+
+/* 9) Multi-Level Dropdown (Bootstrap 5 Workaround) */
+
+/* Mark each submenu parent as position: relative */
+.dropdown-submenu {
+  position: relative;
+}
+
+/* The nested .dropdown-menu is absolutely placed to the right of parent */
+.dropdown-submenu .dropdown-menu {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  margin-top: -1px;
+  display: none;    /* hidden unless toggled */
+  z-index: 9999;    /* so it's above other elements */
+}
+
+/* If .show is toggled, we display the nested menu */
+.dropdown-submenu .dropdown-menu.show {
+  display: block;
+}
+
+/* Indicate there's a deeper level arrow or chevron for the parent item */
+.dropdown-submenu > .dropdown-item.dropdown-toggle::after {
+  float: right;
+  font-weight: bold;
+  transform: scale(0.8);
+  opacity: 0.7;
+  transition: transform 0.3s;
+  
+}
+
+/* Subtle effect on hover (desktop usage). On mobile, the click toggles show/hide. */
+.dropdown-submenu:hover > .dropdown-item.dropdown-toggle::after {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* Dark theme for sub-menus */
+.dropdown-menu-dark {
+  background-color: #242830;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.dropdown-menu-dark .dropdown-item {
+  color: #c9c9c9;
+  font-family: var(--font-body);
+}
+.dropdown-menu-dark .dropdown-item:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+
+
+@media (max-width: 992px) {
+  .dropdown-submenu .dropdown-menu {
+    position: static;
+    margin-top: 0;
+    margin-left: 0;
+    left: auto;   /* ignore left: 100% from earlier */
+    top: auto;    /* ignore top: 0 from earlier */
+    z-index: auto;/* no need for high z-index */
+  }
+
+  .dropdown-submenu .dropdown-menu.show {
+    display: block;
+  }
+
+  .dropdown-submenu > .dropdown-item.dropdown-toggle::after {
+    content: "";
+  }
+}
+
