@@ -1,12 +1,43 @@
-import jwt
 from datetime import datetime, timedelta, timezone
+from uuid import UUID
+
+import jwt
+from jwt import PyJWTError
+
 from django.conf import settings
-from ninja.security import HttpBearer
-from ninja.errors import HttpError
 from django.http import HttpRequest
+
+from ninja.errors import HttpError
+from ninja.security import HttpBearer
+
 from application.models import User
 
-def create_jwt_token(user_id: int) -> str:
+
+def jwt_get(token, jwt_secrete, payload_key, default=None):
+    """
+    Decode and verify a JWT token using project settings, then retrieve a specific claim.
+
+    Returns:
+        Claim value or default if not found
+    """
+    try:
+        algorithms = getattr(settings, "JWT_ALGORITHM", ["HS256"])
+        if isinstance(algorithms, str):
+            algorithms = [algorithms]
+
+        decoded = jwt.decode(
+            token,
+            key=jwt_secrete,
+            algorithms=algorithms
+        )
+        return decoded.get(payload_key, default)
+    except AttributeError as e:
+        raise PyJWTError("Missing required JWT configuration in settings") from e
+    except PyJWTError as e:
+        raise
+
+
+def create_jwt_token(user_id: UUID) -> str:
     """
     Create a JWT with an 'exp' (expiration) claim
     and a 'sub' (subject) or 'user_id' claim.
@@ -15,7 +46,7 @@ def create_jwt_token(user_id: int) -> str:
     exp = now + timedelta(seconds=settings.JWT_EXPIRE_SECONDS)
 
     payload = {
-        "sub": user_id,
+        "sub": str(user_id),
         "iat": now,
         "exp": exp
     }
@@ -36,6 +67,25 @@ def decode_jwt_token(token: str) -> dict:
         raise
 
 
+def create_refresh_token(user_id: UUID) -> str:
+    """
+    Create a long-lived JWT refresh token.
+    """
+    now = datetime.now(tz=timezone.utc)
+    exp = now + timedelta(seconds=settings.JWT_REFRESH_EXPIRE_SECONDS)
+    
+    payload = {
+        "sub": str(user_id),
+        "iat": now,
+        "exp": exp,
+        "scope": "refresh_token"
+    }
+    
+    return jwt.encode(
+        payload, 
+        settings.JWT_REFRESH_SECRET, 
+        algorithm=settings.JWT_ALGORITHM
+    )
 
     
 class TokenAuth(HttpBearer):

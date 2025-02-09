@@ -1,7 +1,7 @@
 from django.urls import path
 from application.Utils.urlutils import create_path, SlashBehavior
 from application.views.api.auth import LoginView, RegisterView
-from ..views.api.modules import shellWebSocket
+from ..views.api.agents_modules import shellWebSocket
 
 
 urlpatterns = [

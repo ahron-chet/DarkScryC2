@@ -73,9 +73,10 @@ class ApiRouteV2:
     with multiple HTTP methods in one call.
     """
 
-    def __init__(self, tags:List[str] = None):
+    def __init__(self, tags:List[str] = None, prefix="/"):
         self.router = Router()
         self.tags = [] if tags is None else tags
+        self.prefix = prefix
 
     def register_route(
         self,
@@ -84,7 +85,8 @@ class ApiRouteV2:
         view_func: Callable[..., Any],
         response: Any = None,
         permissions_req: List[str] = None,
-        **kwargs,
+        _login_req = True,
+        **kwargs
     ):
         """
         - path: "/agents"
@@ -95,6 +97,8 @@ class ApiRouteV2:
         - auth: if you want to attach an auth class/decorator
         - kwargs: additional parameters (operation_id, summary, etc.)
         """
+        if self.prefix:
+            path = f"/{self.prefix.strip('/')}/{path.strip('/')}"
         if permissions_req is not None:
             view_func = check_permissions(permissions=permissions_req)(view_func)
             pass
@@ -107,7 +111,7 @@ class ApiRouteV2:
             view_func=view_func,
             response=response,
             tags=self.tags,
-            auth=TokenAuth(),
+            auth=TokenAuth() if _login_req else None,
             **kwargs,
         )
 

@@ -60,11 +60,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    "corsheaders",
     "channels",
     "ninja"
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -169,7 +172,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 
-JWT_SECRET = SECRET_KEY
+JWT_SECRET = 'iC8GkE9PIQ7kuUEw3_9CqWlo7Fve_IY3vRnLkHxjyIrVRCohwGfNig'
+JWT_REFRESH_SECRET = 'fXtFlP9qobvkNOdqwPe3EzRtGKj45RzfBCJcn5WIO0rQrZ7FCJLatw'
 JWT_ALGORITHM = "HS256"
-JWT_EXPIRE_SECONDS = 3600
+JWT_EXPIRE_SECONDS = 360000
+JWT_REFRESH_EXPIRE_SECONDS = JWT_EXPIRE_SECONDS * 9
 
+
+CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
+CORS_ALLOW_CREDENTIALS = True
+SESSION_COOKIE_SAMESITE = None
+SESSION_COOKIE_SECURE = False

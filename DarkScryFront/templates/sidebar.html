@@ -103,8 +103,8 @@
 <script>
    const url = window.location.href;
 
-   const parts = url.split('/').filter(part => part !== ''); // Remove empty parts
-   const lastSegment = parts[parts.length - 1]; // Get the last meaningful segment
+   const parts = url.split('/').filter(part => part !== '');
+   const lastSegment = parts[parts.length - 1];
 
    const sideBar = document.querySelector(".nav-list");
    const sideBarLinks = sideBar.querySelectorAll(".nav-item");

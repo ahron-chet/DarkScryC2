@@ -9,20 +9,12 @@ from application.services.view_base import ApiRouteV2
 
 from application.Utils.arq_tasks_utils import get_task_executor
 from uuid import UUID
+from application.views.api.Schemas.general import TaskOut
 
-
-from ninja import Schema, Field
-
-class TaskOut(Schema):
-    """
-    Schema to represent a task with its unique identifier.
-    """
-    task_id: UUID = Field(..., description="The unique identifier for the task.")
-
-
+prefix_with_agent = "/agents/{agent_id}/modules/collection/machine"
 class MashineCollection(ApiRouteV2):
     def __init__(self, tags = ['Collection']):
-        super().__init__(tags)
+        super().__init__(tags=tags, prefix=prefix_with_agent)
         self.register_routes()
 
     
@@ -31,7 +23,7 @@ class MashineCollection(ApiRouteV2):
         task_excutor = await get_task_executor()
         job = await task_excutor.enqueue_job(
             "remote_send_command_task",
-            agent_id=str(agent_id), 
+            agent_id=str(agent_id),
             command=payload,
             _action_name=CommandIdentifiers.GET_BASIC_MACHINE_INFO
         )
@@ -40,7 +32,7 @@ class MashineCollection(ApiRouteV2):
     
     def register_routes(self):
         return self.register_route(
-            path="/{agent_id}", 
+            path="/basic_mashine_info", 
             methods=["GET"], 
             view_func=self.fetch_basic, 
             response={200:TaskOut},

@@ -13,6 +13,8 @@ urlpatterns = [
     path("", include("application.urls.ui_urls")),
 ]
 
+
+
 urlpatterns += [
     path("api/v2/", api_ninja.urls)
 ]

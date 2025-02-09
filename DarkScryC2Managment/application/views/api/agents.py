@@ -20,7 +20,7 @@ class AgentsApi(ApiRouteV2):
     """
 
     def __init__(self):
-        super().__init__(tags=["Agnets"])
+        super().__init__(tags=["Agnets"], prefix="/agents")
         self.register_routes()
 
 

@@ -1,38 +1,10 @@
-
-
-from ...services.view_base import ApiRouteV2
+from uuid import UUID
+from arq.jobs import Job
 from application.Utils.arq_tasks_utils import get_task_executor
 
-from arq.jobs import Job, JobStatus
-# from DarkScryC2Managment.arq_worker import WorkerSettings
-from pydantic import BaseModel, Field, ConfigDict
-from uuid import UUID
-from datetime import datetime
-from typing import Any
 from darkscryc2server.Models.schemas import CommandIdentifiersName, CommandIdentifiers
-
-
-class TaskStatusOut(BaseModel):
-    """
-    Schema to represent the current status of a task.
-    """
-    status: JobStatus = Field(..., description="The current status of the job.")
-    job_id: UUID = Field(..., description="The unique identifier of the job.")
-
-
-class TaskResultOut(BaseModel):
-    """
-    Schema to represent the result of a task.
-    """
-    success: bool = Field(..., description="Indicates whether the task completed successfully.")
-    result: Any = Field(..., description="The result or output of the task. This can be of any type depending on the task.")
-    start_time: datetime = Field(..., description="The timestamp when the task started.")
-    finish_time: datetime = Field(..., description="The timestamp when the task finished.")
-    action: CommandIdentifiersName = Field(..., description="The name identifier of the action the job was processed in.")
-    job_id: UUID = Field(..., description="The unique identifier of the job.")
-    
-
-    model_config = ConfigDict(use_enum_values=True)
+from application.views.api.Schemas.general import TaskResultOut, TaskStatusOut, DeletedSuccessfully
+from ...services.view_base import ApiRouteV2
 
 
 class TaskApi(ApiRouteV2):
@@ -50,7 +22,7 @@ class TaskApi(ApiRouteV2):
         redis = await get_task_executor()
         job = Job(task_id.hex, redis)
         info = await job.result_info()
-        
+
         if isinstance(info.result, Exception):
             result = str(info.result)
         else:
@@ -61,6 +33,7 @@ class TaskApi(ApiRouteV2):
             act = CommandIdentifiersName(act.name)
         else:
             act = CommandIdentifiersName.UNKNOW
+
         return TaskResultOut(
             success=info.success,
             result=result,
@@ -70,7 +43,28 @@ class TaskApi(ApiRouteV2):
             job_id=task_id,
             action=act
         )
-        
+
+    async def revoke_task(self, request, task_id: UUID):
+        """
+        Attempt to stop a running task if it's in progress (arq 'abort').
+        If the task is already finished, abort() does nothing.
+        """
+        redis = await get_task_executor()
+        job = Job(task_id.hex, redis)
+        # If job doesn't exist, job.status() might return None or raise an error
+        await job.abort()  # stops the job if still active
+        return {"detail": f"Task {task_id} was revoked (if it was running)."}
+
+    async def delete_task(self, request, task_id: UUID):
+        """
+        Remove the job data from redis (arq 'delete').
+        This only succeeds if the job is completed or aborted.
+        """
+        redis = await get_task_executor()
+        job = Job(task_id.hex, redis)
+        # If job isn't finished or doesn't exist, this might fail
+        await job.delete()
+        return DeletedSuccessfully(detail=f"Task {task_id} deleted successfully")
 
     def register_routes(self):
         self.register_route(
@@ -87,4 +81,16 @@ class TaskApi(ApiRouteV2):
             response={200: TaskStatusOut},
             summary="Check task status"
         )
-        
+        self.register_route(
+            path="/{task_id}/revoke",
+            methods=["PUT"],
+            view_func=self.revoke_task,
+            summary="Revoke a running task (if in progress)"
+        )
+        self.register_route(
+            path="/{task_id}",
+            methods=["DELETE"],
+            view_func=self.delete_task,
+            response={200: DeletedSuccessfully},
+            summary="Delete a completed/aborted task from redis"
+        )

