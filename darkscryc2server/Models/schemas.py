@@ -45,7 +45,7 @@ class CommandIdentifiersName(str, Enum):
     pass
 CommandIdentifiersName = Enum(
     "CommandIdentifiers", 
-    {name: name for name in CommandIdentifiers.__members__.keys()}
+    {name: name for name in CommandIdentifiers.__members__.keys() + ["UNKNOW"]}
 )
 
 
