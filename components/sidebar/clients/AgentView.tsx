@@ -4,7 +4,7 @@ import { Agent } from "@/lib/types";
 
 // Example panels you've already defined
 import AgentDetailPanel from "./AgentDetailPanel";
-import AgentShellPanel from "./AgentShellPanel";
+import ShellPanel from "./ShellPanel";
 import ModulesTestPanel from "./modules/TestPanel";
 import ModulesWifiPasswordsPanel from "./modules/WifiPasswordPanel";
 import { initAgentViewDropdowns } from "lib/custome_effects"
@@ -32,7 +32,7 @@ export default function AgentView({ agent }: AgentViewProps) {
   let panelContent = null;
   switch (activeModule) {
     case "shell":
-      panelContent = <AgentShellPanel agent={agent} />;
+      panelContent = <ShellPanel agent={agent} />;
       break;
     case "modules-test":
       panelContent = <ModulesTestPanel agent={agent} />;

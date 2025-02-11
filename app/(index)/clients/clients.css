@@ -189,3 +189,85 @@ body {
   }
 }
 
+
+
+
+/* SHELL */
+/**********************************************
+ * Shell Panel "Cyber" styling
+ **********************************************/
+ .shell-panel {
+  /* Our base card is already "d-flex flex-column" in the .tsx */
+  border-radius: var(--border-radius);
+  min-height: 24rem;       /* some minimum to ensure enough space */
+  max-height: 70vh;        /* limit it so it won't become too tall on big screens */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Top bar area */
+.shell-panel-header {
+  background-color: #242830; /* Slightly different from #1c1f24 */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* The chat area: fill leftover vertical space, overflow auto. */
+.shell-chat-body {
+  background-color: #1c1f24;
+  /* overflow: auto; is in the .tsx via "overflow-auto" from Bootstrap,
+     but we reaffirm if needed: */
+  /* If you prefer a fixed approach: see below. */
+}
+
+/* Chat bubble styling */
+.shell-message {
+  max-width: 65%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 12px;
+  word-break: break-word; /* handle long lines */
+}
+
+/* user vs. server colors */
+.shell-message-user {
+  background-color: var(--accent-color);
+  color: #000; 
+}
+
+.shell-message-server {
+  background-color: #333;
+  color: #fff;
+}
+
+/* Footer area */
+.shell-panel-footer {
+  background-color: #252525;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Optional: specialized custom scrollbar for shell-chat-body */
+.shell-chat-body::-webkit-scrollbar {
+  width: 8px;
+}
+.shell-chat-body::-webkit-scrollbar-track {
+  background: #1c1f24;
+}
+.shell-chat-body::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 4px;
+}
+.shell-chat-body::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/*******************
+ * RESPONSIVE TWEAKS
+ *******************/
+@media (max-width: 576px) {
+  .shell-message {
+    max-width: 80%; /* Let messages be a bit wider on small screens */
+  }
+
+  .shell-panel {
+    max-height: 80vh; /* If you want more vertical space on phone */
+  }
+}

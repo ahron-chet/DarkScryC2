@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Agent } from "@/lib/types";
 import useAuthApi from "lib/fetchApiClient";
-import runFetchUntilComplete from "lib/fetchApiClient";
+import useTaskRunner from "@/lib/hooks/useTaskRunner";
 
 interface AgentDetailPanelProps {
   agent: Agent;
@@ -24,49 +24,12 @@ interface BasicMachineInfo {
 }
 
 export default function AgentDetailPanel({ agent }: AgentDetailPanelProps) {
-  const { authGetApi } = useAuthApi();
 
+  const { runFetchUntilComplete, error: task_error, result: task_result } = useTaskRunner();
   const [machineInfo, setMachineInfo] = useState<BasicMachineInfo | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  async function runFetchUntilComplete(
-    url: string,
-    { method = "GET", headers = {}, body="", intervalMs = 2000, maxAttempts = 30 } = {}
-  ): Promise<any> {
-    // This replicates your old polling approach { method, headers, body }
-  
-    const startJson = await authGetApi(url);
-    if (!startJson) throw new Error(`Initial request failed`);
-    const taskId = startJson?.task_id;
-    if (!taskId) throw new Error("No task_id returned from initial request");
-  
-    let attempts = 0;
-    return new Promise((resolve, reject) => {
-      const checkStatus = async () => {
-        attempts++;
-        try {
-          const statusData = await authGetApi(`/tasks/${taskId}/status`);
-          if (!statusData) return reject(new Error("Status request failed"));
-          if (statusData.status === "complete") {
-            const resultData = await authGetApi(`/tasks/${taskId}/result`);
-            if (!resultData) return reject(new Error(`Result request failed`));
-            return resolve(resultData);
-          } else if (statusData.status === "failed") {
-            return reject(new Error(`Task ${taskId} failed.`));
-          }
-          if (attempts < maxAttempts) {
-            setTimeout(checkStatus, intervalMs);
-          } else {
-            reject(new Error(`Task ${taskId} not complete after ${maxAttempts} attempts.`));
-          }
-        } catch (err) {
-          reject(err);
-        }
-      };
-      checkStatus();
-    });
-  }
 
   useEffect(() => {
     let mounted = true;
