@@ -17,6 +17,7 @@ class ShellConsumer(AsyncWebsocketConsumer):
         data = text_data or bytes_data
         if data is None:
             raise ValueError("No data was presented")
+        print("Got data: "+ str(data))
         data = json.loads(data)
         command = data.get("command")
         # Do shell logic or dispatch to a worker, etc.
