@@ -76,3 +76,10 @@ class Command(BaseModel):
     class Config:  
         use_enum_values = True
 
+
+class GenAction(Command):
+    action: CommandIdentifiers = Field(..., Literal=False, description="Action to prform basen on CommandIdentifiers enum")
+
+    class Config:
+        extra = "allow"
+        allow_extra_fildes = True
