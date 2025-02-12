@@ -38,10 +38,11 @@ async def remote_send_command(conn_id: str, command: str, host: str = "127.0.0.1
     }
     r = await session().post(url="http://{}:{}/api/send_command".format(host,port), json=req)
     resp_dict = await r.json()
-    if _parse_data:
-        resp_dict = loads(resp_dict["result"])
+    
     try:
         mgr_resp = ManagerResponse(**resp_dict)
+        if _parse_data:
+            mgr_resp.data = loads(mgr_resp.data["result"])
         return mgr_resp
     except ValidationError as ve:
         return ManagerResponse(success=False, error=ve.json())
