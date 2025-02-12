@@ -1,6 +1,7 @@
 import aiohttp
 from pydantic import ValidationError
 from ...Models.remote_tools_schemas import ManagerResponse
+from json import loads
 
 _session = None
 def session():
@@ -25,7 +26,7 @@ async def remote_get_connections(host: str = "127.0.0.1", port: int = 9100) -> M
         return ManagerResponse(success=False, error=ve.json())
 
 
-async def remote_send_command(conn_id: str, command: str, host: str = "127.0.0.1", port: int = 9100) -> ManagerResponse:
+async def remote_send_command(conn_id: str, command: str, host: str = "127.0.0.1", port: int = 9100, _parse_data=False) -> ManagerResponse:
     """
     Instruct a specific connection to run 'command'.
     Return a ManagerResponse object (with success/data/error).
@@ -37,6 +38,8 @@ async def remote_send_command(conn_id: str, command: str, host: str = "127.0.0.1
     }
     r = await session().post(url="http://{}:{}/api/send_command".format(host,port), json=req)
     resp_dict = await r.json()
+    if _parse_data:
+        resp_dict = loads(resp_dict["result"])
     try:
         mgr_resp = ManagerResponse(**resp_dict)
         return mgr_resp
