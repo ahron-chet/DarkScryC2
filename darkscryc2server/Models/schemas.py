@@ -28,6 +28,8 @@ class CommandIdentifiers(str, Enum):
     START_SHELL_INSTANCE   = ("be425fd08e9ea24230bac47493228ada", "Start a shell instance on client")
     RUN_COMMAND            = ("58e129c7158b9fed8be5473640e54ae4", "Execute a command on a running shell instance")
     GET_BASIC_MACHINE_INFO = ("929cecb8e795d93306020c7f2e8682d2", "GET_BASIC_MACHINE_INFO")
+    SNAP_FULL_DIRECTORY    = ("74d6aa572d1b19102f9f5aedbe00dfd0", "SNAP_FULL_DIRECTORY")
+
 
 
     def __new__(cls, value, description):
@@ -67,10 +69,10 @@ class Command(BaseModel):
     
     def xml(self, *args, **kwargs):
         base_dump = super().model_dump(*args, **kwargs)
-        if isinstance(self.action, CommandIdentifiers):
+        if isinstance(self.action,  ):
             base_dump['action'] = self.action.value
         return gen_xml(tag="root", **base_dump)
     
     class Config:  
         use_enum_values = True
-        
+
