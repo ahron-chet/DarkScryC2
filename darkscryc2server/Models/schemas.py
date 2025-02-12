@@ -69,7 +69,7 @@ class Command(BaseModel):
     
     def xml(self, *args, **kwargs):
         base_dump = super().model_dump(*args, **kwargs)
-        if isinstance(self.action,  ):
+        if isinstance(self.action, CommandIdentifiers):
             base_dump['action'] = self.action.value
         return gen_xml(tag="root", **base_dump)
     
