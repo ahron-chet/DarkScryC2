@@ -221,6 +221,7 @@ body {
 
 /* Chat bubble styling */
 .shell-message {
+  white-space: pre;
   max-width: 65%;
   padding: 0.5rem 0.75rem;
   border-radius: 12px;

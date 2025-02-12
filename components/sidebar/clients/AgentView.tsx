@@ -8,11 +8,14 @@ import ShellPanel from "./ShellPanel";
 import ModulesTestPanel from "./modules/TestPanel";
 import ModulesWifiPasswordsPanel from "./modules/WifiPasswordPanel";
 import { initAgentViewDropdowns } from "lib/custome_effects"
+import useAuthApi from "@/lib/fetchApiClient";
+
 type ActiveModule =
   | "details"
   | "shell"
   | "modules-test"
-  | "modules-collection-passwords-wifi";
+  | "modules-collection-passwords-wifi"
+  | "modules-collection-files-collectfiles";
 
 interface AgentViewProps {
   agent: Agent;
@@ -27,11 +30,13 @@ export default function AgentView({ agent }: AgentViewProps) {
     setActiveModule(moduleKey);
   }
 
+  const { authGetApi } = useAuthApi()
 
   // Decide which content to render
   let panelContent = null;
   switch (activeModule) {
     case "shell":
+      authGetApi(`/agents/${agent.AgentId}/modules/execution/shell/start_shell`)
       panelContent = <ShellPanel agent={agent} />;
       break;
     case "modules-test":
@@ -91,6 +96,18 @@ export default function AgentView({ agent }: AgentViewProps) {
                         <li>
                           <a className="dropdown-item" style={{ cursor: "pointer" }} onClick={() => handleSelect("modules-collection-passwords-wifi")}>
                             WiFi
+                          </a>
+                        </li>
+                      </ul>
+                    </li>
+                    <li className="dropdown-submenu">
+                      <a className="dropdown-item dropdown-toggle" style={{ cursor: "pointer" }}>
+                        Files
+                      </a>
+                      <ul className="dropdown-menu dropdown-menu-dark">
+                        <li>
+                          <a className="dropdown-item" style={{ cursor: "pointer" }} onClick={() => handleSelect("modules-collection-files-collectfiles")}>
+                            File Explorer
                           </a>
                         </li>
                       </ul>

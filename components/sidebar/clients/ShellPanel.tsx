@@ -54,31 +54,43 @@ export default function ShellPanel({ agent }: ShellPanelProps) {
     <div className="card shell-panel bg-dark text-white d-flex flex-column">
       {/* --- TOP BAR --- */}
       <div className="card-header shell-panel-header d-flex align-items-center justify-content-between">
-        
-        {/* File dropdown */}
-        <div className="btn-group">
-          <button className="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-            File: {shellType}
-          </button>
-          <ul className="dropdown-menu dropdown-menu-dark">
-            <li><a className="dropdown-item" onClick={() => setShellType("powershell")}>PowerShell</a></li>
-            <li><a className="dropdown-item" onClick={() => setShellType("cmd")}>CMD</a></li>
-          </ul>
+
+        <div>
+          {/* File dropdown */}
+          <div className="btn-group">
+            <button className="btn btn-sm btn-secondary dropdown-toggle me-2" type="button" data-bs-toggle="dropdown">
+              File: {shellType}
+            </button>
+            <ul className="dropdown-menu dropdown-menu-dark">
+              <li><a className="dropdown-item" onClick={() => setShellType("powershell")}>PowerShell</a></li>
+              <li><a className="dropdown-item" onClick={() => setShellType("cmd")}>CMD</a></li>
+            </ul>
+          </div>
+          <div className="btn-group">
+            <button className="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+              {currentUser}
+            </button>
+            <ul className="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+              <li><a className="dropdown-item" onClick={() => setCurrentUser("Test User")}>Test User</a></li>
+              {/* Future dynamic user listing */}
+            </ul>
+          </div>
         </div>
+
 
         {/* Connection status badge */}
-        <span className="badge bg-info bg-opacity-75">{connectionStatus}</span>
+        <span
+          className="badge bg-opacity-75"
+          style={{
+            backgroundColor: "#00000030",
+            color: connectionStatus === "Disconnected" ? "red" : "aquamarine",
+            cursor: "default"
+          }}
+        >
+          {connectionStatus}
+        </span>
 
-        {/* User dropdown */}
-        <div className="btn-group">
-          <button className="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-            {currentUser}
-          </button>
-          <ul className="dropdown-menu dropdown-menu-dark dropdown-menu-end">
-            <li><a className="dropdown-item" onClick={() => setCurrentUser("Test User")}>Test User</a></li>
-            {/* Future dynamic user listing */}
-          </ul>
-        </div>
+
       </div>
 
       {/* --- CHAT BODY --- */}
