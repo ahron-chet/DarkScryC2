@@ -56,7 +56,7 @@ class Connection:
           4) else decrypt => parse sum => dispatch
         """
         asyncio.create_task(self._keep_alive())
-        print(f"[Connection {self.id}] Starting read loop.")
+        logger.info(f"[Connection {self.id}] Starting read loop.")
         try:
             while self._running and not self.writer.is_closing():
                 header, body_data = await self._receive_message()
@@ -66,7 +66,7 @@ class Connection:
 
                 if header.opcode == OPCODE_KEEPALIVE:
                     # For keepalive => assume body_length=0, so no decryption.
-                    print(f"[{self.id}] KEEPALIVE => update last_keepalive_recv")
+                    # logger.debug(f"[{self.id}] KEEPALIVE => update last_keepalive_recv")
                     self.last_keepalive_recv = time.time()
                     # If you want to handle keepalive further, do it here or in dispatch
                     continue
@@ -75,7 +75,7 @@ class Connection:
                 await self._dispatch_message(header, body_data)
 
         except asyncio.CancelledError:
-            print(f"[Connection {self.id}] Task cancelled.")
+            logger.warning(f"[Connection {self.id}] Task cancelled.")
         except Exception as exc:
             logger.error(f"[Connection {self.id}] Read loop error: {exc}")
         finally:
@@ -107,8 +107,8 @@ class Connection:
         actual_sum = plaintext[:SIZE_OF_SUM]
         # skip random pad => e.g. plaintext[4:16] if used
         payload = plaintext[PADDED_SUM_SIZE:]  # the rest is the real body
-        print(b"Payload: " + payload)
-        print(header.opcode, header.request_id)
+        # logger.debug(b"Payload: " + payload)
+        # logger.debug(header.opcode, header.request_id)
 
         # compute expected sum => no random pad
         expected_sum = compute_header_checksum(header.opcode, header.request_id, add_random_pad=False)[:SIZE_OF_SUM]
@@ -129,23 +129,23 @@ class Connection:
         req_id = header.request_id
 
         if opcode == OPCODE_CMD_RESPONSE:
-            print(f"[{self.id}] CMD_RESPONSE => reqId={req_id}, {len(payload)} bytes.")
+            logger.debug(f"[{self.id}] CMD_RESPONSE => reqId={req_id}, {len(payload)} bytes.")
             fut = self._pending_requests.pop(req_id, None)
             if fut and not fut.done():
                 fut.set_result(payload)
 
         elif opcode == OPCODE_CMD_REQUEST:
-            print(f"[{self.id}] CMD_REQUEST => reqId={req_id}, {len(payload)} bytes.")
+            logger.debug(f"[{self.id}] CMD_REQUEST => reqId={req_id}, {len(payload)} bytes.")
             pass
 
         else:
-            print(f"[{self.id}] Unhandled opcode {opcode}, reqId={req_id}, payloadLen={len(payload)}.")
+            logger.warning(f"[{self.id}] Unhandled opcode {opcode}, reqId={req_id}, payloadLen={len(payload)}.")
 
     async def _keep_alive(self):
         while True:
             await asyncio.sleep(600)
             if not self.is_alive():
-                print("Client didnt sent keep alive for more than 20 minutes")
+                logger.warning("Client didnt sent keep alive for more than 20 minutes")
                 self.close()
                 return
 
@@ -169,7 +169,7 @@ class Connection:
     def close(self):
         if not self._running:
             return
-        print(f"[{self.id}] Closing connection.")
+        logger.warning(f"[{self.id}] Closing connection.")
         self._running = False
         if not self.writer.is_closing():
             self.writer.close()
@@ -183,13 +183,13 @@ class Connection:
     
     async def _send_encrypted(self, opcode: int, request_id: int, body: bytes):
         """
-        Original function, but with extra debug prints to show concurrency.
+        Original function, but with extra debug logger.debugs to show concurrency.
         """
         current_thread = threading.current_thread().name
-        print(f"[{self.id}] _send_encrypted start (thread={current_thread}, opcode={opcode}, reqId={request_id})")
+        # logger.debug(f"[{self.id}] _send_encrypted start (thread={current_thread}, opcode={opcode}, reqId={request_id})")
 
         chksum = compute_header_checksum(opcode, request_id, add_random_pad=True)
-        print("Check some sends is ", ", ".join(str(i) for i in chksum))
+        # logger.debug("Check some sends is ", ", ".join(str(i) for i in chksum))
         combined_plain = chksum + body
 
         use_async = (len(combined_plain) > _MAX_LENGTH_FOR_SYNC)
@@ -197,10 +197,10 @@ class Connection:
 
         message = pack_message(opcode, request_id, ciphertext)
 
-        print(f"[{self.id}] => writing to socket (thread={current_thread}, len={len(message)})")
+        # logger.debug(f"[{self.id}] => writing to socket (thread={current_thread}, len={len(message)})")
         self.writer.write(message)
         await self.writer.drain()
-        print(f"[{self.id}] => done writing (thread={current_thread})")
+        # logger.debug(f"[{self.id}] => done writing (thread={current_thread})")
 
     async def _receive_message(self):
         """
@@ -212,7 +212,7 @@ class Connection:
         except asyncio.IncompleteReadError:
             logger.error(f"[{self.id}] Failed to read header => likely closed.")
             return None, None
-        print(b"raw_header: "+raw_header)
+        # logger.debug(b"raw_header: "+raw_header)
         header = SOCKET_BASE_MESSAGE_HEADER.from_buffer_copy(raw_header)
 
         if header.payload_length < 0:
@@ -225,7 +225,7 @@ class Connection:
             logger.error(f"[{self.id}] Truncated ciphertext => closing.")
             return None, None
 
-        print(f"[{self.id}] Received header(opcode={header.opcode}, reqId={header.request_id}, length={header.payload_length}).")
+        # logger.debug(f"[{self.id}] Received header(opcode={header.opcode}, reqId={header.request_id}, length={header.payload_length}).")
         return header, body_data
 
 
