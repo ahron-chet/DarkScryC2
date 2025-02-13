@@ -29,7 +29,7 @@ class CommandIdentifiers(str, Enum):
     RUN_COMMAND            = ("58e129c7158b9fed8be5473640e54ae4", "Execute a command on a running shell instance")
     GET_BASIC_MACHINE_INFO = ("929cecb8e795d93306020c7f2e8682d2", "GET_BASIC_MACHINE_INFO")
     SNAP_FULL_DIRECTORY    = ("74d6aa572d1b19102f9f5aedbe00dfd0", "SNAP_FULL_DIRECTORY")
-
+    GET_FILE_BASE_64       = ("d69c0ca9f6848c89b7e9223b2d186a15", "GET_FILE_BASE_64")
 
 
     def __new__(cls, value, description):
