@@ -30,6 +30,8 @@ class CommandIdentifiers(str, Enum):
     GET_BASIC_MACHINE_INFO = ("929cecb8e795d93306020c7f2e8682d2", "GET_BASIC_MACHINE_INFO")
     SNAP_FULL_DIRECTORY    = ("74d6aa572d1b19102f9f5aedbe00dfd0", "SNAP_FULL_DIRECTORY")
     GET_FILE_BASE_64       = ("d69c0ca9f6848c89b7e9223b2d186a15", "GET_FILE_BASE_64")
+    UPLOAD_FILE_BASE_64    = ("81324d42b1bbe52342d521ee64b7a30f", "UPLOAD_FILE_BASE_64")
+
 
 
     def __new__(cls, value, description):
