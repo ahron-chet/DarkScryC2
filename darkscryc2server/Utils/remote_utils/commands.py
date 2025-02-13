@@ -42,7 +42,7 @@ async def remote_send_command(conn_id: str, command: str, host: str = "127.0.0.1
     try:
         mgr_resp = ManagerResponse(**resp_dict)
         if _parse_data:
-            if isinstance(mgr_resp.data, str):
+            if isinstance(mgr_resp.data["result"], str):
                 mgr_resp.data = loads(mgr_resp.data["result"])
             else:
                 mgr_resp.data = mgr_resp.data["result"]
