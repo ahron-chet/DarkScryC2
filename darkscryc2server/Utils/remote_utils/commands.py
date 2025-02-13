@@ -42,7 +42,10 @@ async def remote_send_command(conn_id: str, command: str, host: str = "127.0.0.1
     try:
         mgr_resp = ManagerResponse(**resp_dict)
         if _parse_data:
-            mgr_resp.data = loads(mgr_resp.data["result"])
+            if isinstance(mgr_resp.data, str):
+                mgr_resp.data = loads(mgr_resp.data["result"])
+            else:
+                mgr_resp.data = mgr_resp.data["result"]
         return mgr_resp
     except ValidationError as ve:
         return ManagerResponse(success=False, error=ve.json())
