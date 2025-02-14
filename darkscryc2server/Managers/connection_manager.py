@@ -84,7 +84,7 @@ class Connection:
                 if not fut.done():
                     fut.set_exception(ConnectionError("Connection closed"))
             self._pending_requests.clear()
-            self.close()
+            await self.close()
 
     async def _dispatch_message(self, header: SOCKET_BASE_MESSAGE_HEADER, ciphertext: bytes):
         """
@@ -95,12 +95,12 @@ class Connection:
             plaintext = await self.aes_manager.decrypt(ciphertext, use_async=use_async)
         except Exception as ex:
             logger.error(f"[{self.id}] Decrypt error: {ex}")
-            self.close()
+            await self.close()
             return
 
         if len(plaintext) < SIZE_OF_SUM:
             logger.error(f"[{self.id}] Plaintext too short for sum => closing.")
-            self.close()
+            await self.close()
             return
 
         # The first 4 bytes => actual sum, the next (PAD_LEN) if you used random padding => skip
@@ -114,7 +114,7 @@ class Connection:
         expected_sum = compute_header_checksum(header.opcode, header.request_id, add_random_pad=False)[:SIZE_OF_SUM]
         if actual_sum != expected_sum:
             logger.error(f"[{self.id}] Checksum mismatch => closing.")
-            # self.close()
+            # await self.close()
             # return
 
         # Finally handle the opcode logic
@@ -146,7 +146,7 @@ class Connection:
             await asyncio.sleep(600)
             if not self.is_alive():
                 logger.warning("Client didnt sent keep alive for more than 20 minutes")
-                self.close()
+                await self.close()
                 return
 
     def is_alive(self):
@@ -166,7 +166,7 @@ class Connection:
         await self._send_encrypted(OPCODE_CMD_REQUEST, req_id, body_data)
         return await fut
 
-    def close(self):
+    async def close(self):
         if not self._running:
             return
         logger.warning(f"[{self.id}] Closing connection.")
@@ -276,7 +276,7 @@ class ConnectionManager:
     async def unregister(self, connection: Union[Connection, WsConnection]) -> None:
         conn_id = connection.id
         if conn_id in self.connections:
-            connection.close()
+            await connection.close()
             del self.connections[conn_id]
             logger.info(f"Unregistered connection {conn_id}")
             try:

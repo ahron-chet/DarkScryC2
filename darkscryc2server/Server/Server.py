@@ -160,7 +160,7 @@ class Server:
         ws_conn: WsConnection = None
         try:
             # 1) Read the agent_id
-            agent_id = (websocket.request.path.split("/", 1) or [""])[0]
+            agent_id = websocket.request.path.split("/", 1)[1]
             if not agent_id:
                 await websocket.close()
 
@@ -172,13 +172,13 @@ class Server:
             logger.info(f"WebSocket client connected: agent_id={agent_id}, path={websocket.request.path}")
 
             # 4) Start reading messages. We'll do a streaming approach:
-            def on_message(msg: str):
-                logger.info(f"[WsConnection {agent_id}] => {msg}")
-                # Optionally echo or handle
+            # def on_message(msg: str):
+            #     logger.info(f"[WsConnection {agent_id}] => {msg}")
+            #     # Optionally echo or handle
 
-            await ws_conn.start_stream(on_message=on_message)
-        except Exception as e:
-            raise
+            # await ws_conn.start_stream(on_message=on_message)
+            
+            await websocket.wait_closed()
         except websockets.ConnectionClosed as exc:
             logger.warning(f"WebSocket closed: {exc}")
         except Exception as e:
