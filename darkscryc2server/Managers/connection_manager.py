@@ -185,7 +185,7 @@ class Connection:
         """
         Original function, but with extra debug logger.debugs to show concurrency.
         """
-        current_thread = threading.current_thread().name
+        # current_thread = threading.current_thread().name
         # logger.debug(f"[{self.id}] _send_encrypted start (thread={current_thread}, opcode={opcode}, reqId={request_id})")
 
         chksum = compute_header_checksum(opcode, request_id, add_random_pad=True)
@@ -257,7 +257,7 @@ class ConnectionManager:
         if isinstance(connection, Connection):
             return "ACPROTO" 
         elif isinstance(connection, WsConnection):
-            return "WSPROTO" 
+            return "WSPROTO"
         raise TypeError("Unsupported connection type {}.".format(str(type(Connection))))
 
     async def register(self, connection: Union[Connection, WsConnection]) -> None:

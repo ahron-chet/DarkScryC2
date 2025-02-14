@@ -151,7 +151,7 @@ class Server:
     # -------------------------------------------------------------------------
     #                    WebSocket Handling (WSPROTO)
     # -------------------------------------------------------------------------
-    async def _handle_websocket(self, websocket: ServerConnection, path: str):
+    async def _handle_websocket(self, websocket: ServerConnection):
         """
         Handle a new WebSocket client. 
         We'll assume the client sends a JSON handshake message with agent_id.
@@ -159,19 +159,17 @@ class Server:
         """
         ws_conn: WsConnection = None
         try:
-            # 1) Read the first message from client => handshake or agent_id
-            raw_data = await websocket.recv()
-            handshake_data = loads(raw_data)  # e.g. {"agent_id": "1234-abc"}
-            agent_id = handshake_data.get("agent_id")
+            # 1) Read the agent_id
+            agent_id = (websocket.request.path.split("/", 1) or [""])[0]
             if not agent_id:
-                websocket.close()
+                await websocket.close()
 
             # 2) Create WsConnection
             ws_conn = WsConnection(websocket, agent_id=agent_id)
 
             # 3) Register with manager
             await self.connection_manager.register(ws_conn)
-            logger.info(f"WebSocket client connected: agent_id={agent_id}, path={path}")
+            logger.info(f"WebSocket client connected: agent_id={agent_id}, path={websocket.request.path}")
 
             # 4) Start reading messages. We'll do a streaming approach:
             def on_message(msg: str):
@@ -179,7 +177,8 @@ class Server:
                 # Optionally echo or handle
 
             await ws_conn.start_stream(on_message=on_message)
-
+        except Exception as e:
+            raise
         except websockets.ConnectionClosed as exc:
             logger.warning(f"WebSocket closed: {exc}")
         except Exception as e:

@@ -23,6 +23,7 @@ class WsConnection:
         """
         self.id = agent_id
         self.websocket = websocket
+        self.address = websocket.remote_address
         self._running = False
 
     async def send_and_receive(self, message: str) -> str:
