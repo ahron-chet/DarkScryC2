@@ -67,11 +67,12 @@ namespace DarkScryClient.Client
 			Console.WriteLine("Read loop ended.");
 		}
 
-		private void _command(string message)
+		private async Task _command(string message)
 		{
 			// Replace this with whatever logic you need:
 			Console.WriteLine($"[WSClient] Received: {message}");
 			// For example, parse JSON, run local logic, etc.
+			await _websocket.SendAsync(new ArraySegment<byte>(Tools.StringToBytes("message")), WebSocketMessageType.Text, true, CancellationToken.None);
 		}
 
 		public async Task StopAsync()
