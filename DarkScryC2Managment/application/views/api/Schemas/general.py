@@ -57,3 +57,7 @@ class TaskResultOut(BaseModel):
     
 
     model_config = ConfigDict(use_enum_values=True)
+
+
+class GeneralError(BaseModel):
+    error:str
