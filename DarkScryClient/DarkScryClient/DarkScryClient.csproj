@@ -35,6 +35,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Text.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL" />
     <Reference Include="System.Xml.Linq" />
@@ -53,6 +54,8 @@
     <Compile Include="Config.cs" />
     <Compile Include="Models\Agent.cs" />
     <Compile Include="Models\CommandOutput.cs" />
+    <Compile Include="Moduls\Collection\Files\FilesExplorer.cs" />
+    <Compile Include="Moduls\Collection\Files\General.cs" />
     <Compile Include="Moduls\Collection\Machine\MachineInfo.cs" />
     <Compile Include="Moduls\Collection\Schemas\Machine.cs" />
     <Compile Include="Moduls\Collection\Schemas\Users.cs" />

