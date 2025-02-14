@@ -5,8 +5,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
-import UserDropdown from "components/sidebar/user";
+import UserDropdown from "components/sidebar/UserDropdown";
 import { side_bar_effect } from "lib/custome_effects"
+
 
 export default function Sidebar() {
   const pathname = usePathname();

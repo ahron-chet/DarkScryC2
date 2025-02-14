@@ -41,7 +41,7 @@ export const authOptions: AuthOptions = {
         const user_details = await GetUserDetails(json_res.token);
         if (json_res) {
           return {        
-              id: credentials?.username || "AnonUser",
+              id: user_details.user_id || "AnonUser",
               userName: credentials?.username,
               accessToken: json_res.token,
               refreshToken: json_res.refresh_token,

@@ -9,6 +9,7 @@ import ModulesTestPanel from "./modules/TestPanel";
 import ModulesWifiPasswordsPanel from "./modules/WifiPasswordPanel";
 import { initAgentViewDropdowns } from "lib/custome_effects"
 import useAuthApi from "@/lib/fetchApiClient";
+import FileExplorerPanel from "./modules/FileExplorerPanel";
 
 type ActiveModule =
   | "details"
@@ -44,6 +45,9 @@ export default function AgentView({ agent }: AgentViewProps) {
       break;
     case "modules-collection-passwords-wifi":
       panelContent = <ModulesWifiPasswordsPanel agent={agent} />;
+      break;
+    case "modules-collection-files-collectfiles":
+      panelContent = <FileExplorerPanel agent={agent} />;
       break;
     case "details":
     default:

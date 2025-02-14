@@ -1,5 +1,6 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "app/api/auth/[...nextauth]/route";
+import { signOut } from "next-auth/react";
 
 const BASE_URL = process.env.NEXT_DJANGO_API_URL_V2;
 async function refreshToken(refreshToken: string) {
@@ -12,7 +13,9 @@ async function refreshToken(refreshToken: string) {
   });
   const data = await res.json();
   console.log({ data });
-
+  if(!res.ok){
+    signOut();
+  }
   return data.accessToken;
 }
 
