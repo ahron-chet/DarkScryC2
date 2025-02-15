@@ -32,7 +32,7 @@ class FileCollection(ApiRouteV2):
     
     async def get_file_base64(self, request, agent_id:UUID, payload:FileCollectionRequest, *args, **kwargs):
         agent = await aget_object_or_404(Agent, AgentId=agent_id)
-        command = GenAction(action=CommandIdentifiers.GET_FILE_BASE_64, path=payload.path, file_name=payload.file_name).xml()
+        command = GenAction(action=CommandIdentifiers.GET_FILE_BASE_64, path=payload.path).xml()
         task_excutor = await get_task_executor()
         job = await task_excutor.enqueue_job(
             "remote_send_command_task",

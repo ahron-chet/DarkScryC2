@@ -9,7 +9,7 @@ from application.services.arq_tasks import remote_send_command_task
 from arq.connections import RedisSettings
 
 class WorkerSettings:
-    # Which functions are our tasks?
+
     functions = [
         remote_send_command_task
     ]

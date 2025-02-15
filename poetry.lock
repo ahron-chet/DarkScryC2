@@ -480,7 +480,7 @@ websockets = "^14.1"
 type = "git"
 url = "https://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@github.com/ahron-chet/DarkScryC2Server.git"
 reference = "HEAD"
-resolved_reference = "322b12e0757b49d982a7f1e36253bbf941f3408b"
+resolved_reference = "dbfa2adfad812d8ac7382e8a39df4867359ef0ce"
 
 [[package]]
 name = "django"
