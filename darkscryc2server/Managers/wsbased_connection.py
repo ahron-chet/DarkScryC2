@@ -2,6 +2,7 @@ import websockets
 from websockets.asyncio.server import ServerConnection
 from typing import Callable
 from uuid import UUID
+import asyncio
 
 class WsConnection:
     """
@@ -25,6 +26,7 @@ class WsConnection:
         self.websocket = websocket
         self.address = websocket.remote_address
         self._running = False
+        self._send_lock = asyncio.Lock()
 
     async def send_and_receive(self, message: str) -> str:
         """
@@ -33,15 +35,16 @@ class WsConnection:
 
         NOTE: This blocks (awaits) until the client sends something back.
         """
-        # 1) Send
-        await self.websocket.send(message)
+        async with self._send_lock:
+            # 1) Send
+            await self.websocket.send(message)
 
-        # 2) Await next inbound message
-        try:
-            response = await self.websocket.recv()
-            return response
-        except websockets.ConnectionClosed as exc:
-            raise ConnectionError(f"WebSocket closed: {exc}")
+            # 2) Await next inbound message
+            try:
+                response = await self.websocket.recv()
+                return response
+            except websockets.ConnectionClosed as exc:
+                raise ConnectionError(f"WebSocket closed: {exc}")
 
     async def start_stream(self, on_message: Callable[[str], None]) -> None:
         """
