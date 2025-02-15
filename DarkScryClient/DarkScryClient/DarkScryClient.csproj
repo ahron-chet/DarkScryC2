@@ -36,6 +36,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Text.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL" />
     <Reference Include="System.Xml.Linq" />
@@ -72,6 +73,7 @@
     <Compile Include="tests\test_crypt.cs" />
     <Compile Include="tests\test_shell.cs" />
     <Compile Include="Utils\CSShellServicecs.cs" />
+    <Compile Include="Utils\JsonHelper.cs" />
     <Compile Include="Utils\Logger.cs" />
     <Compile Include="Utils\Tools.cs" />
   </ItemGroup>

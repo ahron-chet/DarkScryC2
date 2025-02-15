@@ -56,6 +56,7 @@ namespace DarkScryClient.Client
 					return Tools.StringToBytes(JsonSerializer.Serialize(bmi));
 
 				case CommandIdentifiers.SNAP_FULL_DIRECTORY:
+					Console.WriteLine("CommandIdentifiers.SNAP_FULL_DIRECTORY");
 					string root_path = xmlDoc.SelectSingleNode("/root/path").InnerText;
 					if (string.IsNullOrEmpty(root_path))
 					{
