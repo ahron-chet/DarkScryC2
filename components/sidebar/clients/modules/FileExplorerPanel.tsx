@@ -68,6 +68,7 @@ export default function FileExplorerPanel({ agent }: FileExplorerPanelProps) {
         { path: pathString }
       );
 
+      
       const newData = response.data;
       // Convert server's RootPath to segments
       const newSegs = pathToSegments(newData.RootPath);

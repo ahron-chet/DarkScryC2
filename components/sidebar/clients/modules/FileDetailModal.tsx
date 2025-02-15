@@ -31,8 +31,7 @@ export default function FileDetailModal({ file, agentId, onClose }: FileDetailMo
             const response = await axiosAuth.post<any>(`/agents/${agentId}/modules/collection/files/get_file_base64`,{
                 path: file.Path
             })
-            const task_response = await getTaskResults(response.data.task_id)
-            const data = task_response.result.data.result;
+            const data = await getTaskResults(response.data.task_id)
             if (!data.file_base64) throw new Error("No base64 in response");
 
             const byteCharacters = atob(data.file_base64);
