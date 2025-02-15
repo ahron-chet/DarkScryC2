@@ -31,7 +31,7 @@ class CommandIdentifiers(str, Enum):
     SNAP_FULL_DIRECTORY    = ("74d6aa572d1b19102f9f5aedbe00dfd0", "SNAP_FULL_DIRECTORY")
     GET_FILE_BASE_64       = ("d69c0ca9f6848c89b7e9223b2d186a15", "GET_FILE_BASE_64")
     UPLOAD_FILE_BASE_64    = ("81324d42b1bbe52342d521ee64b7a30f", "UPLOAD_FILE_BASE_64")
-
+    GET_WIFI_BAISIC_INFO   = ("0c9f43143832f340691b2f701b5d56fa", "UPLOAD_FILE_BASE_64")
 
 
     def __new__(cls, value, description):
