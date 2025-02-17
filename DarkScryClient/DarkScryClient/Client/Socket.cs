@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 
+
 namespace DarkScryClient.Client
 {
 	[StructLayout(LayoutKind.Sequential, Pack = 1)]

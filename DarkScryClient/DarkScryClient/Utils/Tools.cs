@@ -1,15 +1,13 @@
 ﻿using System.IO;
 using System.Runtime.InteropServices;
-using System.Security.Principal;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System;
 
 
 
-internal class Tools
+public class Tools
 {
-
 	public static byte[] StructToBytes<T>(T data) where T : struct
 	{
 		var size = Marshal.SizeOf(typeof(T));
@@ -39,23 +37,6 @@ internal class Tools
 		finally
 		{
 			Marshal.FreeHGlobal(ptr);
-		}
-	}
-
-	public static bool IsAdministrator()
-	{
-		WindowsIdentity identity = WindowsIdentity.GetCurrent();
-		WindowsPrincipal principal = new WindowsPrincipal(identity);
-		return principal.IsInRole(WindowsBuiltInRole.Administrator);
-	}
-
-	public static bool IsSystemUser()
-	{
-		var localSystemSid = new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null);
-
-		using (var identity = WindowsIdentity.GetCurrent())
-		{
-			return identity.User != null && identity.User.Equals(localSystemSid);
 		}
 	}
 
@@ -104,6 +85,6 @@ internal class Tools
 
 		return true;
 	}
-}
 
+}
 
