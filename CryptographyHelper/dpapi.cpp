@@ -34,8 +34,9 @@ char* DpapiUnprotectBase64(const char* base64Encrypted, DWORD cryptProtection)
         LocalFree(outputBlob.pbData);
     }
     std::string decrypted = Base64Encode(unprotectedData);
-    char* outStr = static_cast<char*>(std::malloc(decrypted.size() + 1));
+    char* outStr = static_cast<char*>(std::malloc(decrypted.size() + 1)); 
     std::memcpy(outStr, decrypted.c_str(), decrypted.size() + 1);
+    *outSize = decrypted.size() + 1;
     return outStr;
 }
 

