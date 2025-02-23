@@ -5,13 +5,14 @@ import django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "DarkScryC2Managment.settings")
 django.setup()
 
-from application.services.arq_tasks import remote_send_command_task
+from application.services.arq_tasks import remote_send_command_task, remote_send_web_cred_gather
 from arq.connections import RedisSettings
 
 class WorkerSettings:
 
     functions = [
-        remote_send_command_task
+        remote_send_command_task,
+        remote_send_web_cred_gather
     ]
 
     redis_settings = RedisSettings(
