@@ -31,8 +31,8 @@ function useAuthApi() {
       // signIn() or throw an error
       throw new Error("No valid user session or access token");
     }
-
-    let res = await fetch(`${process.env.NEXT_DJANGO_API_URL_V2}${url}`, {
+    console.log(process.env.NEXT_DJANGO_API_URL_V2)
+    let res = await fetch(`${process.env.NEXT_DJANGO_API_URL_V2}/${url}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${session.user.accessToken}`,
