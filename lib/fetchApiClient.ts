@@ -8,7 +8,7 @@ function useAuthApi() {
 
   // Function to handle refreshing the token
   const refreshToken = async (refreshToken: string) => {
-    const res = await fetch(`${process.env.NEXT_DJANGO_API_URL_V2}/auth/refresh`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_DJANGO_API_URL_V2}/auth/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refresh_token: refreshToken }),
@@ -31,8 +31,8 @@ function useAuthApi() {
       // signIn() or throw an error
       throw new Error("No valid user session or access token");
     }
-    console.log("process.env.NEXT_DJANGO_API_URL_V2", process.env.NEXT_DJANGO_API_URL_V2)
-    let res = await fetch(`${process.env.NEXT_DJANGO_API_URL_V2}/${url}`, {
+    console.log("process.env.NEXT_PUBLIC_DJANGO_API_URL_V2", process.env.NEXT_PUBLIC_DJANGO_API_URL_V2)
+    let res = await fetch(`${process.env.NEXT_PUBLIC_DJANGO_API_URL_V2}/${url}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${session.user.accessToken}`,
@@ -54,8 +54,8 @@ function useAuthApi() {
         });
 
         // Retry the fetch with the new token
-        console.log(process.env.NEXT_DJANGO_API_URL_V2)
-        res = await fetch(`${process.env.NEXT_DJANGO_API_URL_V2}${url}`, {
+        console.log(process.env.NEXT_PUBLIC_DJANGO_API_URL_V2)
+        res = await fetch(`${process.env.NEXT_PUBLIC_DJANGO_API_URL_V2}${url}`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${newAccessToken}`,

@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "app/api/auth/[...nextauth]/route";
 import { signOut } from "next-auth/react";
 
-const BASE_URL = process.env.NEXT_DJANGO_API_URL_V2;
+const BASE_URL = process.env.NEXT_PUBLIC_DJANGO_API_URL_V2;
 async function refreshToken(refreshToken: string) {
   const res = await fetch(BASE_URL + "/auth/refresh", {
     method: "POST",
