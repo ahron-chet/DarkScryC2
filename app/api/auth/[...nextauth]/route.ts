@@ -4,7 +4,7 @@ import JWT from 'jsonwebtoken';
 
 async function GetUserDetails(accessToken:string){
   const user_id = (JWT.decode(accessToken) as { sub: string }).sub;
-  const res = await fetch(`http://localhost:8000/api/v2/users/${user_id}`, {
+  const res = await fetch(`http://localhost:80/api/v2/users/${user_id}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -24,7 +24,7 @@ export const authOptions: AuthOptions = {
       },
       async authorize(credentials, req) {
 
-        const res = await fetch("http://localhost:8000/api/v2/auth/", {
+        const res = await fetch("http://localhost:80/api/v2/auth/", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
