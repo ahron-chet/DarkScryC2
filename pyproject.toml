@@ -18,6 +18,7 @@ pyjwt = "^2.10.1"
 django = "5.2a1"
 django-cors-headers = "^4.6.0"
 darkscryc2server = {git = "https://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@github.com/ahron-chet/DarkScryC2Server.git"}
+arq = "^0.26.3"
 
 
 [tool.poetry.group.dev.dependencies]

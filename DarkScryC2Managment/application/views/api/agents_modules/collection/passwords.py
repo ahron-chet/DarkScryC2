@@ -5,12 +5,11 @@ from darkscryc2server.Models.schemas import CommandIdentifiers
 from django.shortcuts import aget_object_or_404
 from application.models import Agent
 from application.views.api.Schemas.general import TaskOut
-from application.views.api.Schemas.general import GeneralError
 from application.shortcuts import make_task
 
 
-prefix_with_agent = "/agents/{agent_id}/modules/collection/files"
-class FileCollection(ApiRouteV2):
+prefix_with_agent = "/agents/{agent_id}/modules/collection/passwords"
+class PasswordCollection(ApiRouteV2):
     def __init__(self, tags = ['Collection']):
         super().__init__(tags=tags, prefix=prefix_with_agent)
         self.register_routes()
