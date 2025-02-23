@@ -7,11 +7,16 @@
 
 /* 2) Root Variables */
 :root {
-  --accent-color: #497ea5;        /* Main accent color */
-  --text-color: #ffffff;          /* Base text color */
-  --border-radius: 16px;          /* Global border radius */
-  --font-heading: "Orbitron", sans-serif;  /* Futuristic heading font */
-  --font-body: "Rajdhani", sans-serif;     /* Body font */
+  --accent-color: #497ea5;
+  /* Main accent color */
+  --text-color: #ffffff;
+  /* Base text color */
+  --border-radius: 16px;
+  /* Global border radius */
+  --font-heading: "Orbitron", sans-serif;
+  /* Futuristic heading font */
+  --font-body: "Rajdhani", sans-serif;
+  /* Body font */
 }
 
 /* 3) Base Body Styling */
@@ -24,9 +29,10 @@ body {
 }
 
 /* 4) Cards & Hover Effects */
-.card-header{
+.card-header {
   border-radius: var(--border-radius) !important;
 }
+
 .card,
 .client-card {
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -44,13 +50,15 @@ body {
 /* Title styling within cards */
 .card-title {
   font-family: var(--font-heading);
-  color: beige !important; /* If you want a contrasting color for titles */
+  color: beige !important;
+  /* If you want a contrasting color for titles */
 }
 
 /* OS icon styling (if used in client cards) */
 .os-icon img {
   transition: transform 0.3s;
 }
+
 .os-icon img:hover {
   transform: scale(1.1);
 }
@@ -61,20 +69,24 @@ body {
   transition: background-color 0.3s, color 0.3s;
   font-family: var(--font-body);
 }
+
 .btn-primary {
   background-color: var(--accent-color);
   border: none;
-  color: #000; 
+  color: #000;
 }
+
 .btn-primary:hover {
   background-color: #006fa1;
   color: #fff;
 }
+
 .btn-secondary {
   background-color: #3a3f48;
   border: none;
   color: #ccc;
 }
+
 .btn-secondary:hover {
   background-color: #4a4f58;
   color: #fff;
@@ -84,13 +96,16 @@ body {
 ::-webkit-scrollbar {
   width: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: #1c1f24;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #444;
   border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
@@ -101,6 +116,7 @@ body {
   align-items: center;
   gap: 0.5rem;
 }
+
 .pulsing-dot {
   width: 12px;
   height: 12px;
@@ -108,15 +124,28 @@ body {
   border-radius: 50%;
   animation: pulseAnim 1s infinite ease-in-out;
 }
+
 @keyframes pulseAnim {
-  0%   { transform: scale(1);   opacity: 1;   }
-  50%  { transform: scale(0.7); opacity: 0.5; }
-  100% { transform: scale(1);   opacity: 1;   }
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(0.7);
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* 8) Agent View spacing (optional) */
 .agent-view {
-  margin-top: 1rem; /* Provide some top spacing if desired */
+  margin-top: 1rem;
+  /* Provide some top spacing if desired */
 }
 
 /* 9) Multi-Level Dropdown (Bootstrap 5 Workaround) */
@@ -132,8 +161,10 @@ body {
   top: 0;
   left: 100%;
   margin-top: -1px;
-  display: none;    /* hidden unless toggled */
-  z-index: 9999;    /* so it's above other elements */
+  display: none;
+  /* hidden unless toggled */
+  z-index: 9999;
+  /* so it's above other elements */
 }
 
 /* If .show is toggled, we display the nested menu */
@@ -142,17 +173,17 @@ body {
 }
 
 /* Indicate there's a deeper level arrow or chevron for the parent item */
-.dropdown-submenu > .dropdown-item.dropdown-toggle::after {
+.dropdown-submenu>.dropdown-item.dropdown-toggle::after {
   float: right;
   font-weight: bold;
   transform: scale(0.8);
   opacity: 0.7;
   transition: transform 0.3s;
-  
+
 }
 
 /* Subtle effect on hover (desktop usage). On mobile, the click toggles show/hide. */
-.dropdown-submenu:hover > .dropdown-item.dropdown-toggle::after {
+.dropdown-submenu:hover>.dropdown-item.dropdown-toggle::after {
   transform: scale(1);
   opacity: 1;
 }
@@ -162,10 +193,12 @@ body {
   background-color: #242830;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
 .dropdown-menu-dark .dropdown-item {
   color: #c9c9c9;
   font-family: var(--font-body);
 }
+
 .dropdown-menu-dark .dropdown-item:hover {
   background-color: rgba(255, 255, 255, 0.08);
   color: #fff;
@@ -178,16 +211,19 @@ body {
     position: static;
     margin-top: 0;
     margin-left: 0;
-    left: auto;   /* ignore left: 100% from earlier */
-    top: auto;    /* ignore top: 0 from earlier */
-    z-index: auto;/* no need for high z-index */
+    left: auto;
+    /* ignore left: 100% from earlier */
+    top: auto;
+    /* ignore top: 0 from earlier */
+    z-index: auto;
+    /* no need for high z-index */
   }
 
   .dropdown-submenu .dropdown-menu.show {
     display: block;
   }
 
-  .dropdown-submenu > .dropdown-item.dropdown-toggle::after {
+  .dropdown-submenu>.dropdown-item.dropdown-toggle::after {
     content: "";
   }
 }
@@ -199,18 +235,21 @@ body {
 /**********************************************
  * Shell Panel "Cyber" styling
  **********************************************/
- .shell-panel {
+.shell-panel {
   /* Our base card is already "d-flex flex-column" in the .tsx */
   border-radius: var(--border-radius);
-  min-height: 24rem;       /* some minimum to ensure enough space */
-  max-height: 70vh;        /* limit it so it won't become too tall on big screens */
+  min-height: 24rem;
+  /* some minimum to ensure enough space */
+  max-height: 70vh;
+  /* limit it so it won't become too tall on big screens */
   display: flex;
   flex-direction: column;
 }
 
 /* Top bar area */
 .shell-panel-header {
-  background-color: #242830; /* Slightly different from #1c1f24 */
+  background-color: #242830;
+  /* Slightly different from #1c1f24 */
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -228,13 +267,14 @@ body {
   max-width: 65%;
   padding: 0.5rem 0.75rem;
   border-radius: 12px;
-  word-break: break-word; /* handle long lines */
+  word-break: break-word;
+  /* handle long lines */
 }
 
 /* user vs. server colors */
 .shell-message-user {
   background-color: var(--accent-color);
-  color: #000; 
+  color: #000;
 }
 
 .shell-message-server {
@@ -252,13 +292,16 @@ body {
 .shell-chat-body::-webkit-scrollbar {
   width: 8px;
 }
+
 .shell-chat-body::-webkit-scrollbar-track {
   background: #1c1f24;
 }
+
 .shell-chat-body::-webkit-scrollbar-thumb {
   background: #444;
   border-radius: 4px;
 }
+
 .shell-chat-body::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
@@ -268,11 +311,13 @@ body {
  *******************/
 @media (max-width: 576px) {
   .shell-message {
-    max-width: 80%; /* Let messages be a bit wider on small screens */
+    max-width: 80%;
+    /* Let messages be a bit wider on small screens */
   }
 
   .shell-panel {
-    max-height: 80vh; /* If you want more vertical space on phone */
+    max-height: 80vh;
+    /* If you want more vertical space on phone */
   }
 }
 
@@ -282,8 +327,8 @@ body {
 /**********************************************
  * File Explorer
  **********************************************/
-
- .file-explorer-panel {
+.general-panel,
+.file-explorer-panel {
   display: flex;
   flex-direction: column;
   min-height: 20rem;
@@ -304,18 +349,21 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #ccc;
 }
+
 .path-input-group .form-control {
   background-color: #2b2f35;
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #ddd;
   font-family: var(--font-body);
 }
+
 .path-input-group .btn-primary {
   background-color: var(--accent-color);
   color: #000;
   border: none;
   transition: background-color 0.3s;
 }
+
 .path-input-group .btn-primary:hover {
   background-color: #006fa1;
   color: #fff;
@@ -334,17 +382,18 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--border-radius);
   padding: 0.5rem;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
   text-align: center;
 }
+
 .file-explorer-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
 }
 
 .file-explorer-icon {
@@ -368,23 +417,28 @@ body {
 .file-explorer-body::-webkit-scrollbar {
   width: 8px;
 }
+
 .file-explorer-body::-webkit-scrollbar-track {
   background: #1c1f24;
 }
+
 .file-explorer-body::-webkit-scrollbar-thumb {
   background: #444;
   border-radius: 4px;
 }
+
 .file-explorer-body::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
 
 @media (max-width: 576px) {
+
   /* If needed, reduce item size or tweak */
   .file-explorer-item {
     width: 70px;
     min-height: 85px;
   }
+
   .file-explorer-icon {
     width: 28px;
     height: 28px;
@@ -406,3 +460,67 @@ body {
 }
 
 
+
+
+
+
+/* The main table. We combine with .table-dark in the component. */
+.credential-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  /* rely on .table-dark styling for base color */
+}
+
+/* Tweak the table header for a futuristic gradient */
+.credential-table thead th {
+  background: linear-gradient(90deg, #242830 0%, #2f343d 100%);
+  color: #ccc;
+  text-shadow: 0 0 3px rgba(73,126,165,0.6);
+  border-color: rgba(255,255,255,0.1);
+  position: relative;
+}
+
+/* Body cells => normal dark background from table-dark. We override further if needed */
+.credential-table tbody td {
+  background-color: #1c1f24;
+  border-color: rgba(255,255,255,0.1);
+  color: #ccc;
+  transition: background-color 0.2s;
+  max-width: 167px
+}
+
+/* Hover row highlight */
+.credential-table.table-hover tbody tr:hover td {
+  background-color: rgba(255,255,255,0.07);
+}
+
+/* The .cred-password-col => a subtle highlight for the password column */
+.credential-table .cred-password-col {
+  background-color: #25282e;
+  color: #bee2fc; /* a bluish color, can be your accent color or #ccc */
+}
+.credential-table.table-hover tbody tr:hover td.cred-password-col {
+  background-color: #2d3138;
+}
+
+/* ============ "Unsafe" states ============ */
+
+/* If no password => highlight in a warning color */
+.credential-table td.unsafe-credential {
+  color: #f66; /* or #ff6666 => redish color */
+  font-weight: 500;
+  background-color: #2a1f1f; /* darker redish background? or keep #25282e? */
+}
+
+/* If old/insecure auth => highlight in a warning color as well */
+.credential-table td.unsafe-protocol {
+  color: #f66; 
+  font-weight: 600;
+  background-color: #2a1f1f;
+}
+
+/* Extra finishing touches for row spacing or smaller padding if you want a "techy" look */
+.credential-table thead th,
+.credential-table tbody td {
+  padding: 0.5rem 0.75rem;
+}
