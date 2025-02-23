@@ -7,6 +7,6 @@ export default axios.create({
   headers: { "Content-Type": "application/json" },
 });
 export const axiosAuth = axios.create({
-  baseURL: BASE_URL,
+  baseURL: process.env.NEXT_DJANGO_API_URL_V2,
   headers: { "Content-Type": "application/json" },
 });
