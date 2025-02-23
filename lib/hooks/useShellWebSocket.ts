@@ -20,7 +20,7 @@ export function useShellWebSocket({
     const socketRef = useRef<WebSocket | null>(null);
 
     useEffect(() => {
-        const socketUrl = `ws://127.0.0.1:8000/ws/shell/${agentId}/?token=${accessToken}`;
+        const socketUrl = `ws://127.0.0.1:80/ws/shell/${agentId}/?token=${accessToken}`;
 
         setConnectionStatus("Connecting");
         const ws = new WebSocket(socketUrl);
