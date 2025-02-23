@@ -3,7 +3,8 @@
 import { useSession, signIn, signOut } from "next-auth/react";
 
 // const BASE_URL = process.env.NEXT_DJANGO_API_URL_V2;
-const BASE_URL = "http://127.0.0.1:8000/api/v2"
+const BASE_URL = process.env.NEXT_DJANGO_API_URL_V2
+
 
 function useAuthApi() {
   const { data: session, update } = useSession();
