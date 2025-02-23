@@ -54,6 +54,7 @@ function useAuthApi() {
         });
 
         // Retry the fetch with the new token
+        console.log(process.env.NEXT_DJANGO_API_URL_V2)
         res = await fetch(`${process.env.NEXT_DJANGO_API_URL_V2}${url}`, {
           method: "GET",
           headers: {
