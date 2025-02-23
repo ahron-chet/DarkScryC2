@@ -2,16 +2,13 @@
 
 import { useSession, signIn, signOut } from "next-auth/react";
 
-// const BASE_URL = process.env.NEXT_DJANGO_API_URL_V2;
-const BASE_URL = process.env.NEXT_DJANGO_API_URL_V2
-
 
 function useAuthApi() {
   const { data: session, update } = useSession();
 
   // Function to handle refreshing the token
   const refreshToken = async (refreshToken: string) => {
-    const res = await fetch(`${BASE_URL}/auth/refresh`, {
+    const res = await fetch(`${process.env.NEXT_DJANGO_API_URL_V2}/auth/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refresh_token: refreshToken }),
@@ -35,7 +32,7 @@ function useAuthApi() {
       throw new Error("No valid user session or access token");
     }
 
-    let res = await fetch(`${BASE_URL}${url}`, {
+    let res = await fetch(`${process.env.NEXT_DJANGO_API_URL_V2}${url}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${session.user.accessToken}`,
@@ -57,7 +54,7 @@ function useAuthApi() {
         });
 
         // Retry the fetch with the new token
-        res = await fetch(`${BASE_URL}${url}`, {
+        res = await fetch(`${process.env.NEXT_DJANGO_API_URL_V2}${url}`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${newAccessToken}`,
