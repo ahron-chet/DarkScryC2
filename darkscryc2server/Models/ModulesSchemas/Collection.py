@@ -2,9 +2,9 @@ from pydantic import BaseModel, Field
 from typing import List
 from enum import Enum
 
-class CredentialType(str, Enum):
-    PASSWORD = "password"
-    COOKIES = "cookies"
+class CredentialType(int, Enum):
+    PASSWORD = 0
+    COOKIES  = 1
 
 
 # A single decrypted password record
