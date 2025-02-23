@@ -27,7 +27,7 @@ class Server:
         self._rsa_manager = RSAManager(PRIVATE_KEY_PATH)
 
         # Optionally choose a separate port for WebSocket
-        self.ws_port = 8765
+        self.ws_port = 876
 
 
         self.ssl_context = None
