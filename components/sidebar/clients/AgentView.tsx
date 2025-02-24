@@ -10,12 +10,14 @@ import ModulesWifiPasswordsPanel from "./modules/WifiPasswordPanel";
 import { initAgentViewDropdowns } from "lib/custome_effects"
 import useAuthApi from "@/lib/fetchApiClient";
 import FileExplorerPanel from "./modules/FileExplorerPanel";
+import WebCredentialsPanel from "./modules/WebCredentialsPanel";
 
 type ActiveModule =
   | "details"
   | "shell"
   | "modules-test"
   | "modules-collection-passwords-wifi"
+  | "modules-collection-passwords-web"
   | "modules-collection-files-collectfiles";
 
 interface AgentViewProps {
@@ -46,6 +48,9 @@ export default function AgentView({ agent }: AgentViewProps) {
     case "modules-collection-passwords-wifi":
       panelContent = <ModulesWifiPasswordsPanel agent={agent} />;
       break;
+      case "modules-collection-passwords-web":
+        panelContent = <WebCredentialsPanel agent={agent} />;
+        break;
     case "modules-collection-files-collectfiles":
       panelContent = <FileExplorerPanel agent={agent} />;
       break;
@@ -100,6 +105,11 @@ export default function AgentView({ agent }: AgentViewProps) {
                         <li>
                           <a className="dropdown-item" style={{ cursor: "pointer" }} onClick={() => handleSelect("modules-collection-passwords-wifi")}>
                             WiFi
+                          </a>
+                        </li>
+                        <li>
+                          <a className="dropdown-item" style={{ cursor: "pointer" }} onClick={() => handleSelect("modules-collection-passwords-web")}>
+                            Web
                           </a>
                         </li>
                       </ul>
