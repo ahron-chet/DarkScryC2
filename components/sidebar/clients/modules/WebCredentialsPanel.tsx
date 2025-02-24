@@ -191,7 +191,7 @@ export default function WebCredentialsPanel({ agent }: WebCredentialsPanelProps)
       */}
       <div className="card-body p-0 d-flex flex-column" style={{ maxHeight: "70vh", overflowY: "auto" }}>
         {/* Browser & Profile selectors */}
-        <div className="p-3">
+        <div className="p-1 px-3">
           <div className="row g-2 mb-3">
             <div className="col-sm-auto">
               <label className="form-label mb-1" style={{ fontSize: "0.9rem" }}>
