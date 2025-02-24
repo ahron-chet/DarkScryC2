@@ -334,6 +334,13 @@ body {
   min-height: 20rem;
   max-height: 70vh;
 }
+.general-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 20rem;
+  max-height: 70vh;
+  overflow-y: auto; /* let it scroll vertically if content is taller */
+}
 
 .file-explorer-header {
   background-color: #242830;
