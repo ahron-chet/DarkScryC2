@@ -45,6 +45,7 @@ export default function WebCredentialsPanel({ agent }: WebCredentialsPanelProps)
     const [selectedBrowser, setSelectedBrowser] = useState<string>("");
     const [selectedProfile, setSelectedProfile] = useState<string>("");
 
+
     const { getTaskResults } = useTaskRunner();
     const axiosAuth = useAxiosAuth()
 
@@ -58,64 +59,100 @@ export default function WebCredentialsPanel({ agent }: WebCredentialsPanelProps)
             setLoading(true);
             setError(null);
 
-            const response = await axiosAuth.post<any>(`/agents/${agent.AgentId}/modules/collection/passwords/collect_web_credentials`,{
+            const response = await axiosAuth.post<any>(`/agents/${agent.AgentId}/modules/collection/passwords/collect_web_credentials`, {
                 cred_type: 0
             })
             const resp: WebCredentialResponse = await getTaskResults(response.data.task_id);
 
             if (!resp?.browsers) {
                 setData([]);
+                setSelectedBrowser("");
+                setSelectedProfile("");
             } else {
                 setData(resp.browsers);
+                // Auto-select first browser & first profile if they exist
+                if (resp.browsers.length > 0) {
+                    const defaultBrowser = resp.browsers[0].browser;
+                    setSelectedBrowser(defaultBrowser);
+
+                    if (resp.browsers[0].profiles.length > 0) {
+                        setSelectedProfile(resp.browsers[0].profiles[0].profile);
+                    } else {
+                        setSelectedProfile("");
+                    }
+                } else {
+                    setSelectedBrowser("");
+                    setSelectedProfile("");
+                }
             }
 
             setLoading(false);
         } catch (err) {
             console.error("Failed to fetch web credentials:", err);
             setError("Error loading browser credentials.");
+            setData(null);
             setLoading(false);
         }
     }
 
-    // 2) When user selects a different browser => reset profile
     function handleBrowserChange(e: React.ChangeEvent<HTMLSelectElement>) {
         const newBrowser = e.target.value;
         setSelectedBrowser(newBrowser);
-        setSelectedProfile(""); // reset
+
+        // If user picks a new browser, auto-select that browser's first profile if any
+        if (data) {
+            const foundBrowser = data.find((b) => b.browser === newBrowser);
+            if (foundBrowser && foundBrowser.profiles.length > 0) {
+                setSelectedProfile(foundBrowser.profiles[0].profile);
+            } else {
+                setSelectedProfile("");
+            }
+        }
     }
-    // 3) When user picks a profile
+
     function handleProfileChange(e: React.ChangeEvent<HTMLSelectElement>) {
         setSelectedProfile(e.target.value);
     }
 
-    // 4) Logic to find the "current" profile's credentials
+    // Which credentials do we display?
     function getCurrentCredentials(): CredentialRecord[] {
         if (!data || !selectedBrowser) return [];
         const browserObj = data.find((b) => b.browser === selectedBrowser);
         if (!browserObj) return [];
 
-        // If user hasn't chosen a profile, pick the first?
-        // Or rely on user picking from dropdown
-        const profileName = selectedProfile || browserObj.profiles[0]?.profile;
-        if (!profileName) return [];
+        // If no profile selected, we can't show anything
+        if (!selectedProfile) return [];
 
-        const profObj = browserObj.profiles.find((p) => p.profile === profileName);
+        const profObj = browserObj.profiles.find((p) => p.profile === selectedProfile);
         if (!profObj) return [];
-        return profObj.credentials || [];
+        return profObj.credentials;
     }
 
-    if (loading) return <Loading text="Loading Web Credentials..." />;
-    if (error) return <div className="text-danger">{error}</div>;
+    function handleRefresh() {
+        fetchWebCredentials();
+    }
+
+    if (loading) {
+        return (
+            <Loading text={"Loading Web Credentials..."}></Loading>
+        );
+    }
+
+    if (error) {
+        return <div className="text-danger">{error}</div>;
+    }
+
     if (!data || data.length === 0) {
         return (
             <div className="card bg-dark text-white" style={{ borderRadius: 16 }}>
-                <div className="card-body">No browser credentials found.</div>
+                <div className="card-body">
+                    No browser credentials found.
+                </div>
             </div>
         );
     }
 
-    // Prepare the browser list and profile list for the UI
-    const browserNames = data.map((b) => b.browser);
+    // Build the list of profiles for the current selected browser
     let profileNames: string[] = [];
     if (selectedBrowser) {
         const found = data.find((b) => b.browser === selectedBrowser);
@@ -132,44 +169,43 @@ export default function WebCredentialsPanel({ agent }: WebCredentialsPanelProps)
                 <h5 className="mb-0" style={{ fontFamily: "Orbitron, sans-serif" }}>
                     Web Credentials
                 </h5>
-                <button
-                    className="btn btn-sm btn-secondary d-flex align-items-center"
-                    onClick={() => fetchWebCredentials()}
-                >
+                <button className="btn btn-sm btn-secondary d-flex align-items-center" onClick={handleRefresh}>
                     <i className="bi bi-arrow-clockwise me-1" />
                     Refresh
                 </button>
             </div>
 
             <div className="card-body">
-                {/* A row for the two <select> elements (browser / profile) */}
+                {/* Browser & Profile selectors */}
                 <div className="row g-2 mb-3">
+                    {/* Browser selector */}
                     <div className="col-sm-auto">
                         <label className="form-label mb-1" style={{ fontSize: "0.9rem" }}>Browser</label>
                         <select
-                            className="form-select form-select-sm bg-secondary text-white"
+                            className="form-select form-select-sm bg-secondary text-white border-0"
                             value={selectedBrowser}
                             onChange={handleBrowserChange}
                         >
-                            <option value="">-- Select Browser --</option>
-                            {browserNames.map((bn) => (
-                                <option key={bn} value={bn}>
-                                    {bn}
+                            {data.map((b) => (
+                                <option key={b.browser} value={b.browser}>
+                                    {b.browser}
                                 </option>
                             ))}
                         </select>
                     </div>
 
+                    {/* Profile selector */}
                     <div className="col-sm-auto">
                         <label className="form-label mb-1" style={{ fontSize: "0.9rem" }}>Profile</label>
                         <select
-                            className="form-select form-select-sm bg-secondary text-white"
+                            className="form-select form-select-sm bg-secondary text-white border-0"
                             value={selectedProfile}
                             onChange={handleProfileChange}
                             disabled={!selectedBrowser}
                         >
-                            <option value="">-- Select Profile --</option>
-                            {profileNames.map((pn) => (
+                            {profileNames.length === 0 ? (
+                                <option value="">No Profiles</option>
+                            ) : profileNames.map((pn) => (
                                 <option key={pn} value={pn}>
                                     {pn}
                                 </option>
@@ -178,9 +214,9 @@ export default function WebCredentialsPanel({ agent }: WebCredentialsPanelProps)
                     </div>
                 </div>
 
-                {/* Show table of credentials if any */}
-                {(!selectedBrowser || !selectedProfile) ? (
-                    <p className="text-muted">Please select a browser and profile.</p>
+                {/* Credentials Table */}
+                {!selectedProfile ? (
+                    <p className="text-muted">No profile selected.</p>
                 ) : credentials.length === 0 ? (
                     <p className="text-muted">No credentials found for this profile.</p>
                 ) : (
@@ -196,15 +232,17 @@ export default function WebCredentialsPanel({ agent }: WebCredentialsPanelProps)
                                 </tr>
                             </thead>
                             <tbody>
-                                {credentials.map((c, idx) => (
-                                    <tr key={idx}>
-                                        <td>{c.url}</td>
-                                        <td>{c.created}</td>
-                                        <td>{c.last_used}</td>
-                                        <td>{c.username || "N/A"}</td>
-                                        <td>{c.password || "None"}</td>
-                                    </tr>
-                                ))}
+                                {credentials.map((c, idx) => {
+                                    return (
+                                        <tr key={idx}>
+                                            <td>{c.url || "N/A"}</td>
+                                            <td>{c.created}</td>
+                                            <td>{c.last_used}</td>
+                                            <td>{c.username || "N/A"}</td>
+                                            <td>{c.password || "None"}</td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>
