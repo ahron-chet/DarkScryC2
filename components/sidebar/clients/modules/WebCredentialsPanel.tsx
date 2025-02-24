@@ -1,9 +1,9 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { Agent } from "@/lib/types";
-import useAuthApi from "@/lib/fetchApiClient";
 import useTaskRunner from "@/lib/hooks/useTaskRunner";
 import Loading from "@/components/Loading";
+import useAxiosAuth from "@/lib/hooks/useAxiosAuth";
 
 // Data structures
 interface CredentialRecord {
@@ -37,7 +37,6 @@ interface WebCredentialsPanelProps {
  * - A table of credentials
  */
 export default function WebCredentialsPanel({ agent }: WebCredentialsPanelProps) {
-    const { authGetApi } = useAuthApi(); // or your custom fetch method
     const [data, setData] = useState<BrowserInfo[] | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -47,7 +46,7 @@ export default function WebCredentialsPanel({ agent }: WebCredentialsPanelProps)
     const [selectedProfile, setSelectedProfile] = useState<string>("");
 
     const { getTaskResults } = useTaskRunner();
-
+    const axiosAuth = useAxiosAuth()
 
     useEffect(() => {
         fetchWebCredentials();
@@ -59,8 +58,10 @@ export default function WebCredentialsPanel({ agent }: WebCredentialsPanelProps)
             setLoading(true);
             setError(null);
 
-            const endpoint = `/agents/${agent.AgentId}/modules/collection/passwords/collect_web_credentials`;
-            const resp: WebCredentialResponse = await getTaskResults(endpoint);
+            const response = await axiosAuth.post<any>(`/agents/${agent.AgentId}/modules/collection/passwords/collect_web_credentials`,{
+                cred_type: 0
+            })
+            const resp: WebCredentialResponse = await getTaskResults(response.data.task_id);
 
             if (!resp?.browsers) {
                 setData([]);
