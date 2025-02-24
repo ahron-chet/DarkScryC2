@@ -2,252 +2,274 @@
 import React, { useEffect, useState } from "react";
 import { Agent } from "@/lib/types";
 import useTaskRunner from "@/lib/hooks/useTaskRunner";
-import Loading from "@/components/Loading";
 import useAxiosAuth from "@/lib/hooks/useAxiosAuth";
+import Loading from "@/components/Loading";
 
 // Data structures
 interface CredentialRecord {
-    url: string;
-    created: string;
-    last_used: string;
-    username: string;
-    password: string | null;
+  url: string;
+  created: string;
+  last_used: string;
+  username: string;
+  password: string | null;
 }
 interface BrowserProfile {
-    profile: string;
-    credentials: CredentialRecord[];
+  profile: string;
+  credentials: CredentialRecord[];
 }
 interface BrowserInfo {
-    browser: string;
-    profiles: BrowserProfile[];
+  browser: string;
+  profiles: BrowserProfile[];
 }
-
 interface WebCredentialResponse {
-    browsers: BrowserInfo[];
+  browsers: BrowserInfo[];
 }
 
 interface WebCredentialsPanelProps {
-    agent: Agent;
+  agent: Agent;
 }
 
 /**
  * Renders a "Web Credentials" panel:
- * - A dropdown to select browser
- * - A dropdown to select profile
- * - A table of credentials
+ * - Auto-selects the first browser/profile if found
+ * - A table with columns: URL, Created, Last Used, Username, Password
+ * - Same style as your Wi-Fi table (password highlighting, vertical scroll fix).
  */
 export default function WebCredentialsPanel({ agent }: WebCredentialsPanelProps) {
-    const [data, setData] = useState<BrowserInfo[] | null>(null);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<BrowserInfo[] | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-    // States for selection
-    const [selectedBrowser, setSelectedBrowser] = useState<string>("");
-    const [selectedProfile, setSelectedProfile] = useState<string>("");
+  // States for selection
+  const [selectedBrowser, setSelectedBrowser] = useState<string>("");
+  const [selectedProfile, setSelectedProfile] = useState<string>("");
 
+  const { getTaskResults } = useTaskRunner();
+  const axiosAuth = useAxiosAuth();
 
-    const { getTaskResults } = useTaskRunner();
-    const axiosAuth = useAxiosAuth()
+  // On mount => fetch data
+  useEffect(() => {
+    fetchWebCredentials();
+  }, [agent.AgentId]);
 
-    useEffect(() => {
-        fetchWebCredentials();
-    }, [agent.AgentId]);
+  // ---------- FETCH LOGIC ----------
+  async function fetchWebCredentials() {
+    try {
+      setLoading(true);
+      setError(null);
 
-    // 1) Fetch data from server
-    async function fetchWebCredentials() {
-        try {
-            setLoading(true);
-            setError(null);
+      // We do a POST to start the collection task
+      const response = await axiosAuth.post<any>(
+        `/agents/${agent.AgentId}/modules/collection/passwords/collect_web_credentials`,
+        { cred_type: 0 }  // or other payload if needed
+      );
+      // Then poll results
+      const resp: WebCredentialResponse = await getTaskResults(response.data.task_id);
 
-            const response = await axiosAuth.post<any>(`/agents/${agent.AgentId}/modules/collection/passwords/collect_web_credentials`, {
-                cred_type: 0
-            })
-            const resp: WebCredentialResponse = await getTaskResults(response.data.task_id);
+      if (!resp?.browsers) {
+        setData([]);
+        setSelectedBrowser("");
+        setSelectedProfile("");
+      } else {
+        setData(resp.browsers);
 
-            if (!resp?.browsers) {
-                setData([]);
-                setSelectedBrowser("");
-                setSelectedProfile("");
-            } else {
-                setData(resp.browsers);
-                // Auto-select first browser & first profile if they exist
-                if (resp.browsers.length > 0) {
-                    const defaultBrowser = resp.browsers[0].browser;
-                    setSelectedBrowser(defaultBrowser);
+        // Auto-select first browser & profile
+        if (resp.browsers.length > 0) {
+          const defaultBrowser = resp.browsers[0];
+          setSelectedBrowser(defaultBrowser.browser);
 
-                    if (resp.browsers[0].profiles.length > 0) {
-                        setSelectedProfile(resp.browsers[0].profiles[0].profile);
-                    } else {
-                        setSelectedProfile("");
-                    }
-                } else {
-                    setSelectedBrowser("");
-                    setSelectedProfile("");
-                }
-            }
-
-            setLoading(false);
-        } catch (err) {
-            console.error("Failed to fetch web credentials:", err);
-            setError("Error loading browser credentials.");
-            setData(null);
-            setLoading(false);
+          if (defaultBrowser.profiles.length > 0) {
+            setSelectedProfile(defaultBrowser.profiles[0].profile);
+          } else {
+            setSelectedProfile("");
+          }
+        } else {
+          setSelectedBrowser("");
+          setSelectedProfile("");
         }
+      }
+      setLoading(false);
+    } catch (err) {
+      console.error("Failed to fetch web credentials:", err);
+      setError("Error loading browser credentials.");
+      setData(null);
+      setLoading(false);
     }
+  }
 
-    function handleBrowserChange(e: React.ChangeEvent<HTMLSelectElement>) {
-        const newBrowser = e.target.value;
-        setSelectedBrowser(newBrowser);
+  function handleRefresh() {
+    fetchWebCredentials();
+  }
 
-        // If user picks a new browser, auto-select that browser's first profile if any
-        if (data) {
-            const foundBrowser = data.find((b) => b.browser === newBrowser);
-            if (foundBrowser && foundBrowser.profiles.length > 0) {
-                setSelectedProfile(foundBrowser.profiles[0].profile);
-            } else {
-                setSelectedProfile("");
-            }
-        }
+  // ---------- BROWSER & PROFILE SELECTION ----------
+  function handleBrowserChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const newBrowser = e.target.value;
+    setSelectedBrowser(newBrowser);
+
+    // Auto-select the first profile if available
+    if (data) {
+      const foundBrowser = data.find((b) => b.browser === newBrowser);
+      if (foundBrowser && foundBrowser.profiles.length > 0) {
+        setSelectedProfile(foundBrowser.profiles[0].profile);
+      } else {
+        setSelectedProfile("");
+      }
     }
+  }
 
-    function handleProfileChange(e: React.ChangeEvent<HTMLSelectElement>) {
-        setSelectedProfile(e.target.value);
-    }
+  function handleProfileChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    setSelectedProfile(e.target.value);
+  }
 
-    // Which credentials do we display?
-    function getCurrentCredentials(): CredentialRecord[] {
-        if (!data || !selectedBrowser) return [];
-        const browserObj = data.find((b) => b.browser === selectedBrowser);
-        if (!browserObj) return [];
+  // ---------- GET CURRENT CREDENTIALS ----------
+  function getCurrentCredentials(): CredentialRecord[] {
+    if (!data || !selectedBrowser) return [];
+    const browserObj = data.find((b) => b.browser === selectedBrowser);
+    if (!browserObj) return [];
 
-        // If no profile selected, we can't show anything
-        if (!selectedProfile) return [];
+    if (!selectedProfile) return [];
+    const profObj = browserObj.profiles.find((p) => p.profile === selectedProfile);
+    if (!profObj) return [];
+    return profObj.credentials;
+  }
 
-        const profObj = browserObj.profiles.find((p) => p.profile === selectedProfile);
-        if (!profObj) return [];
-        return profObj.credentials;
-    }
+  // ---------- "No Password" or "unsafe protocol" helpers? (If you want) ----------
+  function isNoPassword(pwd: string | null): boolean {
+    return !pwd || pwd.toLowerCase() === "none";
+  }
 
-    function handleRefresh() {
-        fetchWebCredentials();
-    }
+  // If you want to highlight some "unsafe" condition for web? Typically might not apply for "open"/"WEP" logic
+  // But you can adapt from wifi if you want:
 
-    if (loading) {
-        return (
-            <Loading text={"Loading Web Credentials..."}></Loading>
-        );
-    }
-
-    if (error) {
-        return <div className="text-danger">{error}</div>;
-    }
-
-    if (!data || data.length === 0) {
-        return (
-            <div className="card bg-dark text-white" style={{ borderRadius: 16 }}>
-                <div className="card-body">
-                    No browser credentials found.
-                </div>
-            </div>
-        );
-    }
-
-    // Build the list of profiles for the current selected browser
-    let profileNames: string[] = [];
-    if (selectedBrowser) {
-        const found = data.find((b) => b.browser === selectedBrowser);
-        if (found) {
-            profileNames = found.profiles.map((p) => p.profile);
-        }
-    }
-
-    const credentials = getCurrentCredentials();
-
+  // ---------- RENDERING ----------
+  if (loading) {
+    return <Loading text="Loading Web Credentials..." />;
+  }
+  if (error) {
+    return <div className="text-danger">{error}</div>;
+  }
+  if (!data || data.length === 0) {
     return (
-        <div className="card bg-dark text-white web-cred-panel" style={{ borderRadius: 16 }}>
-            <div className="card-header d-flex justify-content-between align-items-center">
-                <h5 className="mb-0" style={{ fontFamily: "Orbitron, sans-serif" }}>
-                    Web Credentials
-                </h5>
-                <button className="btn btn-sm btn-secondary d-flex align-items-center" onClick={handleRefresh}>
-                    <i className="bi bi-arrow-clockwise me-1" />
-                    Refresh
-                </button>
-            </div>
-
-            <div className="card-body">
-                {/* Browser & Profile selectors */}
-                <div className="row g-2 mb-3">
-                    {/* Browser selector */}
-                    <div className="col-sm-auto">
-                        <label className="form-label mb-1" style={{ fontSize: "0.9rem" }}>Browser</label>
-                        <select
-                            className="form-select form-select-sm bg-secondary text-white border-0"
-                            value={selectedBrowser}
-                            onChange={handleBrowserChange}
-                        >
-                            {data.map((b) => (
-                                <option key={b.browser} value={b.browser}>
-                                    {b.browser}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Profile selector */}
-                    <div className="col-sm-auto">
-                        <label className="form-label mb-1" style={{ fontSize: "0.9rem" }}>Profile</label>
-                        <select
-                            className="form-select form-select-sm bg-secondary text-white border-0"
-                            value={selectedProfile}
-                            onChange={handleProfileChange}
-                            disabled={!selectedBrowser}
-                        >
-                            {profileNames.length === 0 ? (
-                                <option value="">No Profiles</option>
-                            ) : profileNames.map((pn) => (
-                                <option key={pn} value={pn}>
-                                    {pn}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
-
-                {/* Credentials Table */}
-                {!selectedProfile ? (
-                    <p className="text-muted">No profile selected.</p>
-                ) : credentials.length === 0 ? (
-                    <p className="text-muted">No credentials found for this profile.</p>
-                ) : (
-                    <div className="table-responsive">
-                        <table className="table table-dark table-hover table-sm mb-0 credential-table table-fixed">
-                            <thead>
-                                <tr>
-                                    <th>URL</th>
-                                    <th>Created</th>
-                                    <th>Last Used</th>
-                                    <th>Username</th>
-                                    <th>Password</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {credentials.map((c, idx) => {
-                                    return (
-                                        <tr key={idx}>
-                                            <td>{c.url || "N/A"}</td>
-                                            <td>{c.created}</td>
-                                            <td>{c.last_used}</td>
-                                            <td>{c.username || "N/A"}</td>
-                                            <td>{c.password || "None"}</td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
-            </div>
+      <div className="card bg-dark text-white" style={{ borderRadius: 16 }}>
+        <div className="card-body">
+          No browser credentials found.
         </div>
+      </div>
     );
+  }
+
+  // Build list of profiles for the selected browser
+  let profileNames: string[] = [];
+  if (selectedBrowser) {
+    const found = data.find((b) => b.browser === selectedBrowser);
+    if (found) {
+      profileNames = found.profiles.map((p) => p.profile);
+    }
+  }
+
+  const credentials = getCurrentCredentials();
+
+  return (
+    <div className="card bg-dark text-white web-cred-panel" style={{ borderRadius: 16 }}>
+      <div className="card-header d-flex justify-content-between align-items-center">
+        <h5 className="mb-0" style={{ fontFamily: "Orbitron, sans-serif" }}>
+          Web Credentials
+        </h5>
+        <button
+          className="btn btn-sm btn-secondary d-flex align-items-center"
+          onClick={handleRefresh}
+        >
+          <i className="bi bi-arrow-clockwise me-1" />
+          Refresh
+        </button>
+      </div>
+
+      {/*
+        We do the vertical scroll fix here:
+        style={{ maxHeight: "70vh", overflowY: "auto" }}
+        so all rows remain accessible.
+      */}
+      <div className="card-body p-0 d-flex flex-column" style={{ maxHeight: "70vh", overflowY: "auto" }}>
+        {/* Browser & Profile selectors */}
+        <div className="p-3">
+          <div className="row g-2 mb-3">
+            <div className="col-sm-auto">
+              <label className="form-label mb-1" style={{ fontSize: "0.9rem" }}>
+                Browser
+              </label>
+              <select
+                className="form-select form-select-sm bg-secondary text-white border-0"
+                value={selectedBrowser}
+                onChange={handleBrowserChange}
+              >
+                {data.map((b) => (
+                  <option key={b.browser} value={b.browser}>
+                    {b.browser}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="col-sm-auto">
+              <label className="form-label mb-1" style={{ fontSize: "0.9rem" }}>
+                Profile
+              </label>
+              <select
+                className="form-select form-select-sm bg-secondary text-white border-0"
+                value={selectedProfile}
+                onChange={handleProfileChange}
+                disabled={!selectedBrowser}
+              >
+                {profileNames.length === 0 ? (
+                  <option value="">No Profiles</option>
+                ) : profileNames.map((pn) => (
+                  <option key={pn} value={pn}>
+                    {pn}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* The table area => .table-responsive for horizontal scroll */}
+        {!selectedProfile ? (
+          <div className="p-3 text-muted">No profile selected.</div>
+        ) : credentials.length === 0 ? (
+          <div className="p-3 text-muted">No credentials found for this profile.</div>
+        ) : (
+          <div className="table-responsive">
+            <table className="table table-dark table-hover table-sm mb-0 credential-table table-fixed">
+              <thead>
+                <tr>
+                  <th>URL</th>
+                  <th>Created</th>
+                  <th>Last Used</th>
+                  <th>Username</th>
+                  <th className="cred-password-col">Password</th>
+                </tr>
+              </thead>
+              <tbody>
+                {credentials.map((c, idx) => {
+                  const pwd = c.password || "None";
+                  // If no password => highlight
+                  const pwdClass = isNoPassword(c.password) ? "unsafe-credential" : "";
+
+                  return (
+                    <tr key={idx}>
+                      <td>{c.url || "N/A"}</td>
+                      <td>{c.created}</td>
+                      <td>{c.last_used}</td>
+                      <td>{c.username || "N/A"}</td>
+                      <td className={`cred-password-col ${pwdClass}`}>{pwd}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
