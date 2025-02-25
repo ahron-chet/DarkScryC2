@@ -33,6 +33,8 @@ class CommandIdentifiers(str, Enum):
     UPLOAD_FILE_BASE_64          = ("81324d42b1bbe52342d521ee64b7a30f", "UPLOAD_FILE_BASE_64")
     GET_WIFI_BAISIC_INFO         = ("0c9f43143832f340691b2f701b5d56fa", "UPLOAD_FILE_BASE_64")
     FETCH_WEB_BROSER_CREDENTIALS = ("852d663cbe347857ffe2bfadb378d3be", "FETCH_WEB_BROSER_CREDENTIALS") 
+    ENUMERATE_PROCESSES          = ("57886325b8715ae917d8fde55e4de227", "ENUMERATE_PROCESSES")
+
 
 
     def __new__(cls, value, description):
