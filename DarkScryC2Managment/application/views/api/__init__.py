@@ -5,6 +5,7 @@ from .test import TestApi as TestApi
 from .agents_modules.collection import mashine
 from .agents_modules.collection import files
 from .agents_modules.collection import passwords
+from .agents_modules.collection import processe
 from .agents_modules.execution import shell
 
 from . import tasks
@@ -24,7 +25,7 @@ user_api = users.UserApi()
 collection_mashine = mashine.MashineCollection()
 collection_files = files.FileCollection()
 collection_password = passwords.PasswordCollection()
-
+collection_processe = processe.ProcessCollection()
 
 execution_shell = shell.ShellExecution()
 
@@ -37,6 +38,7 @@ api_ninja.add_router("", router=user_api.router)
 api_ninja.add_router("", router=collection_mashine.router)
 api_ninja.add_router("", router=collection_files.router)
 api_ninja.add_router("", router=collection_password.router)
+api_ninja.add_router("", router=collection_processe.router)
 
 
 api_ninja.add_router("", router=execution_shell.router)
