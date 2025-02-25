@@ -30,12 +30,17 @@ interface WebCredentialsPanelProps {
 }
 
 /**
- * Renders a "Web Credentials" panel:
- * - Auto-selects the first browser/profile if found
+ * Renders a "Web Credentials" panel with:
+ * - Auto-selected first browser/profile if available
  * - A table with columns: URL, Created, Last Used, Username, Password
- * - Same style as your Wi-Fi table (password highlighting, vertical scroll fix).
+ * - Hides rows where username is "none"/"N/A"/empty
+ * - Icons next to "Browser" / "Profile" labels
+ * - Narrower widths for "Created" / "Last Used" columns
  */
 export default function WebCredentialsPanel({ agent }: WebCredentialsPanelProps) {
+  const { getTaskResults } = useTaskRunner();
+  const axiosAuth = useAxiosAuth();
+
   const [data, setData] = useState<BrowserInfo[] | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,10 +49,6 @@ export default function WebCredentialsPanel({ agent }: WebCredentialsPanelProps)
   const [selectedBrowser, setSelectedBrowser] = useState<string>("");
   const [selectedProfile, setSelectedProfile] = useState<string>("");
 
-  const { getTaskResults } = useTaskRunner();
-  const axiosAuth = useAxiosAuth();
-
-  // On mount => fetch data
   useEffect(() => {
     fetchWebCredentials();
   }, [agent.AgentId]);
@@ -58,12 +59,11 @@ export default function WebCredentialsPanel({ agent }: WebCredentialsPanelProps)
       setLoading(true);
       setError(null);
 
-      // We do a POST to start the collection task
+      // 1) Trigger a POST => poll results
       const response = await axiosAuth.post<any>(
         `/agents/${agent.AgentId}/modules/collection/passwords/collect_web_credentials`,
-        { cred_type: 0 }  // or other payload if needed
+        { cred_type: 0 } 
       );
-      // Then poll results
       const resp: WebCredentialResponse = await getTaskResults(response.data.task_id);
 
       if (!resp?.browsers) {
@@ -73,7 +73,7 @@ export default function WebCredentialsPanel({ agent }: WebCredentialsPanelProps)
       } else {
         setData(resp.browsers);
 
-        // Auto-select first browser & profile
+        // Auto-select first browser & profile if available
         if (resp.browsers.length > 0) {
           const defaultBrowser = resp.browsers[0];
           setSelectedBrowser(defaultBrowser.browser);
@@ -97,31 +97,32 @@ export default function WebCredentialsPanel({ agent }: WebCredentialsPanelProps)
     }
   }
 
+  // Refresh button
   function handleRefresh() {
     fetchWebCredentials();
   }
 
-  // ---------- BROWSER & PROFILE SELECTION ----------
+  // Browser selection => auto-pick first profile
   function handleBrowserChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const newBrowser = e.target.value;
     setSelectedBrowser(newBrowser);
 
-    // Auto-select the first profile if available
     if (data) {
-      const foundBrowser = data.find((b) => b.browser === newBrowser);
-      if (foundBrowser && foundBrowser.profiles.length > 0) {
-        setSelectedProfile(foundBrowser.profiles[0].profile);
+      const found = data.find((b) => b.browser === newBrowser);
+      if (found && found.profiles.length > 0) {
+        setSelectedProfile(found.profiles[0].profile);
       } else {
         setSelectedProfile("");
       }
     }
   }
 
+  // Profile selection
   function handleProfileChange(e: React.ChangeEvent<HTMLSelectElement>) {
     setSelectedProfile(e.target.value);
   }
 
-  // ---------- GET CURRENT CREDENTIALS ----------
+  // Which credentials do we show for the selected browser+profile?
   function getCurrentCredentials(): CredentialRecord[] {
     if (!data || !selectedBrowser) return [];
     const browserObj = data.find((b) => b.browser === selectedBrowser);
@@ -130,16 +131,18 @@ export default function WebCredentialsPanel({ agent }: WebCredentialsPanelProps)
     if (!selectedProfile) return [];
     const profObj = browserObj.profiles.find((p) => p.profile === selectedProfile);
     if (!profObj) return [];
-    return profObj.credentials;
+
+    // Filter out rows where username is "none"/"N/A"/empty:
+    return profObj.credentials.filter((c) => {
+      const user = c.username?.toLowerCase() || "";
+      return user !== "none" && user !== "n/a" && user.trim() !== "";
+    });
   }
 
-  // ---------- "No Password" or "unsafe protocol" helpers? (If you want) ----------
+  // If no password => highlight as unsafe
   function isNoPassword(pwd: string | null): boolean {
     return !pwd || pwd.toLowerCase() === "none";
   }
-
-  // If you want to highlight some "unsafe" condition for web? Typically might not apply for "open"/"WEP" logic
-  // But you can adapt from wifi if you want:
 
   // ---------- RENDERING ----------
   if (loading) {
@@ -158,7 +161,7 @@ export default function WebCredentialsPanel({ agent }: WebCredentialsPanelProps)
     );
   }
 
-  // Build list of profiles for the selected browser
+  // Prepare list of profile names for the chosen browser
   let profileNames: string[] = [];
   if (selectedBrowser) {
     const found = data.find((b) => b.browser === selectedBrowser);
@@ -185,17 +188,24 @@ export default function WebCredentialsPanel({ agent }: WebCredentialsPanelProps)
       </div>
 
       {/*
-        We do the vertical scroll fix here:
-        style={{ maxHeight: "70vh", overflowY: "auto" }}
-        so all rows remain accessible.
+        We'll let the .card-body handle vertical scrolling. 
+        .table-responsive for horizontal
       */}
-      <div className="card-body p-0 d-flex flex-column" style={{ maxHeight: "70vh", overflowY: "auto" }}>
+      <div
+        className="card-body p-0 d-flex flex-column"
+        style={{
+          maxHeight: "70vh",
+          overflowY: "auto",
+        }}
+      >
         {/* Browser & Profile selectors */}
-        <div className="p-1 px-3">
+        <div className="p-3">
           <div className="row g-2 mb-3">
+            {/* Browser */}
             <div className="col-sm-auto">
               <label className="form-label mb-1" style={{ fontSize: "0.9rem" }}>
-                Browser
+                {/* Add an icon to label for a better style */}
+                <i className="bi bi-globe me-1"></i> Browser
               </label>
               <select
                 className="form-select form-select-sm bg-secondary text-white border-0"
@@ -210,9 +220,11 @@ export default function WebCredentialsPanel({ agent }: WebCredentialsPanelProps)
               </select>
             </div>
 
+            {/* Profile */}
             <div className="col-sm-auto">
               <label className="form-label mb-1" style={{ fontSize: "0.9rem" }}>
-                Profile
+                {/* Another icon for profile */}
+                <i className="bi bi-person me-1"></i> Profile
               </label>
               <select
                 className="form-select form-select-sm bg-secondary text-white border-0"
@@ -232,7 +244,7 @@ export default function WebCredentialsPanel({ agent }: WebCredentialsPanelProps)
           </div>
         </div>
 
-        {/* The table area => .table-responsive for horizontal scroll */}
+        {/* The table => if no profile or no creds => message; else render */}
         {!selectedProfile ? (
           <div className="p-3 text-muted">No profile selected.</div>
         ) : credentials.length === 0 ? (
@@ -243,8 +255,9 @@ export default function WebCredentialsPanel({ agent }: WebCredentialsPanelProps)
               <thead>
                 <tr>
                   <th>URL</th>
-                  <th>Created</th>
-                  <th>Last Used</th>
+                  {/* narrower columns for dates */}
+                  <th style={{ width: "12%" }}>Created</th>
+                  <th style={{ width: "12%" }}>Last Used</th>
                   <th>Username</th>
                   <th className="cred-password-col">Password</th>
                 </tr>
@@ -252,7 +265,7 @@ export default function WebCredentialsPanel({ agent }: WebCredentialsPanelProps)
               <tbody>
                 {credentials.map((c, idx) => {
                   const pwd = c.password || "None";
-                  // If no password => highlight
+                  // If no password => highlight it
                   const pwdClass = isNoPassword(c.password) ? "unsafe-credential" : "";
 
                   return (

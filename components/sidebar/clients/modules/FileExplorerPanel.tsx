@@ -5,6 +5,7 @@ import FileDetailModal from "./FileDetailModal";
 import { segmentsToPath, pathToSegments } from "@/utils/files";
 import useAxiosAuth from "@/lib/hooks/useAxiosAuth";
 import useTaskRunner from "@/lib/hooks/useTaskRunner";
+import Loading from "@/components/Loading";
 
 interface FileItem {
   Name: string;
@@ -191,14 +192,7 @@ export default function FileExplorerPanel({ agent }: FileExplorerPanelProps) {
 
   if (loading) {
     return (
-      <div className="card bg-dark text-white" style={{ borderRadius: 16 }}>
-        <div className="card-body">
-          <div className="d-flex align-items-center gap-2 text-secondary">
-            <div className="spinner-border spinner-border-sm" role="status" />
-            <span>Loading file explorer...</span>
-          </div>
-        </div>
-      </div>
+      <Loading text={"Loading file explorer..."}/>
     );
   }
 
