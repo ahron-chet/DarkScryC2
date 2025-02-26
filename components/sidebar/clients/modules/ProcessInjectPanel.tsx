@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Agent } from "@/lib/types";
 import useAxiosAuth from "@/lib/hooks/useAxiosAuth";
+import useTaskRunner from "@/lib/hooks/useTaskRunner";
 import Loading from "@/components/Loading";
 
 interface ProcessRecord {
@@ -17,8 +18,8 @@ interface ProcessInjectPanelProps {
     injection_type: InjectionType
 }
 
-type InjectionType = 
- | "remote_thread_shellcode";
+type InjectionType =
+    | "remote_thread_shellcode";
 
 export default function ProcessInjectPanel({ agent, injection_type }: ProcessInjectPanelProps) {
     const authAxios = useAxiosAuth();
@@ -26,6 +27,8 @@ export default function ProcessInjectPanel({ agent, injection_type }: ProcessInj
     const [processList, setProcessList] = useState<ProcessRecord[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+
+    const { getTaskResults } = useTaskRunner();
 
     // On mount => fetch processes
     useEffect(() => {
@@ -37,10 +40,11 @@ export default function ProcessInjectPanel({ agent, injection_type }: ProcessInj
             setLoading(true);
             setError(null);
 
-            const resp = await authAxios.get<ProcessRecord[]>(
+            const resp = await authAxios.get<any>(
                 `/agents/${agent.AgentId}/modules/collection/process/enumerate_processes`
             );
-            setProcessList(resp.data || []);
+            const processes = await getTaskResults(resp.data.task_id);
+            setProcessList(processes || []);
             setLoading(false);
         } catch (err) {
             console.error("Failed to fetch processes:", err);
@@ -56,7 +60,7 @@ export default function ProcessInjectPanel({ agent, injection_type }: ProcessInj
     // For now, the injection logic is empty.
     function handleInjectClick(proc: ProcessRecord) {
         console.log("Injecting into PID:", proc.ProcessId);
-        switch (injection_type){
+        switch (injection_type) {
             case "remote_thread_shellcode":
                 console.log("remote_thread_shellcode");
                 break
