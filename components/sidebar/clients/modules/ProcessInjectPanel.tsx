@@ -4,6 +4,7 @@ import { Agent } from "@/lib/types";
 import useAxiosAuth from "@/lib/hooks/useAxiosAuth";
 import useTaskRunner from "@/lib/hooks/useTaskRunner";
 import Loading from "@/components/Loading";
+import { module_descriptior } from "@/lib/models";
 
 interface ProcessRecord {
   ProcessName: string;
@@ -196,7 +197,7 @@ export default function ProcessInjectPanel({ agent, injection_type }: ProcessInj
                 <div className="modal-body">
                   {/* 1) Technique explanation (placeholder text) */}
                   <p className="text-info">
-                    [Technique Description Here - e.g. "Remote Thread Shellcode injection does X, Y, Z..."]
+                    {module_descriptior.remote_thread_shellcode}
                   </p>
                   <p className="text-warning">
                     This module requires valid shellcode. If you want to run a PE file, use the "PE to Shellcode" module first.
