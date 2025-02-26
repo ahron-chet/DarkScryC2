@@ -11,6 +11,7 @@ import { initAgentViewDropdowns } from "lib/custome_effects"
 import useAuthApi from "@/lib/fetchApiClient";
 import FileExplorerPanel from "./modules/FileExplorerPanel";
 import WebCredentialsPanel from "./modules/WebCredentialsPanel";
+import ProcessInjectPanel from "./modules/ProcessInjectPanel";
 
 type ActiveModule =
   | "details"
@@ -18,7 +19,8 @@ type ActiveModule =
   | "modules-test"
   | "modules-collection-passwords-wifi"
   | "modules-collection-passwords-web"
-  | "modules-collection-files-collectfiles";
+  | "modules-collection-files-collectfiles"
+  | "modules-evasion-injection-remote_thread_shellcode";
 
 interface AgentViewProps {
   agent: Agent;
@@ -48,11 +50,14 @@ export default function AgentView({ agent }: AgentViewProps) {
     case "modules-collection-passwords-wifi":
       panelContent = <ModulesWifiPasswordsPanel agent={agent} />;
       break;
-      case "modules-collection-passwords-web":
-        panelContent = <WebCredentialsPanel agent={agent} />;
-        break;
+    case "modules-collection-passwords-web":
+      panelContent = <WebCredentialsPanel agent={agent} />;
+      break;
     case "modules-collection-files-collectfiles":
       panelContent = <FileExplorerPanel agent={agent} />;
+      break;
+    case "modules-evasion-injection-remote_thread_shellcode":
+      panelContent = <ProcessInjectPanel agent={agent} injection_type={"remote_thread_shellcode"}/>
       break;
     case "details":
     default:
@@ -122,6 +127,25 @@ export default function AgentView({ agent }: AgentViewProps) {
                         <li>
                           <a className="dropdown-item" style={{ cursor: "pointer" }} onClick={() => handleSelect("modules-collection-files-collectfiles")}>
                             File Explorer
+                          </a>
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+                <li className="dropdown-submenu">
+                  <a className="dropdown-item dropdown-toggle" style={{ cursor: "pointer" }} >
+                    Defence Evasion
+                  </a>
+                  <ul className="dropdown-menu dropdown-menu-dark">
+                    <li className="dropdown-submenu">
+                      <a className="dropdown-item dropdown-toggle" style={{ cursor: "pointer" }}>
+                        Process Injection
+                      </a>
+                      <ul className="dropdown-menu dropdown-menu-dark">
+                        <li>
+                          <a className="dropdown-item" style={{ cursor: "pointer" }} onClick={() => handleSelect("modules-evasion-injection-remote_thread_shellcode")}>
+                            Shellcode remote thread
                           </a>
                         </li>
                       </ul>
