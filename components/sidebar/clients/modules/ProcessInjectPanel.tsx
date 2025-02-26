@@ -126,18 +126,15 @@ export default function ProcessInjectPanel({ agent, injection_type }: ProcessInj
                     {/* A small area for the search bar */}
                     <div className="p-3">
                         <div className="row g-2 align-items-center">
-                            <div className="col-auto">
-                                <label className="form-label mb-0" style={{ fontSize: "0.9rem" }}>
-                                    Search:
-                                </label>
-                            </div>
                             <div className="col">
+                                <i className="bi bi-search"></i>
                                 <input
                                     type="text"
                                     className="form-control form-control-sm bg-secondary text-white border-0"
                                     placeholder="Filter by name, owner, or PID..."
                                     value={searchText}
                                     onChange={(e) => setSearchText(e.target.value)}
+                                    style={{maxWidth: "300px", borderRadius:"10px"}}
                                 />
                             </div>
                         </div>
