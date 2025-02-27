@@ -61,6 +61,7 @@ class Server:
                 SERVER_HOST,
                 self.ws_port,
                 ssl=self.ssl_context,  # pass SSL context if using TLS
+                max_size=104857600 # 100MB
             )
             logger.info(f"WebSocket server started on {SERVER_HOST}:{self.ws_port}")
 
