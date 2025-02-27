@@ -50,7 +50,8 @@ class Server:
             tcp_server = await asyncio.start_server(
                 self._handle_client,
                 SERVER_HOST,
-                SERVER_PORT
+                SERVER_PORT,
+                limit=100 * 1024 * 1024 # 100MB
             )
             logger.info(f"TCP server started on {SERVER_HOST}:{SERVER_PORT}")
 
