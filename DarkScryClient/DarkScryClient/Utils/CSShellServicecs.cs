@@ -78,7 +78,7 @@ namespace DarkScryClient.Utils
 			{
 				output.Remove(lastIndex, output.Length - lastIndex);
 			}
-			ClearShellOutput();
+			// ClearShellOutput();
 			return output.ToString();
 		}
 

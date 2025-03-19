@@ -1,14 +1,15 @@
 ﻿using DarkScryClient;
 using DarkScryClient.Client;
 using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 using WebProxy;
 
 class Program
 {
-	private static bool use_proxy = true;
 	static async Task Main()
 	{
+
 		WsClient wsclient;
 		if (Config.UseProxy)
 		{
@@ -43,7 +44,7 @@ class Program
 		}
 		else
 		{
-			wsclient = new WsClient($"ws://127.0.0.1:8765/{Config.agent_id}");
+			wsclient = new WsClient($"ws://{Config.ServerIp}:876/{Config.agent_id}");
 			await wsclient.StartAsync();
 		}
 	}

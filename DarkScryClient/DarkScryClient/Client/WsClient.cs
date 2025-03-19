@@ -87,6 +87,7 @@ namespace DarkScryClient.Client
 			Console.WriteLine($"[WSClient] Received: {message}");
 			ArraySegment<byte> res = new ArraySegment<byte>(_command.RunCommand(message));
 			await _websocket.SendAsync(res, WebSocketMessageType.Text, true, CancellationToken.None);
+			Console.WriteLine("[WSClient] Send results!");
 		}
 
 		public async Task StopAsync()
