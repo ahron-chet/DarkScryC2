@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "darkscryc2django"
+version = "0.1.0"
+description = ""
+authors = ["Aahron Chetrit <105120555+ahron-chet@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+psycopg = "^3.2.3"
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.36"}
+pydantic = "^2.10.4"
+uvicorn = "^0.34.0"
+django-environ = "^0.11.2"
+channels = "3.0.4"
+django-ninja = "^1.3.0"
+pyjwt = "^2.10.1"
+django = "5.2a1"
+django-cors-headers = "^4.6.0"
+darkscryc2server = {git = "https://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@github.com/ahron-chet/DarkScryC2Server.git"}
+arq = "^0.26.3"
+
+
+[tool.poetry.group.dev.dependencies]
+django-stubs = "^5.1.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

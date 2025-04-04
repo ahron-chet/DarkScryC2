@@ -1,0 +1,19 @@
+
+{% load static %}
+
+
+{% block content %}
+<main class="main-content">
+  <div class="tabs-container" id="client-tabs-container">
+    <div class="tab active" data-tab="all-clients" id="allClients">All Clients</div>
+  </div>
+  <div id="client-tab-content"></div>
+  <div class="scrollable-container" id="clientsContainer"></div>
+</main>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/agents/agentList.js' %}"></script>
+<script type="module" src="{% static 'js/agents/agentDetail.js' %}"></script>
+<script type="module" src="{% static 'js/agents/shell.js' %}"></script>
+{% endblock %}
