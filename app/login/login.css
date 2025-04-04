@@ -1,0 +1,121 @@
+body,
+html {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+	font-family: 'Roboto', sans-serif;
+	color: #fff;
+	/* White text for dark backgrounds */
+	overflow: hidden;
+	/* Hide default scrollbars (Vanta covers the page) */
+	background-color: #10131a;
+}
+
+/* Vanta background container covers the entire viewport */
+#vanta-bg {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
+/* Centered container to hold the 2-column login “card” */
+.login-wrapper {
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	padding: 1rem;
+}
+
+/* A slightly translucent backdrop for our card */
+.login-card {
+	background-color: rgba(0, 0, 0, 0.6);
+	backdrop-filter: blur(6px);
+	border-radius: 12px;
+	padding: 2rem;
+	width: 100%;
+	max-width: 1100px;
+}
+
+/* Custom styling for the brand column */
+.brand-col {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: flex-start;
+	border-right: 1px solid rgba(255, 255, 255, 0.2);
+	padding-right: 2rem;
+}
+
+.brand-col img {
+	max-width: 60%;
+	height: auto;
+	margin-bottom: 1.5rem;
+	filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+	transition: transform 0.3s;
+}
+
+.brand-col h2 {
+	font-weight: 500;
+	margin-bottom: 0.5rem;
+}
+
+.brand-col p {
+	font-weight: 300;
+	line-height: 1.4;
+	color: #cfcfcf;
+	margin-bottom: 0;
+}
+
+/* Login form column */
+.form-col {
+	padding-left: 2rem;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.form-col h1 {
+	font-size: 1.8rem;
+	font-weight: 500;
+	margin-bottom: 1.5rem;
+}
+
+/* Form elements (Bootstrap-based) */
+.form-floating label {
+	color: #444;
+}
+
+.btn-custom {
+	background-color: #497ea5;
+	border: none;
+}
+
+.btn-custom:hover {
+	box-shadow: 0 0 10px #497ea5, inset 0 0 10px #497ea5;
+}
+
+.brand-col img:hover {
+	transform: scale(1.05);
+	/* box-shadow: 0 0 10px #497ea5, 0 0 30px #497ea5, 0 0 50px #497ea5; */
+}
+
+/* Responsive: collapse to single column on smaller screens */
+@media (max-width: 992px) {
+	.brand-col {
+		border-right: none;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+		padding-right: 0;
+		margin-bottom: 1.5rem;
+		align-items: center;
+	}
+
+	.form-col {
+		padding-left: 0;
+		align-items: center;
+	}
+}
