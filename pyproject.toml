@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "darkscryc2server"
+version = "0.1.0"
+description = ""
+authors = ["Aahron Chetrit <105120555+ahron-chet@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<4.0"
+cryptography = "^44.0.0"
+redis = "^5.2.1"
+pydantic = "^2.10.4"
+
+
+websockets = "^14.1"
+fastapi = "^0.115.6"
+uvicorn = "^0.34.0"
+uvloop = {version = "^0.21.0", platform = "unix"}
+aiohttp = "^3.11.11"
+aiosqlite = "^0.21.0"
+aiofiles = "^24.1.0"
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+run-c2manager = "darkscryc2server.run_with_remote_manager:run"
