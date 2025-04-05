@@ -6,7 +6,7 @@ from logging.handlers import QueueHandler, QueueListener
 from dotenv import load_dotenv
 
 APP_NAME = 'DarkScryC2Server'
-ENV_FILE = f'../.env'
+ENV_FILE = f'../../.env'
 
 # Load .env file
 if not os.path.isfile(ENV_FILE):
