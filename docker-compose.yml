@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  django:
+    build: ./django
+    container_name: darkscry_django
+    env_file:
+      - ./django/.env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./django:/app
+    depends_on:
+      - db
+    restart: unless-stopped
+    entrypoint: ["/bin/bash", "-c", "/app/init-env.sh && uvicorn DarkScryC2Managment.asgi:application --host 0.0.0.0 --port 8000"]
+
+  db:
+    image: postgres:16-alpine
+    container_name: darkscry_db
+    environment:
+      POSTGRES_DB: darkscry_db
+      POSTGRES_USER: darkscry_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - darkscry_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  darkscry_postgres_data:
