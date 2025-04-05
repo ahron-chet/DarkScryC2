@@ -1,31 +1,46 @@
 version: '3.8'
 
 services:
-  django:
-    build: ./django
-    container_name: darkscry_django
-    env_file:
-      - ./django/.env
-    ports:
-      - "8000:8000"
+  setup:
+    image: alpine:3.17
+    container_name: darkscry_setup
     volumes:
-      - ./django:/app
-    depends_on:
-      - db
-    restart: unless-stopped
-    entrypoint: ["/bin/bash", "-c", "/app/init-env.sh && uvicorn DarkScryC2Managment.asgi:application --host 0.0.0.0 --port 8000"]
+      - ./env_data:/env
+      - ./django/init-env.sh:/init-env.sh:ro
+    command: sh /init-env.sh
+    healthcheck:
+      test: ["CMD", "test", "-f", "/env/.env"]
+      interval: 1s
+      retries: 30
 
   db:
     image: postgres:16-alpine
     container_name: darkscry_db
-    environment:
-      POSTGRES_DB: darkscry_db
-      POSTGRES_USER: darkscry_user
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "5432:5432"
+    env_file:
+      - ./env_data/.env
     volumes:
       - darkscry_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    depends_on:
+      setup:
+        condition: service_healthy
+    restart: unless-stopped
+
+  django:
+    build: ./django      # <--- This Dockerfile uses Poetry
+    container_name: darkscry_django
+    env_file:
+      - ./env_data/.env
+    depends_on:
+      - db
+      - setup
+    ports:
+      - "8000:8000"
+    # This example volume-mounts local code if you want hot reloading
+    volumes:
+      - ./django:/app
+    restart: unless-stopped
 
 volumes:
   darkscry_postgres_data:

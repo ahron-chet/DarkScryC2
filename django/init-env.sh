@@ -1,21 +1,21 @@
-#!/bin/bash
+#!/bin/sh
 
-ENV_FILE=".env"
+ENV_FILE="/env/.env"  # We'll mount env_data -> /env inside the setup container
 
 if [ ! -f "$ENV_FILE" ]; then
-    echo "Generating new .env file with secure random secrets..."
+    echo "Generating new .env with secure random secrets..."
 
     SECRET_KEY=$(openssl rand -base64 64)
     JWT_SECRET=$(openssl rand -base64 64)
     JWT_REFRESH_SECRET=$(openssl rand -base64 64)
     DB_PASSWORD=$(openssl rand -base64 32)
 
-    cat <<EOL > $ENV_FILE
-# Django Settings
+    cat <<EOL > "$ENV_FILE"
+# Django settings
 DEBUG=False
 SECRET_KEY=$SECRET_KEY
 
-# Database configuration
+# PostgreSQL settings
 DB_NAME=darkscry_db
 DB_USER=darkscry_user
 DB_PASSWORD=$DB_PASSWORD
@@ -30,7 +30,10 @@ JWT_REFRESH_SECRET=$JWT_REFRESH_SECRET
 CORS_ALLOWED_ORIGINS=http://localhost:3000
 EOL
 
-    echo ".env file generated successfully."
+    echo ".env file generated."
 else
-    echo ".env file already exists."
+    echo ".env file already exists, skipping generation."
 fi
+
+# Keep the container alive so other containers can read the file
+tail -f /dev/null
