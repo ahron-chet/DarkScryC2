@@ -48,7 +48,9 @@ services:
   # 3) Django (Poetry-based)
   #################################################
   django:
-    build: ./django
+    build:
+      context: ./django
+      dockerfile: Dockerfile
     container_name: darkscry_django
     volumes:
       - ./django:/app       # (Optional) if you want local-code mounting
