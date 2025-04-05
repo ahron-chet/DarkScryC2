@@ -1,9 +1,13 @@
 version: '3.8'
 
 services:
+  #################################################
+  # 1) Setup Container: generates /env/.env
+  #################################################
   setup:
     image: alpine:3.17
     container_name: darkscry_setup
+    # Mount local env_data folder -> /env in container
     volumes:
       - ./env_data:/env
       - ./django/init-env.sh:/init-env.sh:ro
@@ -12,35 +16,56 @@ services:
       test: ["CMD", "test", "-f", "/env/.env"]
       interval: 1s
       retries: 30
+    # no ports
+    # no restart needed
+    # The container never exits (tail -f /dev/null)
 
+  #################################################
+  # 2) PostgreSQL Database
+  #################################################
   db:
     image: postgres:16-alpine
     container_name: darkscry_db
-    env_file:
-      - ./env_data/.env
     volumes:
       - darkscry_postgres_data:/var/lib/postgresql/data
+      - ./env_data:/env              # So we can read /env/.env
     ports:
       - "5432:5432"
+    # Wait until 'setup' is healthy => .env is created
     depends_on:
       setup:
         condition: service_healthy
     restart: unless-stopped
+    # Instead of env_file, dynamically source /env/.env:
+    command: >
+      sh -c "
+        set -a &&
+        . /env/.env &&
+        exec docker-entrypoint.sh postgres
+      "
 
+  #################################################
+  # 3) Django (Poetry-based)
+  #################################################
   django:
-    build: ./django      # <--- This Dockerfile uses Poetry
+    build: ./django
     container_name: darkscry_django
-    env_file:
-      - ./env_data/.env
+    volumes:
+      - ./django:/app       # (Optional) if you want local-code mounting
+      - ./env_data:/env     # So we can read /env/.env
+    ports:
+      - "8000:8000"
     depends_on:
       - db
       - setup
-    ports:
-      - "8000:8000"
-    # This example volume-mounts local code if you want hot reloading
-    volumes:
-      - ./django:/app
     restart: unless-stopped
+    # Source environment from /env/.env, THEN run uvicorn:
+    command: >
+      sh -c "
+        set -a &&
+        . /env/.env &&
+        poetry run uvicorn DarkScryC2Managment.asgi:application --host 0.0.0.0 --port 8000
+      "
 
 volumes:
   darkscry_postgres_data:
