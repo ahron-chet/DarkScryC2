@@ -24,7 +24,7 @@ class Server:
         # Shared manager for both ACPROTO and WSPROTO connections
         self.connection_manager = ConnectionManager(REDIS_URI)
         # RSA manager for legacy handshake
-        self._rsa_manager = RSAManager(PRIVATE_KEY_PATH)
+        # self._rsa_manager = RSAManager(PRIVATE_KEY_PATH)
 
         # Optionally choose a separate port for WebSocket
         self.ws_port = 876
@@ -47,13 +47,13 @@ class Server:
 
         try:
             # 1) Start the legacy TCP server
-            tcp_server = await asyncio.start_server(
-                self._handle_client,
-                SERVER_HOST,
-                SERVER_PORT,
-                limit=100 * 1024 * 1024 # 100MB
-            )
-            logger.info(f"TCP server started on {SERVER_HOST}:{SERVER_PORT}")
+            # tcp_server = await asyncio.start_server(
+            #     self._handle_client,
+            #     SERVER_HOST,
+            #     SERVER_PORT,
+            #     limit=100 * 1024 * 1024 # 100MB
+            # )
+            # logger.info(f"TCP server started on {SERVER_HOST}:{SERVER_PORT}")
 
             # 2) Start the WebSocket server on a separate port
             ws_server = await websockets.serve(
@@ -66,9 +66,13 @@ class Server:
             logger.info(f"WebSocket server started on {SERVER_HOST}:{self.ws_port}")
 
             # 3) Run both servers concurrently until cancelled
-            async with tcp_server, ws_server:
+            # async with tcp_server, ws_server:
+            #     await asyncio.gather(
+            #         tcp_server.serve_forever(),
+            #         ws_server.wait_closed()
+            #     )
+            async with  ws_server:
                 await asyncio.gather(
-                    tcp_server.serve_forever(),
                     ws_server.wait_closed()
                 )
 

@@ -11,8 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os
 from pathlib import Path
-
-import environ
+from secrets import token_urlsafe
 import mimetypes
 mimetypes.add_type("text/css", ".css", True)
 
@@ -25,14 +24,6 @@ FRONT_DIR = BASE_DIR.parent / "DarkScryFront"
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-env = environ.Env(
-    DEBUG=(bool, False)
-)
-
-# Assuming your .env is in the project root
-ENV_FILE = os.path.join(BASE_DIR.parent, '.env')
-if os.path.exists(ENV_FILE):
-    env.read_env(ENV_FILE)
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '7srtjwTeXj69tIbITp_AOC3q-5X5Ou9sQdTud9K6qvOXYDhyfne6ysGipkn4ZjZyooXA0WO1Hgx468GQfthPi2vsMLQuyAupt1FWUcc8V0kSfxpZwae_tI'
@@ -109,11 +100,11 @@ ASGI_APPLICATION = 'DarkScryC2Managment.asgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('DB_NAME', default='default_db_name'),
-        'USER': env('DB_USER', default='default_user'),
-        'PASSWORD': env('DB_PASSWORD', default='default_password'),
-        'HOST': env('DB_HOST', default='localhost'),
-        'PORT': env('DB_PORT', default='5432')
+        'NAME': os.getenv('DB_NAME', default='default_db_name'),
+        'USER': os.getenv('DB_USER', default='default_user'),
+        'PASSWORD': os.getenv('DB_PASSWORD', default='default_password'),
+        'HOST': os.getenv('DB_HOST', default='localhost'),
+        'PORT': os.getenv('DB_PORT', default='5432')
     }
 }
 
@@ -172,11 +163,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 
-JWT_SECRET = 'iC8GkE9PIQ7kuUEw3_9CqWlo7Fve_IY3vRnLkHxjyIrVRCohwGfNig'
-JWT_REFRESH_SECRET = 'fXtFlP9qobvkNOdqwPe3EzRtGKj45RzfBCJcn5WIO0rQrZ7FCJLatw'
-JWT_ALGORITHM = "HS256"
-JWT_EXPIRE_SECONDS = 360000
-JWT_REFRESH_EXPIRE_SECONDS = JWT_EXPIRE_SECONDS * 9
+JWT_SECRET = os.getenv("DJANGO_JWT_SECRET", token_urlsafe(60))
+JWT_REFRESH_SECRET = os.getenv("DJANGO_JWT_REFRESH_SECRET", token_urlsafe(60))
+JWT_ALGORITHM = os.getenv("DJANGO_JWT_ALGORITHM", "HS256")
+JWT_EXPIRE_SECONDS = int(os.getenv("DJANGO_JWT_EXPIRE_SECONDS", "360000"))
+JWT_REFRESH_EXPIRE_SECONDS = int(os.getenv("DJANGO_JWT_REFRESH_EXPIRE_SECONDS", "3240000"))
 
 
 CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]

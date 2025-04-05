@@ -15,10 +15,11 @@ pydantic = "^2.10.4"
 websockets = "^14.1"
 fastapi = "^0.115.6"
 uvicorn = "^0.34.0"
-uvloop = {version = "^0.21.0", platform = "unix"}
 aiohttp = "^3.11.11"
 aiosqlite = "^0.21.0"
 aiofiles = "^24.1.0"
+python-dotenv = "^1.1.0"
+uvloop = "^0.21.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
