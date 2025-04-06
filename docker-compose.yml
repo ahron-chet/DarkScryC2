@@ -20,10 +20,11 @@ services:
 
     environment:
       REDIS_HOST: "${REDIS_HOST}"
-      REDIS_PASSWORD: "${REDIS_PASSWORD}"
+      REDIS_PASSWORD: "${REDIS_PASSWORD:-}"
       PRIVATE_KEY_PATH: "${PRIVATE_KEY_PATH}"
       C2_SERVER_HOST: "${C2_SERVER_HOST}"
       C2_SERVER_PORT: "${C2_SERVER_PORT}"
+      C2_SERVER_REDIS_DB: "${C2_SERVER_REDIS_DB}"
 
     command: >
       poetry run python test.py
@@ -44,6 +45,9 @@ services:
     ports:
       - "${DJANGO_PORT:-8000}:8000"
 
+    volumes:
+    - db_password:/run/secrets
+
     depends_on:
       - c2server
       - db
@@ -51,7 +55,7 @@ services:
 
     environment:
       REDIS_HOST: "${REDIS_HOST}"
-      REDIS_PASSWORD: "${REDIS_PASSWORD}"
+      REDIS_PASSWORD: "${REDIS_PASSWORD:-}"
 
       DJANGO_JWT_SECRET: "${DJANGO_JWT_SECRET}"
       DJANGO_JWT_REFRESH_SECRET: "${DJANGO_JWT_REFRESH_SECRET}"
@@ -64,6 +68,9 @@ services:
       DB_PASSWORD: "${DB_PASSWORD}"
       DB_HOST: "${DB_HOST}"
       DB_PORT: "${DB_PORT:-5432}"
+
+      C2_SERVER_HOST: "${C2_SERVER_HOST}"
+      C2_SERVER_PORT: "${C2_SERVER_PORT}"
 
     command: >
       poetry run uvicorn DarkScryC2Managment.asgi:application --host 0.0.0.0 --port 8000

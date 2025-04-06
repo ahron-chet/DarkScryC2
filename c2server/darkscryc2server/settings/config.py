@@ -3,6 +3,7 @@ import sys
 import os
 import queue
 from logging.handlers import QueueHandler, QueueListener
+from ..Utils import getenv_nonempty
 # from dotenv import load_dotenv
 
 APP_NAME = 'DarkScryC2Server'
@@ -48,13 +49,13 @@ internalapplogger.setLevel(getattr(logging, log_level, logging.INFO))
 required_env_vars = ['C2_SERVER_HOST', 'C2_SERVER_PORT']
 
 missing_vars = [var for var in required_env_vars if not os.getenv(var)]
-if missing_vars:
-    internalapplogger.error(f"Missing required environment variables: {', '.join(missing_vars)}")
+# if missing_vars:
+#     internalapplogger.error(f"Missing required environment variables: {', '.join(missing_vars)}")
     # listener.stop()
     # sys.exit(1)
 
-SERVER_HOST = os.getenv('C2_SERVER_HOST')
-SERVER_PORT = int(os.getenv('C2_SERVER_PORT', "0"))
+SERVER_HOST = getenv_nonempty('C2_SERVER_HOST')
+SERVER_PORT = int(getenv_nonempty('C2_SERVER_PORT', "0"))
 
 PRIVATE_KEY_PATH = os.getenv('PRIVATE_KEY_PATH')
 if PRIVATE_KEY_PATH and not os.path.exists(PRIVATE_KEY_PATH):
@@ -63,12 +64,18 @@ if PRIVATE_KEY_PATH and not os.path.exists(PRIVATE_KEY_PATH):
     # sys.exit(1)
 
 # Redis config
-REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
-REDIS_PORT = int(os.getenv('REDIS_PORT', '6379'))
-REDIS_DB = int(os.getenv('C2_SERVER_REDIS_DB', '0'))
-REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
+REDIS_HOST = getenv_nonempty('REDIS_HOST', 'localhost')
+REDIS_PORT = int(getenv_nonempty('REDIS_PORT', '6379'))
+REDIS_DB = int(getenv_nonempty('C2_SERVER_REDIS_DB', '0'))
+REDIS_PASSWORD = getenv_nonempty('REDIS_PASSWORD')
 
-REDIS_URI = f"redis://{':' + REDIS_PASSWORD if REDIS_PASSWORD else ''}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"
+REDIS_URI = (
+    f"redis://"
+    f"{':' + REDIS_PASSWORD + '@' if REDIS_PASSWORD else ''}"
+    f"{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"
+)
+
+internalapplogger.info(REDIS_URI + str(REDIS_PASSWORD))
 
 internalapplogger.info("Configuration loaded successfully.")
 

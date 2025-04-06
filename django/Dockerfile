@@ -53,6 +53,8 @@ RUN chmod +x /app/docker-entrypoint.sh
 
 WORKDIR /app/django/DarkScryC2Managment
 
+RUN poetry run python manage.py collectstatic --noinput || true
+
 EXPOSE 8000
 
 ENTRYPOINT ["/app/docker-entrypoint.sh"]

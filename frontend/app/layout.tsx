@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
-import { authOptions } from "./api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "DarkScryC2",

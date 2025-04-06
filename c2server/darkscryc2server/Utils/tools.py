@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 from typing import Union, Dict
 import json
 from ..Models.protocols import SOCKET_BASE_MESSAGE_HEADER
-
+import os
 
 
 def pack_base_header(header: SOCKET_BASE_MESSAGE_HEADER) -> bytes:
@@ -29,7 +29,6 @@ def hex_to_bytes(hex_string):
     except ValueError:
         raise ValueError("Invalid hexadecimal string")
     
-
 
 
 
@@ -89,3 +88,14 @@ def gen_xml(tag: str, filter_none=False, **kwargs) -> str:
         
         elem.append(child)
     return ET.tostring(elem, encoding='unicode')
+
+
+
+
+def getenv_nonempty(key, default=None):
+    """
+    Works like os.getenv, but treats blank strings as missing.
+    Returns `default` if the env var is unset or just blank.
+    """
+    value = os.getenv(key)
+    return value if value and value.strip() else default
