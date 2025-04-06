@@ -54,7 +54,7 @@ if missing_vars:
     # sys.exit(1)
 
 SERVER_HOST = os.getenv('C2_SERVER_HOST')
-SERVER_PORT = int(os.getenv('C2_SERVER_PORT'))
+SERVER_PORT = int(os.getenv('C2_SERVER_PORT', "0"))
 
 PRIVATE_KEY_PATH = os.getenv('PRIVATE_KEY_PATH')
 if PRIVATE_KEY_PATH and not os.path.exists(PRIVATE_KEY_PATH):
