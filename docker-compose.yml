@@ -1,9 +1,6 @@
 
 services:
 
-  #################################################
-  # 1) C2 Server
-  #################################################
   c2server:
     build:
       context: ./c2server
@@ -33,9 +30,7 @@ services:
       - redis
     restart: unless-stopped
 
-  #################################################
-  # 2) Django
-  #################################################
+  
   django:
     build:
       context: .
@@ -75,9 +70,7 @@ services:
     command: >
       poetry run uvicorn DarkScryC2Managment.asgi:application --host 0.0.0.0 --port 8000
 
-  #################################################
-  # 3) Redis
-  #################################################
+  
   redis:
     image: redis:7-alpine
     container_name: darkscry_redis
@@ -85,9 +78,7 @@ services:
       - "6379"
     restart: unless-stopped
 
-  #################################################
-  # 4) Postgres DB
-  #################################################
+  
   db:
     image: postgres:14-alpine
     container_name: darkscry_postgres
