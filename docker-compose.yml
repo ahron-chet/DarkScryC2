@@ -82,7 +82,7 @@ services:
     image: redis:7-alpine
     container_name: darkscry_redis
     ports:
-      - "63790:6379"
+      - "6379"
     restart: unless-stopped
 
   #################################################
@@ -101,6 +101,22 @@ services:
       - darkscry_postgres_data:/var/lib/postgresql/data
       - db_password:/run/secrets
     restart: unless-stopped
+
+  arqworker:
+    build:
+      context: .
+      dockerfile: ./dockerfiles/arq.dockerfile
+    container_name: darkscry_arqworker
+    environment:
+      REDIS_HOST: "${REDIS_HOST}"
+      REDIS_PASSWORD: "${REDIS_PASSWORD:-}"
+      REDIS_PORT: "6379"
+      ARQ_REDIS_DB: "${ARQ_REDIS_DB:-4}"
+
+      C2_SERVER_HOST: "${C2_SERVER_HOST}"
+      C2_SERVER_PORT: "${C2_SERVER_PORT}"
+    depends_on:
+      - redis
 
 volumes:
   darkscry_postgres_data:

