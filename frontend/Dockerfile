@@ -10,8 +10,11 @@ RUN npm install
 # Copy source code
 COPY . ./
 
-# 2) Write those variables to .env.production
-#   (If you prefer .env.local or something else, adjust accordingly.)
+ARG NEXT_PUBLIC_DJANGO_API_URL_V2
+ARG NEXT_PUBLIC_WS_URL
+ARG NEXTAUTH_URL
+ARG NEXTAUTH_SECRET
+
 RUN echo "NEXT_PUBLIC_DJANGO_API_URL_V2=$NEXT_PUBLIC_DJANGO_API_URL_V2" >> .env.production
 RUN echo "NEXT_PUBLIC_WS_URL=$NEXT_PUBLIC_WS_URL" >> .env.production
 RUN echo "NEXTAUTH_URL=$NEXTAUTH_URL" >> .env.production
