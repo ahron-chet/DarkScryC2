@@ -66,7 +66,10 @@ PRIVATE_KEY_PATH = os.getenv('PRIVATE_KEY_PATH', "")
 
 SSL_CERTIFICATE=getenv_nonempty('SSL_CERTIFICATE')
 SSL_CERTIFICATE_KEY=getenv_nonempty('SSL_CERTIFICATE_KEY')
-if (SSL_CERTIFICATE and SSL_CERTIFICATE_KEY) and not (os.path.exists(SSL_CERTIFICATE) or os.path.exists(SSL_CERTIFICATE_KEY)):
+if SSL_CERTIFICATE and SSL_CERTIFICATE_KEY:
+    if not (os.path.exists(SSL_CERTIFICATE) and os.path.exists(SSL_CERTIFICATE_KEY)):
+        SSL_CERTIFICATE, SSL_CERTIFICATE_KEY = None, None
+else:
     SSL_CERTIFICATE, SSL_CERTIFICATE_KEY = None, None
 
 # Redis config
