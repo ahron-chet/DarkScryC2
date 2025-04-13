@@ -38,4 +38,4 @@ COPY --from=builder /app/public ./public
 EXPOSE 3000
 
 # The default command that runs Next.js in production mode
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "dev"]
