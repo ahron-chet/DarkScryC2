@@ -3,12 +3,6 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Define build args for each variable you want to inject
-ARG NEXT_PUBLIC_DJANGO_API_URL_V2
-ARG NEXT_PUBLIC_WS_URL
-ARG NEXTAUTH_URL
-ARG NEXTAUTH_SECRET
-
 # Copy package files for dependencies
 COPY package*.json ./
 RUN npm install
