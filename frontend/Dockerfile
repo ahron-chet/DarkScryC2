@@ -5,6 +5,14 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
+
+ARG NEXT_PUBLIC_DJANGO_API_URL_V2
+ENV NEXT_PUBLIC_DJANGO_API_URL_V2=$NEXT_PUBLIC_DJANGO_API_URL_V2
+
+ARG NEXT_PUBLIC_WS_URL
+ENV NEXT_PUBLIC_WS_URL=$NEXT_PUBLIC_DJANGO_API_URL_V2
+
+
 # Copy package files and install dependencies
 COPY package*.json ./
 RUN npm install
