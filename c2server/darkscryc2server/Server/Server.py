@@ -9,7 +9,8 @@ from ..settings.config import (
     SERVER_PORT,
     internalapplogger as logger,
     REDIS_URI,
-    PRIVATE_KEY_PATH
+    SSL_CERTIFICATE,
+    SSL_CERTIFICATE_KEY
 )
 
 from ..Managers.connection_manager import ConnectionManager, Connection
@@ -28,12 +29,12 @@ class Server:
 
         # Optionally choose a separate port for WebSocket
         self.ws_port = 876
+        if SSL_CERTIFICATE is None or SSL_CERTIFICATE_KEY is None:
+            self.ssl_context = None
+        else:
+            self.ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+            self.ssl_context.load_cert_chain(certfile=SSL_CERTIFICATE, keyfile=SSL_CERTIFICATE_KEY)
 
-
-        self.ssl_context = None
-        # Example:
-        # self.ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-        # self.ssl_context.load_cert_chain(certfile="server.crt", keyfile="server.key")
 
     async def start(self) -> None:
         """
@@ -61,7 +62,8 @@ class Server:
                 SERVER_HOST,
                 self.ws_port,
                 ssl=self.ssl_context,  # pass SSL context if using TLS
-                max_size=104857600 # 100MB
+                max_size=104857600, # 100MB
+                compression=None
             )
             logger.info(f"WebSocket server started on {SERVER_HOST}:{self.ws_port}")
 

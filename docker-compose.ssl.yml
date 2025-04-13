@@ -1,0 +1,9 @@
+
+services:
+  c2server:
+    volumes:
+      - "${SSL_CERTIFICATE}:/certs/cert.pem:ro"
+      - "${SSL_CERTIFICATE_KEY}:/certs/key.pem:ro"
+    environment:
+      SSL_CERTIFICATE: "/certs/cert.pem"
+      SSL_CERTIFICATE_KEY: "/certs/key.pem"

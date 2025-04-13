@@ -7,9 +7,6 @@ services:
       dockerfile: Dockerfile
     container_name: darkscry_c2server
 
-    volumes:
-      - "./keys/mykey.pem:${PRIVATE_KEY_PATH:-/etc/keys/priv.key}:ro"
-
     ports:
       - "${C2SERVER_PORT:-9100}:9100"
       - "1234:1234"

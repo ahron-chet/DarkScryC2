@@ -57,11 +57,17 @@ missing_vars = [var for var in required_env_vars if not os.getenv(var)]
 SERVER_HOST = getenv_nonempty('C2_SERVER_HOST')
 SERVER_PORT = int(getenv_nonempty('C2_SERVER_PORT', "0"))
 
-PRIVATE_KEY_PATH = os.getenv('PRIVATE_KEY_PATH')
-if PRIVATE_KEY_PATH and not os.path.exists(PRIVATE_KEY_PATH):
-    internalapplogger.error(f"Private key file {PRIVATE_KEY_PATH} does not exist.")
+#Deprecated
+PRIVATE_KEY_PATH = os.getenv('PRIVATE_KEY_PATH', "")
+# if PRIVATE_KEY_PATH and not os.path.exists(PRIVATE_KEY_PATH):
+#     internalapplogger.error(f"Private key file {PRIVATE_KEY_PATH} does not exist.")
     # listener.stop()
     # sys.exit(1)
+
+SSL_CERTIFICATE=getenv_nonempty('SSL_CERTIFICATE')
+SSL_CERTIFICATE_KEY=getenv_nonempty('SSL_CERTIFICATE_KEY')
+if (SSL_CERTIFICATE and SSL_CERTIFICATE_KEY) and not (os.path.exists(SSL_CERTIFICATE) or os.path.exists(SSL_CERTIFICATE_KEY)):
+    SSL_CERTIFICATE, SSL_CERTIFICATE_KEY = None, None
 
 # Redis config
 REDIS_HOST = getenv_nonempty('REDIS_HOST', 'localhost')
