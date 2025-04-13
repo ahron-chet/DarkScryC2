@@ -31,7 +31,7 @@ SECRET_KEY = '7srtjwTeXj69tIbITp_AOC3q-5X5Ou9sQdTud9K6qvOXYDhyfne6ysGipkn4ZjZyoo
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["django", "127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ["django", "127.0.0.1", "localhost", "172.236.98.55"]
 
 CHANNEL_LAYERS = {
     "default": {
