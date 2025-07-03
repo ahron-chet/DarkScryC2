@@ -431,3 +431,5 @@ FodyWeavers.xsd
 *.exe
 *.out
 *.app
+# CMake build
+CppAgent/build/
