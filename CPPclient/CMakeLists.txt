@@ -11,21 +11,16 @@ endif()
 
 project("DarkScryCpp")
 
-# Automatically gather all .cpp source files under src/
-file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS "src/*.cpp")
-
-# Define executable with gathered sources (no explicit header inclusion!)
-add_executable(DarkScryCpp ${SRC_FILES})
-
-# Set C++ standard explicitly
-set_property(TARGET DarkScryCpp PROPERTY CXX_STANDARD 20)
-
-# Explicitly define include directories
-target_include_directories(DarkScryCpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-
 add_subdirectory(modules/Logger)
 
-target_link_libraries(DarkScryCpp PRIVATE Logger)
+find_package(GTest REQUIRED)
 
-# TODO: Add tests and install targets if needed.
+add_executable(logger_test tests/test_logger.cpp)
+set_property(TARGET logger_test PROPERTY CXX_STANDARD 20)
+target_include_directories(logger_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(logger_test PRIVATE Logger GTest::gtest_main)
+
+enable_testing()
+add_test(NAME logger_test COMMAND logger_test)
+
+# TODO: Add install targets if needed.
