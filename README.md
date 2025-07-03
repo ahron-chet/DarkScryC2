@@ -19,6 +19,7 @@ This repository contains:
 ```
 c2server/    # Python server, FastAPI manager and WebSocket/TCP handling
 client/      # C# client source
+client/CppAgent/  # C++ rewrite built with CMake (work in progress)
 django/      # Django backend project
 frontend/    # Next.js frontend
 Dockerfiles/ # Additional worker images
@@ -37,8 +38,8 @@ The framework is split into several cooperating services:
   server component to execute actions.
 - **Next.js frontend** – a React based dashboard that talks to the Django APIs
   for operator interaction.
-- **C# client** – a prototype Windows agent and supporting tools implementing the
-  command set used by the server for training scenarios.
+- **C# client** – prototype Windows agent written in C#.
+- **C++ client** – ongoing port built with CMake and using `websocketpp` for networking.
 
 The framework is designed to work in locked-down networks where only the web
 browser can reach the internet. The Windows agent ships with an optional
