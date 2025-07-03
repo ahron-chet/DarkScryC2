@@ -1,4 +1,4 @@
-#include "Logger.h"
+#include "Logger/Logger.h"
 #include <chrono>
 #include <ctime>
 #include <iostream>
@@ -36,11 +36,11 @@ std::string Logger::format(const std::string& msg, Level level) {
     std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", std::localtime(&now));
     std::string lvl;
     switch (level) {
-        case Level::Info: lvl = "INFO"; break;
-        case Level::Debug: lvl = "DEBUG"; break;
-        case Level::Warning: lvl = "WARN"; break;
-        case Level::Error: lvl = "ERROR"; break;
-        case Level::Critical: lvl = "CRITICAL"; break;
+    case Level::Info: lvl = "INFO"; break;
+    case Level::Debug: lvl = "DEBUG"; break;
+    case Level::Warning: lvl = "WARN"; break;
+    case Level::Error: lvl = "ERROR"; break;
+    case Level::Critical: lvl = "CRITICAL"; break;
     }
     return std::string("[") + buf + "] [" + lvl + "] " + msg;
 }
@@ -50,16 +50,16 @@ void Logger::writeConsole(const std::string& msg, Level level) {
     HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
     WORD color = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
     switch (level) {
-        case Level::Warning:
-            color = FOREGROUND_RED | FOREGROUND_GREEN;
-            break;
-        case Level::Error:
-        case Level::Critical:
-            color = FOREGROUND_RED;
-            break;
-        default:
-            color = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
-            break;
+    case Level::Warning:
+        color = FOREGROUND_RED | FOREGROUND_GREEN;
+        break;
+    case Level::Error:
+    case Level::Critical:
+        color = FOREGROUND_RED;
+        break;
+    default:
+        color = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
+        break;
     }
     SetConsoleTextAttribute(h, color);
     std::cout << msg << std::endl;
