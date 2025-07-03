@@ -19,7 +19,7 @@ This repository contains:
 ```
 c2server/    # Python server, FastAPI manager and WebSocket/TCP handling
 client/      # C# client source
-client/CppAgent/  # C++ rewrite built with CMake (work in progress)
+CppClient/   # C++ rewrite built with CMake (work in progress)
 django/      # Django backend project
 frontend/    # Next.js frontend
 Dockerfiles/ # Additional worker images
