@@ -1,6 +1,9 @@
 # DarkScryC2
 
-DarkScryC2 is a multi component command and control (C2) framework. The repository contains:
+DarkScryC2 is a multi component command and control (C2) framework. This
+repository is provided **solely for simulation purposes** to help organizations
+strengthen their defenses. It should only be used in controlled environments
+where you have explicit authorization. The repository contains:
 
 - **c2server** – Python based server providing agent communication channels and a FastAPI manager.
 - **django** – Django project used for management APIs and asynchronous workers.
