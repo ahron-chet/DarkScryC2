@@ -1,31 +1,67 @@
-﻿# CMakeLists.txt : CMake project for DarkScryCpp
-cmake_minimum_required(VERSION 3.8)
+﻿# ======================================================================
+#  Top-level CMakeLists.txt  – DarkScryCpp
+# ======================================================================
 
-# Enable Hot Reload for MSVC compilers if supported.
-if (POLICY CMP0141)
-    cmake_policy(SET CMP0141 NEW)
-    set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT 
-        "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>"
-    )
-endif()
+cmake_minimum_required(VERSION 3.14)            # FetchContent ≥ 3.14
+project(DarkScryCpp VERSION 1.0 LANGUAGES CXX)
 
-project("DarkScryCpp")
+# ----------------------------------------------------------------------
+# 1. Global compiler settings
+# ----------------------------------------------------------------------
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Automatically gather all .cpp source files under src/
-file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS "src/*.cpp")
+function(enable_compiler_warnings tgt)
+    if (MSVC)
+        target_compile_options(${tgt} PRIVATE /W4 /permissive-)
+    else()
+        target_compile_options(${tgt} PRIVATE -Wall -Wextra -Wpedantic)
+    endif()
+endfunction()
 
-# Define executable with gathered sources (no explicit header inclusion!)
-add_executable(DarkScryCpp ${SRC_FILES})
-
-# Set C++ standard explicitly
-set_property(TARGET DarkScryCpp PROPERTY CXX_STANDARD 20)
-
-# Explicitly define include directories
-target_include_directories(DarkScryCpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+# ----------------------------------------------------------------------
+# 2. Logger library  (modules/Logger)  – LEAVE ITS OWN CMake AS-IS
+# ----------------------------------------------------------------------
+add_subdirectory(modules/Logger)      # creates target: Logger
 
 
-add_subdirectory(modules/Logger)
+# ----------------------------------------------------------------------
+# 3. Main executable
+# ----------------------------------------------------------------------
+file(GLOB_RECURSE APP_SRCS CONFIGURE_DEPENDS src/*.cpp)
 
+add_executable(DarkScryCpp ${APP_SRCS})
 target_link_libraries(DarkScryCpp PRIVATE Logger)
 
-# TODO: Add tests and install targets if needed.
+
+
+# ----------------------------------------------------------------------
+# 4. Unit-tests  (toggle with -DBUILD_TESTING=OFF)
+# ----------------------------------------------------------------------
+include(CTest)                                # defines BUILD_TESTING
+if (BUILD_TESTING)
+    # ---- 4a.  GoogleTest ----------------------------------------------------
+    include(FetchContent)
+    FetchContent_Declare(
+        googletest
+        URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
+    )
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)     # MSVC runtime
+    FetchContent_MakeAvailable(googletest)                 # GTest::gtest_main
+
+    # ---- 4b.  Build a single test binary -----------------------------------
+    file(GLOB TEST_SRCS CONFIGURE_DEPENDS tests/*.cpp)
+    add_executable(unit_tests ${TEST_SRCS})
+    target_link_libraries(unit_tests PRIVATE Logger GTest::gtest_main)
+
+    # same extra include dir for the tests
+    target_include_directories(unit_tests
+        PRIVATE ${PROJECT_SOURCE_DIR}/include/DarkScryCpp
+    )
+    target_compile_features(unit_tests PUBLIC cxx_std_20)
+    enable_compiler_warnings(unit_tests)
+
+    # ---- 4c.  Register tests with CTest -------------------------------------
+    include(GoogleTest)
+    gtest_discover_tests(unit_tests DISCOVERY_MODE PRE_TEST)
+endif()
