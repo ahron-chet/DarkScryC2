@@ -1,18 +1,24 @@
 # DarkScryC2
 
-DarkScryC2 is a multi component command and control (C2) framework. The repository contains:
+**For authorized security simulation only**
 
-- **c2server** – Python based server providing agent communication channels and a FastAPI manager.
+DarkScryC2 is a multi-component security simulation platform built specifically for training and research. It replicates typical remote management behaviors so defenders can practice detection and response in a controlled lab environment. This project is not production ready and must never be used for unauthorized or malicious actions.
+DarkScryC2 scenarios are built around the MITRE ATT&CK framework to emulate
+techniques commonly observed in real-world intrusions.
+
+
+This repository contains:
+- **c2server** – Python based server component providing agent communication channels and a FastAPI manager.
 - **django** – Django project used for management APIs and asynchronous workers.
 - **frontend** – A Next.js application providing the web interface.
-- **client** – C# client implementation and tools.
+- **client** – Proof-of-concept agent originally written in C#; a cross-platform C++ version is being developed for future releases.
 - **dockerfiles** and **docker-compose** files to run the stack.
 
 ## Repository structure
 
 ```
 c2server/    # Python server, FastAPI manager and WebSocket/TCP handling
-client/      # C# client source
+client/      # legacy C# client source (migration to C++ in progress)
 django/      # Django backend project
 frontend/    # Next.js frontend
 Dockerfiles/ # Additional worker images
@@ -22,24 +28,23 @@ Dockerfiles/ # Additional worker images
 
 The framework is split into several cooperating services:
 
-- **C2 server** – the communication hub written in Python. It accepts agent
+- **Server component (`c2server`)** – the communication hub written in Python. It accepts agent
   connections over legacy TCP or WebSocket and stores their state in Redis. A
   built-in FastAPI application exposes management APIs used by the other
   components.
 - **Django backend** – provides REST endpoints and asynchronous task execution
   through `arqworker`. It stores agent metadata in PostgreSQL and relies on the
-  C2 server to execute actions.
+  server component to execute actions.
 - **Next.js frontend** – a React based dashboard that talks to the Django APIs
   for operator interaction.
-- **C# client** – the Windows agent and supporting tools implementing the
-  command set used by the server.
+- **C# client** – a prototype Windows agent implementing the command set used by the server for training scenarios. A replacement client written in C++ is under development.
 
 The framework is designed to work in locked-down networks where only the web
 browser can reach the internet. The Windows agent ships with an optional
-"double proxy" that pairs with a local browser and tunnels all C2 traffic over
+"double proxy" that pairs with a local browser and tunnels all simulation traffic over
 WebSocket connections, blending in with normal browsing activity.
 
-## C2 capabilities
+## Simulation capabilities
 
 Agents connecting to the server expose a range of modules that can be triggered
 through the REST or WebSocket APIs. Core capabilities include:
@@ -49,11 +54,12 @@ through the REST or WebSocket APIs. Core capabilities include:
 - Listing directory contents and enumerating running processes.
 - Collecting browser credentials (Chrome/Edge) and basic Wi‑Fi information.
 - Injecting shellcode into remote processes for in-memory payloads.
-- Optional "double proxy" mode that tunnels C2 traffic through a local
+- Optional "double proxy" mode that tunnels control traffic through a local
   browser, enabling operation when direct network access is blocked.
+- Simulation tasks are mapped to MITRE ATT&CK techniques for realistic scenarios.
 
 All operations are queued by the Django backend which persists task results in
-the database while the C2 server handles the low level transport.
+the database while the server component handles the low level transport.
 
 
 ## Running with Docker
@@ -97,9 +103,13 @@ npm run dev
 
 ## Environment configuration
 
-The `.env.example` file documents all required environment variables including Redis connection, C2 server host/port and Django database settings. Copy it to `.env` and adjust the values for your environment.
+The `.env.example` file documents all required environment variables including Redis connection, server component host/port and Django database settings. Copy it to `.env` and adjust the values for your environment.
 
 ## Testing
 
 No automated tests are provided. Running `pytest` currently reports that no tests are collected.
 
+
+## Disclaimer
+
+DarkScryC2 exists solely to help organizations test and improve their security. Operate it only in environments where you have been granted explicit permission. Any use of this project for unauthorized access or malicious activity is strictly forbidden. The authors provide this code for educational and defensive scenarios and disclaim responsibility for misuse.
