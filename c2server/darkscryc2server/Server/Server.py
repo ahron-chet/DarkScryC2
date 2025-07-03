@@ -1,31 +1,24 @@
 import asyncio
 import ssl
 import websockets
-from json import loads
 from websockets.asyncio.server import ServerConnection
 
 from ..settings.config import (
     SERVER_HOST,
-    SERVER_PORT,
     internalapplogger as logger,
     REDIS_URI,
     SSL_CERTIFICATE,
     SSL_CERTIFICATE_KEY
 )
 
-from ..Managers.connection_manager import ConnectionManager, Connection
+from ..Managers.connection_manager import ConnectionManager
 from ..Managers.wsbased_connection import WsConnection
-from ..Cryptography.Asymetric import RSAManager
-from ..Cryptography.Symetric import AesCrypto
-from ..Models.schemas import AgentConnection
 
 
 class Server:
     def __init__(self) -> None:
-        # Shared manager for both ACPROTO and WSPROTO connections
+        # Manager for active WebSocket connections
         self.connection_manager = ConnectionManager(REDIS_URI)
-        # RSA manager for legacy handshake
-        # self._rsa_manager = RSAManager(PRIVATE_KEY_PATH)
 
         # Optionally choose a separate port for WebSocket
         self.ws_port = 876
@@ -37,26 +30,12 @@ class Server:
 
 
     async def start(self) -> None:
-        """
-        Start listening on:
-          - A TCP server for the old AC protocol (RSA handshake + AES).
-          - A WebSocket server for the new protocol.
-        Run both indefinitely.
-        """
+        """Start the WebSocket server and serve clients indefinitely."""
         # Make sure Redis is connected
         await self.connection_manager.wait_until_connected()
 
         try:
-            # 1) Start the legacy TCP server
-            # tcp_server = await asyncio.start_server(
-            #     self._handle_client,
-            #     SERVER_HOST,
-            #     SERVER_PORT,
-            #     limit=100 * 1024 * 1024 # 100MB
-            # )
-            # logger.info(f"TCP server started on {SERVER_HOST}:{SERVER_PORT}")
-
-            # 2) Start the WebSocket server on a separate port
+            # Start the WebSocket server on a separate port
             ws_server = await websockets.serve(
                 self._handle_websocket,
                 SERVER_HOST,
@@ -67,12 +46,7 @@ class Server:
             )
             logger.info(f"WebSocket server started on {SERVER_HOST}:{self.ws_port}")
 
-            # 3) Run both servers concurrently until cancelled
-            # async with tcp_server, ws_server:
-            #     await asyncio.gather(
-            #         tcp_server.serve_forever(),
-            #         ws_server.wait_closed()
-            #     )
+            # Run the WebSocket server until it is closed
             async with  ws_server:
                 await asyncio.gather(
                     ws_server.wait_closed()
@@ -81,89 +55,14 @@ class Server:
         except Exception as e:
             logger.error(f"Server failed to start: {e}")
 
-    # -------------------------------------------------------------------------
-    #                     Legacy TCP Handling (ACPROTO)
-    # -------------------------------------------------------------------------
-    async def _handle_client(
-        self,
-        reader: asyncio.StreamReader,
-        writer: asyncio.StreamWriter
-    ) -> None:
-        """
-        Handle a new legacy TCP client using your existing ACPROTO handshake.
-        """
-        try:
-            # 1) Perform RSA-based handshake to get (conn_id, aes_manager)
-            conn_id, aes_manager = await self._perform_handshake(reader, writer)
-            if not conn_id or not aes_manager:
-                # Handshake failed or incomplete => bail out
-                return
-
-            # 2) Build the Connection object
-            connection = Connection(reader, writer, aes_manager, conn_id)
-            # 3) Register it with the shared manager
-            await self.connection_manager.register(connection)
-
-        except Exception as e:
-            logger.error(f"Handshake error: {e}")
-            writer.close()
-            return
-
-        try:
-            # 4) Enter the normal read loop for that connection
-            await connection.start()
-        except Exception as e:
-            logger.error(f"Connection {connection.id} error: {e}")
-        finally:
-            await self.connection_manager.unregister(connection)
-
-    async def _perform_handshake(
-        self,
-        reader: asyncio.StreamReader,
-        writer: asyncio.StreamWriter
-    ):
-        """
-        Reads 256 bytes, decrypts with RSA, expects JSON => AgentConnection.
-        Then creates an AesCrypto with the provided key.
-        Returns (agent_id, aes_manager).
-        """
-        # 1) read exactly 256 bytes
-        try:
-            raw_connection = await reader.readexactly(256)
-        except asyncio.IncompleteReadError:
-            logger.warning("Client disconnected before sending handshake.")
-            writer.close()
-            return None, None
-
-        # 2) RSA-decrypt that data
-        try:
-            decrypted_data = await asyncio.to_thread(self._rsa_manager.decrypt_data, raw_connection)
-        except Exception as e:
-            logger.error(f"RSA decryption failed: {e}")
-            writer.close()
-            return None, None
-
-        # 3) parse JSON => build AesCrypto
-        try:
-            connect_data = AgentConnection(**loads(decrypted_data))
-            # connect_data.key is the AES key in hex or raw bytes?
-            # (Adapt as needed; e.g. if it's hex, decode it here.)
-            aes = AesCrypto(connect_data.key, None)
-            aes.set_iv(key=connect_data.key)
-            return str(connect_data.agent_id), aes
-        except Exception as e:
-            logger.error(f"Invalid handshake data: {e}")
-            writer.close()
-            return None, None
 
     # -------------------------------------------------------------------------
     #                    WebSocket Handling (WSPROTO)
     # -------------------------------------------------------------------------
     async def _handle_websocket(self, websocket: ServerConnection):
         """
-        Handle a new WebSocket client. 
-        We'll assume the client sends a JSON handshake message with agent_id.
-        If you want RSA-based handshake for WebSockets, do it here.
+        Handle a new WebSocket client. The agent identifier is passed as part of
+        the connection path.
         """
         ws_conn: WsConnection = None
         try:
