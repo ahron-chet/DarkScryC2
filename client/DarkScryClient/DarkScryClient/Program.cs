@@ -27,19 +27,14 @@ class Program
 						ClientPort = 8765
 					});
 
-					wsclient = new WsClient($"ws://localhost:8765/{Config.agent_id}");
+                                        wsclient = new WsClient($"ws://localhost:8765/{Config.agent_id}");
 
-					Task[] tasks = { manager.StartAllAsync(), wsclient.StartAsync() };
-					await Task.WhenAll(tasks);
-					return;
-					// legacy acp protocol
-					using (Client client = new Client())
-					{
-						client.Start();
-					}
-				default:
-					throw new Exception("Unknow Proxy kind");
-			}
+                                        Task[] tasks = { manager.StartAllAsync(), wsclient.StartAsync() };
+                                        await Task.WhenAll(tasks);
+                                        return;
+                                default:
+                                        throw new Exception("Unknow Proxy kind");
+                        }
 
 		}
 		else
