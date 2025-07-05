@@ -1,10 +1,13 @@
 #pragma once
+
 #include <websocketpp/client.hpp>
-#include <websocketpp/config/asio_client.hpp>
+#include <websocketpp/config/asio_no_tls_client.hpp>
+
 #include <thread>
 #include <atomic>
 #include <string>
 #include "Logger.h"
+
 
 namespace CppAgent {
     class WsClient {
