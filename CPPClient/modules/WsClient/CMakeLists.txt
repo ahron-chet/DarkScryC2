@@ -9,3 +9,4 @@ target_include_directories(WsClient PUBLIC
 target_compile_definitions(WsClient PUBLIC ASIO_STANDALONE)
 
 enable_compiler_warnings(WsClient)
+target_compile_features(WsClient PUBLIC cxx_std_17)
