@@ -8,12 +8,12 @@
 #include <atomic>
 #include <string>
 
-#include "Logger/Logger.h"
+#include "Logger/GlobalLogger.h"
 
 namespace CppAgent {
     class WsClient {
     public:
-        WsClient(const std::string& uri, Logger& logger);
+        explicit WsClient(const std::string& uri);
         ~WsClient();
 
         bool start();
@@ -27,7 +27,6 @@ namespace CppAgent {
         std::thread thread_;
         std::atomic_bool running_{false};
         std::string uri_;
-        Logger& logger_;
 
         void on_open(websocketpp::connection_hdl hdl);
         void on_message(websocketpp::connection_hdl hdl, client::message_ptr msg);

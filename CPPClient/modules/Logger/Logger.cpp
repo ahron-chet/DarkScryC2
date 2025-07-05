@@ -1,4 +1,5 @@
-#include "Logger/Logger.h"
+#include "Logger.h"
+#include "GlobalLogger.h"
 #include <chrono>
 #include <ctime>
 #include <iostream>
@@ -67,4 +68,21 @@ void Logger::writeConsole(const std::string& msg, Level level) {
 #else
     std::cout << msg << std::endl;
 #endif
+}
+
+namespace CppAgent {
+    namespace {
+        std::unique_ptr<Logger> globalLogger;
+    }
+
+    void initLogger(bool toConsole, bool toFile, const std::string& path) {
+        globalLogger = std::make_unique<Logger>(toConsole, toFile, path);
+    }
+
+    Logger& getLogger() {
+        if (!globalLogger) {
+            globalLogger = std::make_unique<Logger>();
+        }
+        return *globalLogger;
+    }
 }
