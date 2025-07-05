@@ -26,6 +26,9 @@ namespace CppAgent {
         websocketpp::connection_hdl hdl_;
         std::thread thread_;
         std::atomic_bool running_{false};
+        std::atomic_bool open_{false};
+        std::mutex open_mtx_;
+        std::condition_variable open_cv_;
         std::string uri_;
 
         void on_open(websocketpp::connection_hdl hdl);

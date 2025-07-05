@@ -1,5 +1,6 @@
 #include "WsClient.h"
 #include <websocketpp/common/thread.hpp>
+#include <chrono>
 
 using websocketpp::lib::placeholders::_1;
 using websocketpp::lib::placeholders::_2;
@@ -29,6 +30,11 @@ bool WsClient::start() {
     ws_client_.connect(con);
     running_ = true;
     thread_ = std::thread(&WsClient::run, this);
+    std::unique_lock<std::mutex> lock(open_mtx_);
+    if(!open_cv_.wait_for(lock, std::chrono::seconds(5), [this]{ return open_.load(); })) {
+        getLogger().log("Connection timeout", Logger::Level::Error);
+        return false;
+    }
     return true;
 }
 
@@ -40,7 +46,10 @@ void WsClient::stop() {
     if(running_) {
         running_ = false;
         websocketpp::lib::error_code ec;
-        ws_client_.close(hdl_, websocketpp::close::status::going_away, "stop", ec);
+        client::connection_ptr con = ws_client_.get_con_from_hdl(hdl_, ec);
+        if(!ec && con->get_state() == websocketpp::session::state::open) {
+            ws_client_.close(hdl_, websocketpp::close::status::going_away, "stop", ec);
+        }
         if(ec) {
             getLogger().log(std::string("Close error: ") + ec.message(), Logger::Level::Error);
         }
@@ -51,16 +60,25 @@ void WsClient::stop() {
 }
 
 bool WsClient::send(const std::string& msg) {
+    if(!open_) {
+        getLogger().log("Send failed: connection not open", Logger::Level::Error);
+        return false;
+    }
     websocketpp::lib::error_code ec;
     ws_client_.send(hdl_, msg, websocketpp::frame::opcode::text, ec);
     if(ec) {
         getLogger().log(std::string("Send failed: ") + ec.message(), Logger::Level::Error);
-		return false;
+        return false;
     }
     return true;
 }
 
 void WsClient::on_open(websocketpp::connection_hdl hdl) {
+    {
+        std::lock_guard<std::mutex> lock(open_mtx_);
+        open_ = true;
+    }
+    open_cv_.notify_all();
     getLogger().log("WebSocket connection opened", Logger::Level::Info);
 }
 
