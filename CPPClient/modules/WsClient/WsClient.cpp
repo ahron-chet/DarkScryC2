@@ -50,12 +50,14 @@ void WsClient::stop() {
     }
 }
 
-void WsClient::send(const std::string& msg) {
+bool WsClient::send(const std::string& msg) {
     websocketpp::lib::error_code ec;
     ws_client_.send(hdl_, msg, websocketpp::frame::opcode::text, ec);
     if(ec) {
         getLogger().log(std::string("Send failed: ") + ec.message(), Logger::Level::Error);
+		return false;
     }
+    return true;
 }
 
 void WsClient::on_open(websocketpp::connection_hdl hdl) {

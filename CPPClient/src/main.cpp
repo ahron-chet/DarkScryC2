@@ -29,6 +29,9 @@ int main() {
         return 1; // Return early if critical connection fails
     }
 
+    if (!client.send("Hello from C++ Agent!")) {
+		return 2; // Exit if sending fails
+    }
     // Run until user stops
     logger.log("Agent running. Awaiting shutdown signal (press Enter)...", CppAgent::Logger::Level::Info);
     std::cin.get();
