@@ -1,21 +1,21 @@
 ﻿# ======================================================================
-#  Top-level CMakeLists.txt  – DarkScryCpp
+# 🌎 Project: DarkScryCpp - Top-Level CMakeLists.txt
 # ======================================================================
 
-cmake_minimum_required(VERSION 3.14)  # Required for FetchContent
+cmake_minimum_required(VERSION 3.14)
 project(DarkScryCpp VERSION 1.0 LANGUAGES CXX)
 
 # ----------------------------------------------------------------------
-# 🌎 Global Compiler Settings
+# 🔧 Global Compiler Settings
 # ----------------------------------------------------------------------
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-function(enable_compiler_warnings tgt)
-    if (MSVC)
-        target_compile_options(${tgt} PRIVATE /W4 /permissive-)
+function(enable_compiler_warnings target)
+    if(MSVC)
+        target_compile_options(${target} PRIVATE /W4 /permissive-)
     else()
-        target_compile_options(${tgt} PRIVATE -Wall -Wextra -Wpedantic)
+        target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic)
     endif()
 endfunction()
 
@@ -24,31 +24,15 @@ endfunction()
 # ----------------------------------------------------------------------
 include(FetchContent)
 
-# websocketpp (Header-only WebSocket Library)
+# websocketpp (WebSocket Library)
 FetchContent_Declare(
     websocketpp
     GIT_REPOSITORY https://github.com/zaphoyd/websocketpp.git
-    GIT_TAG 4dfe1be74e684acca19ac1cf96cce0df9eac2a2d
+    GIT_TAG 0.8.2
 )
 FetchContent_MakeAvailable(websocketpp)
 
-# Patch websocketpp for C++20 compatibility
-file(READ ${websocketpp_SOURCE_DIR}/websocketpp/logger/basic.hpp WSPP_BASIC)
-string(REPLACE "basic<concurrency,names>" "basic" WSPP_BASIC "${WSPP_BASIC}")
-file(WRITE ${websocketpp_SOURCE_DIR}/websocketpp/logger/basic.hpp "${WSPP_BASIC}")
-
-file(READ ${websocketpp_SOURCE_DIR}/websocketpp/endpoint.hpp WSPP_EP)
-string(REPLACE "~endpoint<connection,config>()" "~endpoint()" WSPP_EP "${WSPP_EP}")
-file(WRITE ${websocketpp_SOURCE_DIR}/websocketpp/endpoint.hpp "${WSPP_EP}")
-
-file(READ ${websocketpp_SOURCE_DIR}/websocketpp/roles/server_endpoint.hpp WSPP_SE)
-string(REPLACE "server<config>(" "server(" WSPP_SE "${WSPP_SE}")
-string(REPLACE "server<config> &" "server &" WSPP_SE "${WSPP_SE}")
-string(REPLACE "server<config> &&" "server &&" WSPP_SE "${WSPP_SE}")
-string(REPLACE "~server<config>()" "~server()" WSPP_SE "${WSPP_SE}")
-file(WRITE ${websocketpp_SOURCE_DIR}/websocketpp/roles/server_endpoint.hpp "${WSPP_SE}")
-
-# asio (Standalone ASIO for websocketpp)
+# Standalone ASIO (no Boost dependency)
 FetchContent_Declare(
     asio
     GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
@@ -57,34 +41,34 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(asio)
 
 # ----------------------------------------------------------------------
-# 🧩 Project Libraries (Modules)
+# ⚙️ Global Definitions (Avoid Boost explicitly)
 # ----------------------------------------------------------------------
-add_subdirectory(modules/Logger)   # Target: Logger
-add_subdirectory(modules/WsClient) # Target: WsClient (depends on websocketpp)
+add_compile_definitions(ASIO_STANDALONE _WEBSOCKETPP_CPP11_STL_)
+
+# ----------------------------------------------------------------------
+# 🧩 Internal Modules
+# ----------------------------------------------------------------------
+add_subdirectory(modules/Logger)
+add_subdirectory(modules/WsClient)
 
 # ----------------------------------------------------------------------
 # 🚀 Main Executable
 # ----------------------------------------------------------------------
-# Collect source files automatically
-file(GLOB_RECURSE APP_SRCS CONFIGURE_DEPENDS src/*.cpp)
+file(GLOB_RECURSE APP_SRCS CONFIGURE_DEPENDS src/*.cpp src/*.h)
 
 add_executable(DarkScryCpp ${APP_SRCS})
 
-# Link libraries
 target_link_libraries(DarkScryCpp PRIVATE Logger WsClient)
 
-# Include directory for agent sources
 target_include_directories(DarkScryCpp PRIVATE ${PROJECT_SOURCE_DIR}/src)
 
-# Compiler warnings for executable
 enable_compiler_warnings(DarkScryCpp)
 
 # ----------------------------------------------------------------------
-# ✅ Testing Setup (toggle with -DBUILD_TESTING=OFF)
+# ✅ Testing (toggle with -DBUILD_TESTING=OFF)
 # ----------------------------------------------------------------------
 include(CTest)
 if(BUILD_TESTING)
-    # GoogleTest Framework
     FetchContent_Declare(
         googletest
         URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
@@ -92,19 +76,16 @@ if(BUILD_TESTING)
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     FetchContent_MakeAvailable(googletest)
 
-    # Test executable
     file(GLOB TEST_SRCS CONFIGURE_DEPENDS tests/*.cpp)
+
     add_executable(unit_tests ${TEST_SRCS})
 
     target_link_libraries(unit_tests PRIVATE Logger WsClient GTest::gtest_main)
-
-    # Include directories for tests
     target_include_directories(unit_tests PRIVATE ${PROJECT_SOURCE_DIR}/src)
 
-    target_compile_features(unit_tests PUBLIC cxx_std_20)
+    target_compile_features(unit_tests PUBLIC cxx_std_17)
     enable_compiler_warnings(unit_tests)
 
-    # Register tests with CTest
     include(GoogleTest)
     gtest_discover_tests(unit_tests DISCOVERY_MODE PRE_TEST)
 endif()
