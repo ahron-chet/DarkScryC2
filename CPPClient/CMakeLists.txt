@@ -8,7 +8,7 @@ project(DarkScryCpp VERSION 1.0 LANGUAGES CXX)
 # ----------------------------------------------------------------------
 # 🌎 Global Compiler Settings
 # ----------------------------------------------------------------------
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 function(enable_compiler_warnings tgt)
@@ -57,6 +57,9 @@ add_executable(DarkScryCpp ${APP_SRCS})
 # Link libraries
 target_link_libraries(DarkScryCpp PRIVATE Logger WsClient)
 
+# Include directory for agent sources
+target_include_directories(DarkScryCpp PRIVATE ${PROJECT_SOURCE_DIR}/src)
+
 # Compiler warnings for executable
 enable_compiler_warnings(DarkScryCpp)
 
@@ -77,12 +80,12 @@ if(BUILD_TESTING)
     file(GLOB TEST_SRCS CONFIGURE_DEPENDS tests/*.cpp)
     add_executable(unit_tests ${TEST_SRCS})
 
-    target_link_libraries(unit_tests PRIVATE Logger GTest::gtest_main)
+    target_link_libraries(unit_tests PRIVATE Logger WsClient GTest::gtest_main)
 
     # Include directories for tests
-    target_include_directories(unit_tests PRIVATE ${PROJECT_SOURCE_DIR}/include/DarkScryCpp)
+    target_include_directories(unit_tests PRIVATE ${PROJECT_SOURCE_DIR}/src)
 
-    target_compile_features(unit_tests PUBLIC cxx_std_20)
+    target_compile_features(unit_tests PUBLIC cxx_std_17)
     enable_compiler_warnings(unit_tests)
 
     # Register tests with CTest

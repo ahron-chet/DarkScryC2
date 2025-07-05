@@ -6,7 +6,7 @@
 #include <thread>
 #include <atomic>
 #include <string>
-#include "Logger.h"
+#include "Logger/Logger.h"
 
 
 namespace CppAgent {

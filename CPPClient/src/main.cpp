@@ -1,6 +1,6 @@
 #include <iostream>
-#include "Logger.h"
-#include "DarkScryCpp/Config.h"
+#include "Logger/Logger.h"
+#include "Config.h"
 #include "WsClient/WsClient.h"
 
 int main() {
@@ -12,7 +12,7 @@ int main() {
     logger.log("Initializing agent configuration...", CppAgent::Logger::Level::Info);
 
     // WebSocket URI creation
-    std::string uri = "ws://" + config.SERVER_IP + ":" + std::to_string(config.SERVER_PORT) + "/" + config.AGENT_ID;
+    std::string uri = std::string("ws://") + config.SERVER_IP + ":" + std::to_string(config.SERVER_PORT) + "/" + config.AGENT_ID;
     logger.log("Attempting connection to: " + uri, CppAgent::Logger::Level::Info);
 
     // Initialize WebSocket client
