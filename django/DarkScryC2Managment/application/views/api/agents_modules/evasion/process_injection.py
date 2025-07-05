@@ -21,7 +21,7 @@ class ProcessCollection(ApiRouteV2):
             action=CommandIdentifiers.SHELLCODE_INJECTION_REMOTE_THREAD,
             pid=payload.pid,
             shellcode=payload.shellcode
-        ).xml()
+        ).model_dump_json()
         job = await make_task(
             "remote_send_command_task",
             agent_id=str(agent.AgentId),

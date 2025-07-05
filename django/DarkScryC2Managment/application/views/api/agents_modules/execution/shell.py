@@ -33,7 +33,7 @@ class ShellExecution(ApiRouteV2):
     
     async def run_command_task(self, request:HttpRequest, agent_id:UUID, payload:RunCommandSchema, *args, **kwargs):
         agent = await aget_object_or_404(Agent, AgentId=agent_id)
-        command = RunCommand(command=payload.command).xml()
+        command = RunCommand(command=payload.command).model_dump_json()
         job = await make_task(
             "remote_send_command_task",
             agent_id=str(agent.AgentId),
@@ -44,7 +44,7 @@ class ShellExecution(ApiRouteV2):
     
     async def start_shell_instance(self, request:HttpRequest, agent_id:UUID, *args, **kwargs):
         agent = await aget_object_or_404(Agent, AgentId=agent_id)
-        command = StartShellCommand().xml()
+        command = StartShellCommand().model_dump_json()
         job = await make_task(
             "remote_send_command_task",
             agent_id=str(agent.AgentId),
@@ -54,7 +54,7 @@ class ShellExecution(ApiRouteV2):
         return TaskOut(task_id=job.job_id)
     
     async def run_command(self, request:HttpRequest, agent_id:UUID, payload:RunCommandSchema, *args, **kwargs):
-        command = RunCommand(command=payload.command).xml()
+        command = RunCommand(command=payload.command).model_dump_json()
         return await remote_send_command(conn_id=str(agent_id), command=command)
     
 

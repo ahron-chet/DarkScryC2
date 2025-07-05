@@ -40,6 +40,17 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(asio)
 
+# rapidjson (JSON parsing)
+FetchContent_Declare(
+    rapidjson
+    GIT_REPOSITORY https://github.com/Tencent/rapidjson.git
+    GIT_TAG v1.1.0
+)
+set(RAPIDJSON_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(RAPIDJSON_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(RAPIDJSON_BUILD_DOC OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(rapidjson)
+
 # ----------------------------------------------------------------------
 # ⚙️ Global Definitions (Avoid Boost explicitly)
 # ----------------------------------------------------------------------
@@ -50,6 +61,7 @@ add_compile_definitions(ASIO_STANDALONE _WEBSOCKETPP_CPP11_STL_)
 # ----------------------------------------------------------------------
 add_subdirectory(modules/Logger)
 add_subdirectory(modules/WsClient)
+add_subdirectory(modules/CommandHandler)
 
 # ----------------------------------------------------------------------
 # 🚀 Main Executable
@@ -58,7 +70,7 @@ file(GLOB_RECURSE APP_SRCS CONFIGURE_DEPENDS src/*.cpp src/*.h)
 
 add_executable(DarkScryCpp ${APP_SRCS})
 
-target_link_libraries(DarkScryCpp PRIVATE Logger WsClient)
+target_link_libraries(DarkScryCpp PRIVATE Logger WsClient CommandHandler)
 
 target_include_directories(DarkScryCpp PRIVATE
     ${PROJECT_SOURCE_DIR}/src
@@ -83,7 +95,7 @@ if(BUILD_TESTING)
 
     add_executable(unit_tests ${TEST_SRCS})
 
-    target_link_libraries(unit_tests PRIVATE Logger WsClient GTest::gtest_main)
+    target_link_libraries(unit_tests PRIVATE Logger WsClient CommandHandler GTest::gtest_main)
     target_include_directories(unit_tests PRIVATE
         ${PROJECT_SOURCE_DIR}/src
         ${PROJECT_SOURCE_DIR}/modules

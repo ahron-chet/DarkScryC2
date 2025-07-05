@@ -19,7 +19,7 @@ class StartShellCommand(Command):
     )
 
 class RunCommand(Command):
-    action: str = (CommandIdentifiers.RUN_COMMAND.value)
+    action: int = CommandIdentifiers.RUN_COMMAND.value
     command: str = Field(
         ...,
         title="Command",
