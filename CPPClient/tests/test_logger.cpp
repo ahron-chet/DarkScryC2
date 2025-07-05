@@ -1,4 +1,4 @@
-#include "Logger/Logger.h"
+#include "Logger/GlobalLogger.h"
 #include <gtest/gtest.h>
 #include <fstream>
 #include <cstdio>
@@ -7,9 +7,9 @@ TEST(LoggerTest, WritesToFile) {
     const char* logPath = "test.log";
     std::remove(logPath);
 
-    CppAgent::Logger logger(false, true, logPath);
+    CppAgent::initLogger(false, true, logPath);
     std::string msg = "sample message";
-    logger.log(msg, CppAgent::Logger::Level::Info);
+    CppAgent::getLogger().log(msg, CppAgent::Logger::Level::Info);
 
     std::ifstream file(logPath);
     ASSERT_TRUE(file.is_open());

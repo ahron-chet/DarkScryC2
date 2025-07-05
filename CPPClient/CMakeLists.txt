@@ -60,7 +60,10 @@ add_executable(DarkScryCpp ${APP_SRCS})
 
 target_link_libraries(DarkScryCpp PRIVATE Logger WsClient)
 
-target_include_directories(DarkScryCpp PRIVATE ${PROJECT_SOURCE_DIR}/src)
+target_include_directories(DarkScryCpp PRIVATE
+    ${PROJECT_SOURCE_DIR}/src
+    ${PROJECT_SOURCE_DIR}/modules
+)
 
 enable_compiler_warnings(DarkScryCpp)
 
@@ -81,7 +84,10 @@ if(BUILD_TESTING)
     add_executable(unit_tests ${TEST_SRCS})
 
     target_link_libraries(unit_tests PRIVATE Logger WsClient GTest::gtest_main)
-    target_include_directories(unit_tests PRIVATE ${PROJECT_SOURCE_DIR}/src)
+    target_include_directories(unit_tests PRIVATE
+        ${PROJECT_SOURCE_DIR}/src
+        ${PROJECT_SOURCE_DIR}/modules
+    )
 
     target_compile_features(unit_tests PUBLIC cxx_std_17)
     enable_compiler_warnings(unit_tests)

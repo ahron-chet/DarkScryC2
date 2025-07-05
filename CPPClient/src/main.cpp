@@ -1,11 +1,12 @@
 #include <iostream>
-#include "Logger/Logger.h"
+#include "Logger/GlobalLogger.h"
 #include "Config.h"
 #include "WsClient/WsClient.h"
 
 int main() {
     CppAgent::Config config;
-    CppAgent::Logger logger(true, true, config.LOG_FILE);
+    CppAgent::initLogger(true, true, config.LOG_FILE);
+    auto& logger = CppAgent::getLogger();
 
     // Start of agent
     logger.log("========== " + std::string(config.AGENT_NAME) + " ==========", CppAgent::Logger::Level::Info);
@@ -16,7 +17,7 @@ int main() {
     logger.log("Attempting connection to: " + uri, CppAgent::Logger::Level::Info);
 
     // Initialize WebSocket client
-    CppAgent::WsClient client(uri, logger);
+    CppAgent::WsClient client(uri);
     logger.log("WebSocket client initialized.", CppAgent::Logger::Level::Info);
 
     // Start WebSocket connection

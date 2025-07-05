@@ -1,10 +1,10 @@
 #include "WsClient/WsClient.h"
-#include "Logger/Logger.h"
+#include "Logger/GlobalLogger.h"
 #include <gtest/gtest.h>
 
 TEST(WsClientTest, CanConstruct) {
-    CppAgent::Logger logger(false, false);
-    CppAgent::WsClient client("ws://localhost:12345/test", logger);
+    CppAgent::initLogger();
+    CppAgent::WsClient client("ws://localhost:12345/test");
     SUCCEED();
 }
 
