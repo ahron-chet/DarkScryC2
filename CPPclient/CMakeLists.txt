@@ -24,14 +24,27 @@ endfunction()
 # ----------------------------------------------------------------------
 add_subdirectory(modules/Logger)      # creates target: Logger
 
+# ----------------------------------------------------------------------
+# 2b. Fetch websocketpp library for WebSocket networking
+# ----------------------------------------------------------------------
+include(FetchContent)
+FetchContent_Declare(
+    websocketpp
+    GIT_REPOSITORY https://github.com/zaphoyd/websocketpp.git
+    GIT_TAG 0.8.2
+)
+FetchContent_MakeAvailable(websocketpp)
+
 
 # ----------------------------------------------------------------------
 # 3. Main executable
 # ----------------------------------------------------------------------
 file(GLOB_RECURSE APP_SRCS CONFIGURE_DEPENDS src/*.cpp)
 
+add_subdirectory(modules/WsClient)
+
 add_executable(DarkScryCpp ${APP_SRCS})
-target_link_libraries(DarkScryCpp PRIVATE Logger)
+target_link_libraries(DarkScryCpp PRIVATE Logger WsClient)
 
 
 
