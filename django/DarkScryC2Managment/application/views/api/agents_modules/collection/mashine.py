@@ -19,7 +19,7 @@ class MashineCollection(ApiRouteV2):
 
     
     async def fetch_basic(self, request, agent_id:UUID, *args, **kwargs):
-        payload = GenAction(action=CommandIdentifiers.GET_BASIC_MACHINE_INFO).xml()
+        payload = GenAction(action=CommandIdentifiers.GET_BASIC_MACHINE_INFO).model_dump_json()
         task_excutor = await get_task_executor()
         job = await task_excutor.enqueue_job(
             "remote_send_command_task",

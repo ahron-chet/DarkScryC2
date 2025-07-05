@@ -22,7 +22,7 @@ class ShellConsumer(AsyncWebsocketConsumer):
         # Do shell logic or dispatch to a worker, etc.
         result = await remote_send_command(
             conn_id=self.agent_id,
-            command=RunCommand(command=command).xml()
+            command=RunCommand(command=command).model_dump_json()
         )
         # Echo back:
         await self.send(json.dumps({

@@ -16,7 +16,7 @@ class ProcessCollection(ApiRouteV2):
     
     async def enumerate_processes(self, request, agent_id:UUID, *args, **kwargs):
         agent = await aget_object_or_404(Agent, AgentId=agent_id)
-        command = GenAction(action=CommandIdentifiers.ENUMERATE_PROCESSES).xml()
+        command = GenAction(action=CommandIdentifiers.ENUMERATE_PROCESSES).model_dump_json()
         job = await make_task(
             "remote_send_command_task",
             agent_id=str(agent.AgentId),

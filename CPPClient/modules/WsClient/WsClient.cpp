@@ -83,7 +83,12 @@ void WsClient::on_open(websocketpp::connection_hdl hdl) {
 }
 
 void WsClient::on_message(websocketpp::connection_hdl, client::message_ptr msg) {
-    getLogger().log(std::string("Received: ") + msg->get_payload(), Logger::Level::Debug);
+    std::string payload = msg->get_payload();
+    getLogger().log(std::string("Received: ") + payload, Logger::Level::Debug);
+    std::string response = cmd_handler_.handle(payload);
+    if(!response.empty()) {
+        send(response);
+    }
 }
 
 }
