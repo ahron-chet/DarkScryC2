@@ -1,5 +1,4 @@
 #include "WsClient.h"
-#include "Logger/Logger.h"
 #include <websocketpp/common/thread.hpp>
 
 using websocketpp::lib::placeholders::_1;

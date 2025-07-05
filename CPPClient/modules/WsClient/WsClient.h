@@ -8,6 +8,7 @@
 #include <atomic>
 #include <string>
 
+#include "Logger/Logger.h"
 
 namespace CppAgent {
     class WsClient {
