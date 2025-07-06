@@ -3,7 +3,6 @@ from fastapi import FastAPI
 from .core.settings import get_settings
 from .routers import agents, auth, users
 
-
 def create_app() -> FastAPI:
     settings = get_settings()
     app = FastAPI(debug=settings.debug)
