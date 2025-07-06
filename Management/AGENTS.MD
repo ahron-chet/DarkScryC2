@@ -2,6 +2,7 @@
 
 This `Management` directory contains the FastAPI implementation intended to replace the legacy Django backend. As the migration is ongoing, ensure feature parity with the original functionality while adopting modern Python best practices. All new code should leverage asynchronous patterns, object-oriented design principles, and modular structures to enhance readability, maintainability, and ease of testing.
 
+DB Models should be very like the django part please do not omit columns from the old django
 ---
 
 ## 🛠️ Programming Style
@@ -30,6 +31,16 @@ This `Management` directory contains the FastAPI implementation intended to repl
   * Avoid single monolithic CRUD files.
 
 ---
+
+## 📌 Database Model Guidelines
+
+Ensure all database models closely reflect the original Django models. **Do not omit any columns** present in the legacy Django project. Any changes or additions to the existing structure must be explicitly justified and documented.
+
+* Maintain field names, data types, constraints, and relationships from the original Django definitions.
+* Clearly document any deliberate deviations and the reasoning behind them within your PR description.
+
+---
+
 
 ## 🔐 Security & ⚡ Optimization
 
