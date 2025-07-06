@@ -17,6 +17,7 @@ class UserService:
     """Service object for user-related operations."""
 
     async def create(self, db: AsyncSession, user_in: UserCreate) -> User:
+        """Create a new user after validating the password."""
         validate_password_complexity(user_in.password)
         user = User(
             username=user_in.username,
@@ -41,6 +42,7 @@ class UserService:
     async def authenticate(
         self, db: AsyncSession, username: str, password: str
     ) -> User | None:
+        """Return the user if the credentials are valid."""
         result = await db.execute(select(User).where(User.username == username))
         user = result.scalar_one_or_none()
         if user and user.is_active and verify_password(password, user.password):
@@ -48,14 +50,17 @@ class UserService:
         return None
 
     async def get(self, db: AsyncSession, user_id: uuid.UUID) -> User | None:
+        """Retrieve a user by their public ID."""
         result = await db.execute(select(User).where(User.user_id == user_id))
         return result.scalar_one_or_none()
 
     async def list(self, db: AsyncSession) -> list[User]:
+        """List all users by creation time."""
         result = await db.execute(select(User).order_by(User.time_generated.desc()))
         return list(result.scalars())
 
     async def update(self, db: AsyncSession, user: User, user_in: UserUpdate) -> User:
+        """Update an existing user's attributes."""
         if user_in.username is not None:
             user.username = user_in.username
         if user_in.password is not None:
@@ -82,5 +87,6 @@ class UserService:
         return user
 
     async def delete(self, db: AsyncSession, user: User) -> None:
+        """Delete a user record."""
         await db.delete(user)
         await db.commit()
