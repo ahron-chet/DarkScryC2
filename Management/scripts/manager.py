@@ -1,9 +1,9 @@
 import argparse
 import asyncio
 
-from Management.app.core.database import AsyncSessionLocal
-from Management.app.schemas.user import UserCreate, UserRole
-from Management.app.services.user_service import UserService
+from ..app.core.database import AsyncSessionLocal
+from ..app.schemas.user import UserCreate, UserRole
+from ..app.services.user_service import UserService
 
 
 async def create_user_command(args: argparse.Namespace) -> None:
