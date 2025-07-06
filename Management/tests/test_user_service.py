@@ -82,3 +82,29 @@ async def test_authenticate_inactive_user(anyio_backend):
         assert authenticated is None
 
     await engine.dispose()
+
+
+@pytest.mark.anyio
+async def test_create_user_with_optional_fields(anyio_backend):
+    engine = create_async_engine(os.environ["TEST_DATABASE_URL"])
+    async_session = async_sessionmaker(engine, expire_on_commit=False)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    service = UserService()
+    async with async_session() as session:
+        created = await service.create(
+            session,
+            UserCreate(
+                username="optional",
+                password="Str0ng!Pass",
+                email="optional@example.com",
+                role=UserRole.READER,
+                first_name="Opt",
+                last_name="User",
+            ),
+        )
+        assert created.first_name == "Opt"
+        assert created.last_name == "User"
+
+    await engine.dispose()
