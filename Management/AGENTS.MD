@@ -1,7 +1,7 @@
 
 # 🚀 FastAPI Management Backend Guidelines
 
-This `Management` directory contains the FastAPI implementation intended to replace the legacy Django backend. As the migration is ongoing, ensure feature parity with the original functionality while adopting modern Python best practices. All new code should leverage asynchronous patterns, object-oriented design principles, and modular structures to enhance readability, maintainability, and ease of testing.
+This `Management` directory contains the FastAPI implementation intended to replace the legacy Django backend (django/ folder). As the migration is ongoing, ensure feature parity with the original functionality while adopting modern Python best practices. All new code should leverage asynchronous patterns, object-oriented design principles, and modular structures to enhance readability, maintainability, and ease of testing.
 
 **Database models** should closely match the existing Django models. **Do not omit any columns** from the original schema unless explicitly documented and justified.
 
