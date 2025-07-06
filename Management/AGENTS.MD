@@ -100,7 +100,7 @@ Use **Poetry** for dependency management, strictly following Poetry's recommende
 * Always run tests locally before committing code:
 
 ```bash
-pytest -v backend/tests/
+pytest -v Management/tests/
 ```
 
 * If tests fail:
