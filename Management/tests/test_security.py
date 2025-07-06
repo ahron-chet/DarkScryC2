@@ -12,6 +12,7 @@ from Management.app.core.security import (
     create_access_token,
     create_refresh_token,
     required_role,
+    validate_password_complexity,
 )
 from Management.app.models.user import User, UserRole
 
@@ -41,3 +42,12 @@ async def test_required_role_forbidden(anyio_backend):
     dep = required_role(UserRole.ADMIN)
     with pytest.raises(HTTPException):
         await dep(user=user)
+
+
+def test_validate_password_complexity():
+    validate_password_complexity("Str0ng!Pass")
+
+
+def test_validate_password_complexity_weak():
+    with pytest.raises(ValueError):
+        validate_password_complexity("short")

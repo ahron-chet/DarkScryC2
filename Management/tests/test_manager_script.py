@@ -26,7 +26,7 @@ async def test_create_user_cli(anyio_backend):
             "--username",
             "cliuser",
             "--password",
-            "secret",
+            "Strong1!",
             "--email",
             "cli@example.com",
             "--role",

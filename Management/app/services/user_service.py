@@ -4,7 +4,11 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..core.security import get_password_hash, verify_password
+from ..core.security import (
+    get_password_hash,
+    validate_password_complexity,
+    verify_password,
+)
 from ..models.user import User
 from ..schemas.user import UserCreate, UserUpdate
 
@@ -13,6 +17,7 @@ class UserService:
     """Service object for user-related operations."""
 
     async def create(self, db: AsyncSession, user_in: UserCreate) -> User:
+        validate_password_complexity(user_in.password)
         user = User(
             username=user_in.username,
             password=get_password_hash(user_in.password),
@@ -48,6 +53,7 @@ class UserService:
         if user_in.username is not None:
             user.username = user_in.username
         if user_in.password is not None:
+            validate_password_complexity(user_in.password)
             user.password = get_password_hash(user_in.password)
         if user_in.email is not None:
             user.email = user_in.email
