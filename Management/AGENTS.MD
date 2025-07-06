@@ -21,6 +21,7 @@ This `Management` directory contains the FastAPI implementation intended to repl
 
   * Define clear controller classes for endpoint logic.
   * Each resource/domain should have its own router, encapsulating related class-based endpoints.
+  * Except for the `auth` router, configure each router with `dependencies=[Depends(get_current_user)]` so authentication is enforced globally on its routes.
   * Avoid mixing procedural and class-based endpoints within the same module.
 * Organize code into modular directories clearly:
 
