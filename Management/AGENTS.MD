@@ -43,6 +43,16 @@ Ensure all database models closely reflect the original Django models. **Do not 
 ---
 
 
+## 📌 **Guidelines for Pydantic Schema Best Practices**
+
+When developing and exporting APIs, ensure that **all schemas are clearly defined and documented using Pydantic**. Specifically:
+
+* **Field validation**: Always validate data types and constraints explicitly.
+* **Field descriptions**: Provide descriptive metadata (`Field(...)`) for each schema field to clarify intent and usage.
+* **Clear documentation**: Schemas should be documented thoroughly, making API interactions transparent and easily understood by frontend and API consumers.
+* **Consistency**: Maintain consistency across schemas by using standardized naming conventions and structures.
+
+
 ## 🔐 Security & ⚡ Optimization
 
 * Validate all user input with **Pydantic schemas** or dependencies (`Depends`).
