@@ -108,7 +108,8 @@ pytest -v Management/tests/
   * Fix the issues promptly, or
   * Clearly document and explain the failure in your PR description.
 
-* Address pytest deprecation warnings proactively.
+* Proactively address all pytest deprecation warnings. Do not ignore these warnings; fix them promptly unless there's a clearly justified reason not to.
+
 
 ---
 
