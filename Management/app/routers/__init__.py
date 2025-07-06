@@ -1,5 +1,5 @@
 """API routers for the management backend."""
 
-from . import auth, users
+from . import agents, auth, users
 
-__all__ = ["auth", "users"]
+__all__ = ["auth", "users", "agents"]

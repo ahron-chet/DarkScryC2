@@ -45,6 +45,7 @@ Management/app/
 
 * Ensure all database models closely reflect the original Django models. **Do not omit columns** unless explicitly justified and documented.
 * Maintain the same field names, data types, constraints, and relationships as defined originally.
+* All time fields must be timezone-aware and stored in UTC.
 * Clearly document any deliberate deviations and the reasoning behind them within your PR description.
 
 ---
@@ -95,7 +96,7 @@ Use **Poetry** for dependency management, strictly following Poetry's recommende
 
   * Place tests within `backend/tests/`.
   * Ensure tests cover both successful and edge/error scenarios.
-  * Use the provided `TEST_DATABASE_URL` environment variable pointing to a dedicated PostgreSQL test database for running tests.
+  * Use the provided `TEST_DATABASE_URL` environment variable pointing to a dedicated PostgreSQL test database for running tests. **SQLite must never be used, even for tests.**
 
 * Always run tests locally before committing code:
 

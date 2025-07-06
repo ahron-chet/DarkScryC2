@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from ..models.user import UserRole
 
@@ -51,8 +51,7 @@ class UserRead(BaseModel):
     time_generated: Optional[datetime] = Field(None, description="Creation time")
     last_login: Optional[datetime] = Field(None, description="Last login time")
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Deleted(BaseModel):
