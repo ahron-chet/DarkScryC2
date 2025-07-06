@@ -56,3 +56,29 @@ async def test_update_user_weak_password(anyio_backend):
             )
 
     await engine.dispose()
+
+
+@pytest.mark.anyio
+async def test_authenticate_inactive_user(anyio_backend):
+    engine = create_async_engine(os.environ["TEST_DATABASE_URL"])
+    async_session = async_sessionmaker(engine, expire_on_commit=False)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    service = UserService()
+    async with async_session() as session:
+        user = await service.create(
+            session,
+            UserCreate(
+                username="inactive",
+                password="Str0ng!Pass",
+                email="inactive@example.com",
+                role=UserRole.READER,
+            ),
+        )
+        user.is_active = False
+        await session.commit()
+        authenticated = await service.authenticate(session, "inactive", "Str0ng!Pass")
+        assert authenticated is None
+
+    await engine.dispose()
