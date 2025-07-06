@@ -21,14 +21,16 @@ class User(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(150), unique=True, nullable=False)
     password = Column(String(128), nullable=False)
-    last_login = Column(DateTime, nullable=True)
+    last_login = Column(DateTime(timezone=True), nullable=True)
     is_superuser = Column(Boolean, default=False)
     first_name = Column(String(150), nullable=True)
     last_name = Column(String(150), nullable=True)
     email = Column(String(254), nullable=True)
     is_staff = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)
-    date_joined = Column(DateTime, nullable=False, server_default=func.now())
+    date_joined = Column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
 
     user_id = Column(UUID(as_uuid=True), unique=True, default=uuid.uuid4)
     role = Column(String(20), default=UserRole.READER.value, nullable=False)
@@ -36,7 +38,9 @@ class User(Base):
     company_name = Column(String(100), nullable=True)
     industry = Column(String(100), nullable=True)
     country = Column(String(50), nullable=True)
-    time_generated = Column(DateTime, nullable=False, server_default=func.now())
+    time_generated = Column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
 
     # relationships placeholder
 
