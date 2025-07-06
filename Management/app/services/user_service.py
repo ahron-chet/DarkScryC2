@@ -37,7 +37,7 @@ class UserService:
     ) -> User | None:
         result = await db.execute(select(User).where(User.username == username))
         user = result.scalar_one_or_none()
-        if user and verify_password(password, user.password):
+        if user and user.is_active and verify_password(password, user.password):
             return user
         return None
 
