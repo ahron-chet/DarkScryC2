@@ -8,12 +8,22 @@ os.environ.setdefault("MANAGEMENT_SECRET_KEY", "secret")
 import pytest
 from fastapi import HTTPException
 
-from Management.app.core.security import create_access_token, required_role
+from Management.app.core.security import (
+    create_access_token,
+    create_refresh_token,
+    required_role,
+)
 from Management.app.models.user import User, UserRole
 
 
 def test_create_access_token():
     token = create_access_token({"sub": 1})
+    assert isinstance(token, str)
+    assert token
+
+
+def test_create_refresh_token():
+    token = create_refresh_token({"sub": 1})
     assert isinstance(token, str)
     assert token
 
