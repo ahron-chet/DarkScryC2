@@ -2,9 +2,10 @@ from pydantic import BaseModel, Field
 
 
 class Token(BaseModel):
-    """JWT access token returned after successful authentication."""
+    """JWT tokens returned after successful authentication."""
 
     access_token: str = Field(..., description="JWT access token")
+    refresh_token: str = Field(..., description="JWT refresh token")
     token_type: str = Field(default="bearer", description="Token type")
 
 
@@ -13,3 +14,9 @@ class Login(BaseModel):
 
     username: str = Field(..., description="User login name")
     password: str = Field(..., description="User password")
+
+
+class RefreshTokenRequest(BaseModel):
+    """Schema for requesting a new access token."""
+
+    refresh_token: str = Field(..., description="JWT refresh token")

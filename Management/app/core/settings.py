@@ -13,6 +13,12 @@ class Settings(BaseSettings):
     database_url: str = Field(..., description="Database connection URL")
     secret_key: str = Field(..., description="JWT signing secret")
     debug: bool = Field(False, description="Enable debug mode")
+    access_token_expire_minutes: int = Field(
+        15, description="Access token expiration window in minutes"
+    )
+    refresh_token_expire_days: int = Field(
+        9, description="Refresh token expiration window in days"
+    )
 
     model_config = {
         "env_file": None,
@@ -33,4 +39,14 @@ def get_settings() -> Settings:
         raise RuntimeError("MANAGEMENT_SECRET_KEY is not set")
 
     debug = os.getenv("MANAGEMENT_DEBUG", "False").lower() == "true"
-    return Settings(database_url=db_url, secret_key=secret_key, debug=debug)
+
+    access_minutes = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "15"))
+    refresh_days = int(os.getenv("JWT_REFRESH_TOKEN_EXPIRE_DAYS", "9"))
+
+    return Settings(
+        database_url=db_url,
+        secret_key=secret_key,
+        debug=debug,
+        access_token_expire_minutes=access_minutes,
+        refresh_token_expire_days=refresh_days,
+    )
