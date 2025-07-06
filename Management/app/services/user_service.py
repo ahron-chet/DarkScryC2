@@ -22,6 +22,12 @@ class UserService:
             username=user_in.username,
             password=get_password_hash(user_in.password),
             role=user_in.role.value,
+            email=user_in.email,
+            first_name=user_in.first_name,
+            last_name=user_in.last_name,
+            company_name=user_in.company_name,
+            industry=user_in.industry,
+            country=user_in.country,
         )
         db.add(user)
         try:
