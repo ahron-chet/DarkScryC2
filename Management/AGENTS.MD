@@ -15,6 +15,7 @@ DB Models should be very like the django part please do not omit columns from th
 
   * Encapsulate business logic within classes or services rather than procedural code.
   * Use FastAPI's dependency injection (`Depends`) to manage and isolate concerns.
+  * Use Class based route following fastapi best practices.
 * Organize code into clear and modular directories:
 
   ```
