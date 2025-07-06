@@ -93,6 +93,12 @@ Use **Poetry** for dependency management, strictly following Poetry's recommende
 
 ## 🧪 Testing Guidelines
 
+Navigate to the `Management` directory, then run:
+
+```bash
+poetry install --no-interaction --no-root
+```
+
 * Every new feature or API endpoint **must include comprehensive tests**:
 
   * Place tests within `Management/tests/`.
