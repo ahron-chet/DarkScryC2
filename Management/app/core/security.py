@@ -1,3 +1,4 @@
+import re
 import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Callable, Optional
@@ -15,6 +16,16 @@ from .settings import get_settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
+
+_password_complexity_regex = re.compile(
+    r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$"
+)
+
+
+def validate_password_complexity(password: str) -> None:
+    """Raise ValueError if the password is not complex enough."""
+    if not _password_complexity_regex.match(password):
+        raise ValueError("Password does not meet strength requirements")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
