@@ -16,7 +16,8 @@ where you have explicit authorization. The repository contains:
 ```
 c2server/    # Python server, FastAPI manager and WebSocket/TCP handling
 client/      # C# client source
-django/      # Django backend project
+django/      # Django backend project API Manaement
+Management/  # New Managment on going migration from django
 frontend/    # Next.js frontend
 Dockerfiles/ # Additional worker images
 ```
