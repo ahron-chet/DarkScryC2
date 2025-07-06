@@ -11,7 +11,9 @@ from ..core.security import get_current_user, required_role
 from ..models.user import UserRole
 from ..schemas.agent import AgentCreate, AgentRead, AgentUpdate, Deleted
 
-router = APIRouter(prefix="/agents", tags=["agents"])
+router = APIRouter(
+    prefix="/agents", tags=["agents"], dependencies=[Depends(get_current_user)]
+)
 
 
 @cbv(router)
@@ -27,19 +29,11 @@ class AgentRoutes(AgentController):
     async def create(self, agent_in: AgentCreate) -> AgentRead:
         return await self.create_agent(agent_in)
 
-    @router.get(
-        "/",
-        response_model=List[AgentRead],
-        dependencies=[Depends(get_current_user)],
-    )
+    @router.get("/", response_model=List[AgentRead])
     async def list(self) -> List[AgentRead]:
         return await self.list_agents()
 
-    @router.get(
-        "/{agent_id}",
-        response_model=AgentRead,
-        dependencies=[Depends(get_current_user)],
-    )
+    @router.get("/{agent_id}", response_model=AgentRead)
     async def read(self, agent_id: uuid.UUID) -> AgentRead:
         return await self.get_agent(agent_id)
 

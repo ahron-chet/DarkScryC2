@@ -11,7 +11,9 @@ from ..core.security import get_current_user, required_role
 from ..models.user import UserRole
 from ..schemas.user import Deleted, UserCreate, UserRead, UserUpdate
 
-router = APIRouter(prefix="/users", tags=["users"])
+router = APIRouter(
+    prefix="/users", tags=["users"], dependencies=[Depends(get_current_user)]
+)
 
 
 @cbv(router)
@@ -27,19 +29,11 @@ class UserRoutes(UserController):
     async def create(self, user_in: UserCreate) -> UserRead:
         return await self.create_user(user_in)
 
-    @router.get(
-        "/",
-        response_model=List[UserRead],
-        dependencies=[Depends(get_current_user)],
-    )
+    @router.get("/", response_model=List[UserRead])
     async def list(self) -> List[UserRead]:
         return await self.list_users()
 
-    @router.get(
-        "/{user_id}",
-        response_model=UserRead,
-        dependencies=[Depends(get_current_user)],
-    )
+    @router.get("/{user_id}", response_model=UserRead)
     async def read(self, user_id: uuid.UUID) -> UserRead:
         return await self.get_user(user_id)
 
