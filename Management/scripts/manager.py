@@ -6,6 +6,15 @@ from ..app.schemas.user import UserCreate, UserRole
 from ..app.services.user_service import UserService
 
 
+async def list_users_command(args: argparse.Namespace) -> None:
+    """List all users."""
+    async with AsyncSessionLocal() as session:
+        service = UserService()
+        users = await service.list(session)
+        for user in users:
+            print(f"{user.user_id} {user.username} {user.email} {user.role}")
+
+
 async def create_user_command(args: argparse.Namespace) -> None:
     """Create a new user from CLI arguments."""
     async with AsyncSessionLocal() as session:
@@ -25,9 +34,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Management CLI")
     subparsers = parser.add_subparsers(dest="action", required=True)
 
-    create_user_parser = subparsers.add_parser(
-        "create_user", help="Create a new user"
-    )
+    create_user_parser = subparsers.add_parser("create_user", help="Create a new user")
     create_user_parser.add_argument("--username", required=True)
     create_user_parser.add_argument("--password", required=True)
     create_user_parser.add_argument("--email", required=True)
@@ -37,6 +44,9 @@ def build_parser() -> argparse.ArgumentParser:
         choices=[role.value for role in UserRole],
     )
     create_user_parser.set_defaults(func=create_user_command)
+
+    list_users_parser = subparsers.add_parser("list_users", help="List all users")
+    list_users_parser.set_defaults(func=list_users_command)
 
     return parser
 
