@@ -64,6 +64,13 @@ Ensure all database models closely reflect the original Django models. **Do not 
   * OpenAPI schema annotations
 
 ---
+Here's a clearer, improved version of your text:
+
+---
+
+## 📚 Package Management
+
+Use **Poetry** for dependency management, following Poetry's recommended best practices.
 
 ## 🧪 Testing Guidelines
 
@@ -71,6 +78,9 @@ Ensure all database models closely reflect the original Django models. **Do not 
 
   * Place all tests within `backend/tests/`.
   * Ensure your tests cover both success cases and edge/error scenarios.
+
+TEST_DATABASE_URL from envirnment variable will give you a url to postgres database use it for you tests
+
 * Run tests locally before committing:
 
   ```bash
