@@ -95,7 +95,7 @@ Use **Poetry** for dependency management, strictly following Poetry's recommende
 
 * Every new feature or API endpoint **must include comprehensive tests**:
 
-  * Place tests within `backend/tests/`.
+  * Place tests within `Management/tests/`.
   * Ensure tests cover both successful and edge/error scenarios.
   * Use the provided `TEST_DATABASE_URL` environment variable pointing to a dedicated PostgreSQL test database for running tests. **SQLite must never be used, even for tests.**
 
