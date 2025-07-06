@@ -26,11 +26,11 @@ int main() {
     }
     logger.log("Session successfully started.", CppAgent::Logger::Level::Info);
 
-    if (!client.send("Hello from C++ Agent!")) {
-        logger.log("Failed to send initial message.", CppAgent::Logger::Level::Error);
-        exitCode = 2;
-        goto cleanup;
-    }
+    //if (!client.send("Hello from C++ Agent!")) {
+    //    logger.log("Failed to send initial message.", CppAgent::Logger::Level::Error);
+    //    exitCode = 2;
+    //    goto cleanup;
+    //}
 
     logger.log("Agent running. Awaiting shutdown signal (press Enter)...", CppAgent::Logger::Level::Info);
     std::cin.get();

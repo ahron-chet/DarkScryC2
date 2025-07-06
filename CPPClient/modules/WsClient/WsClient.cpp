@@ -28,13 +28,13 @@ bool WsClient::start() {
     }
     hdl_ = con->get_handle();
     ws_client_.connect(con);
-    running_ = true;
     thread_ = std::thread(&WsClient::run, this);
     std::unique_lock<std::mutex> lock(open_mtx_);
     if(!open_cv_.wait_for(lock, std::chrono::seconds(5), [this]{ return open_.load(); })) {
         getLogger().log("Connection timeout", Logger::Level::Error);
         return false;
     }
+    running_ = true;
     return true;
 }
 
