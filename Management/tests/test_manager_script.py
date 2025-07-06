@@ -5,6 +5,7 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
+from Management.app.core.database import engine as db_engine
 from Management.app.models.base import Base
 from Management.app.models.user import User
 from Management.scripts import manager
@@ -42,3 +43,38 @@ async def test_create_user_cli(anyio_backend):
         assert user.username == "cliuser"
 
     await engine.dispose()
+    await db_engine.dispose()
+
+
+@pytest.mark.anyio
+async def test_list_users_cli(anyio_backend, capsys):
+    engine = create_async_engine(os.environ["TEST_DATABASE_URL"])
+    async_session = async_sessionmaker(engine, expire_on_commit=False)
+
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
+
+    parser = manager.build_parser()
+    create_args = parser.parse_args(
+        [
+            "create_user",
+            "--username",
+            "listme",
+            "--password",
+            "Strong1!",
+            "--email",
+            "list@example.com",
+            "--role",
+            "reader",
+        ]
+    )
+    await create_args.func(create_args)
+
+    list_args = parser.parse_args(["list_users"])
+    await list_args.func(list_args)
+    out = capsys.readouterr().out
+    assert "listme" in out
+
+    await engine.dispose()
+    await db_engine.dispose()
