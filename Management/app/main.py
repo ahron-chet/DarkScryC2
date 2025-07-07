@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 
 from . import tasks
 from .core.database import init_db
@@ -8,7 +9,15 @@ from .middleware.rate_limit import RateLimitMiddleware
 from .routers import agents, auth, users
 
 settings = get_settings()
-app = FastAPI(title="Management API", debug=settings.debug)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_db()
+    await tasks.init_redis()
+    yield
+    await tasks.close_redis()
+
+
+app = FastAPI(title="Management API", debug=settings.debug, lifespan=lifespan)
 
 app.add_middleware(RateLimitMiddleware, max_requests=100, window=60)
 app.add_middleware(
@@ -19,16 +28,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-@app.on_event("startup")
-async def on_startup() -> None:
-    await init_db()
-    await tasks.init_redis()
-
-
-@app.on_event("shutdown")
-async def on_shutdown() -> None:
-    await tasks.close_redis()
 
 
 for router in [auth.router, users.router, agents.router]:
