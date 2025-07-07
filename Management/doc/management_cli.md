@@ -2,8 +2,11 @@
 
 The management CLI is exposed via the `manager` entrypoint defined in
 `pyproject.toml` under `[tool.poetry.scripts]`. The entrypoint maps to
-`app.scripts.manager:main`, so Poetry installs this script automatically and it
+`scripts.manager:main`, so Poetry installs this script automatically and it
 can be executed with `poetry run` from the repository root.
+
+The `scripts/` directory now lives at the top level of the Management package so
+CLI utilities can be maintained separately from the FastAPI application code.
 
 ```bash
 poetry -P Management run manager <command> [options]
