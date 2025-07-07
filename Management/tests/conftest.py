@@ -3,8 +3,6 @@ import sys
 
 import pytest
 
-
-
 # Ensure tests run exclusively against PostgreSQL
 try:
     test_db_url = os.environ["TEST_DATABASE_URL"]

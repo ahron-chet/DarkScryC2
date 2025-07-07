@@ -1,7 +1,7 @@
 import argparse
 import asyncio
 
-from ..core.database import AsyncSessionLocal
+from ..core.database import AsyncSessionLocal, init_db
 from ..schemas.user import UserCreate, UserRole
 from ..services.user_service import UserService
 
@@ -29,6 +29,12 @@ async def create_user_command(args: argparse.Namespace) -> None:
         print(f"Created user {user.username} with id {user.user_id}")
 
 
+async def init_db_command(args: argparse.Namespace) -> None:
+    """Initialize the database schema."""
+    await init_db()
+    print("Database initialized")
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Return the argument parser for the management CLI."""
     parser = argparse.ArgumentParser(description="Management CLI")
@@ -47,6 +53,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     list_users_parser = subparsers.add_parser("list_users", help="List all users")
     list_users_parser.set_defaults(func=list_users_command)
+
+    init_db_parser = subparsers.add_parser("init_db", help="Initialize database")
+    init_db_parser.set_defaults(func=init_db_command)
 
     return parser
 

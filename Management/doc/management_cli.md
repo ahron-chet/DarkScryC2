@@ -21,6 +21,14 @@ export MANAGEMENT_SECRET_KEY="change-me"
 
 ## Available commands
 
+### `init_db`
+
+Create all database tables. Run this once before other commands.
+
+```
+poetry -P Management run manager init_db
+```
+
 ### `create_user`
 
 Create a new user in the database.
