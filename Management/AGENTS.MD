@@ -96,7 +96,7 @@ Use **Poetry** for dependency management, strictly following Poetry's recommende
 Navigate to the `Management` directory, then run:
 
 ```bash
-poetry install --no-interaction --no-root
+poetry install --no-interaction
 ```
 
 * Every new feature or API endpoint **must include comprehensive tests**:
