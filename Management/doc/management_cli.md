@@ -12,6 +12,13 @@ CLI utilities can be maintained separately from the FastAPI application code.
 poetry -P Management run manager <command> [options]
 ```
 
+Database migrations are handled with **Alembic**. Common commands:
+
+```bash
+poetry -P Management run alembic revision --autogenerate -m "message"
+poetry -P Management run alembic upgrade head
+```
+
 Before running any command be sure the management backend environment variables
 are configured. At minimum set `MANAGEMENT_DATABASE_URL` and
 `MANAGEMENT_SECRET_KEY` (they can also be placed in your shell profile or a

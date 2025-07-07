@@ -91,6 +91,23 @@ Use **Poetry** for dependency management, strictly following Poetry's recommende
 
 ---
 
+## 📂 Database Migrations
+
+Use **Alembic** for version controlling the database schema.
+
+* Initialize the migrations directory with `poetry run alembic init migrations`.
+* Autogenerate new revisions whenever models change:
+
+```bash
+poetry run alembic revision --autogenerate -m "Describe change"
+```
+
+* Apply migrations with `poetry run alembic upgrade head` and roll them back with `poetry run alembic downgrade -1`.
+
+Store the `migrations/` directory at the project root alongside `alembic.ini`.
+
+---
+
 ## 🧪 Testing Guidelines
 
 Navigate to the `Management` directory, then run:
