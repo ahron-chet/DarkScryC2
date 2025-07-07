@@ -10,7 +10,7 @@ This document describes how to set up the FastAPI Management backend.
 3. Configure environment variables as described in `.env.example`.
 4. Run the application:
    ```bash
-   poetry run uvicorn app:create_app --reload
+   poetry run uvicorn app.main:app --reload
    ```
 
 Tests can be executed with:
