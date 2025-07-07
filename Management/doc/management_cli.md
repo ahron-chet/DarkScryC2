@@ -1,13 +1,11 @@
 # Management CLI
 
-`Management/scripts/manager.py` exposes a small command line interface for user
-administration. Because the script uses package-relative imports it must be
-executed as a module from the project root so that the `Management` package is
-on the Python path.
+The management CLI is exposed via the `manager` entrypoint defined in
+`pyproject.toml` under `[tool.poetry.scripts]`. Poetry installs this script
+automatically so it can be executed with `poetry run` from the repository root.
 
 ```bash
-# from the repository root
-poetry -P Management run python -m Management.scripts.manager <command> [options]
+poetry -P Management run manager <command> [options]
 ```
 
 Before running any command be sure the management backend environment variables
@@ -27,7 +25,7 @@ export MANAGEMENT_SECRET_KEY="change-me"
 Create a new user in the database.
 
 ```
-poetry -P Management run python -m Management.scripts.manager create_user \
+poetry -P Management run manager create_user \
   --username alice --password Strong1! \
   --email alice@example.com --role reader
 ```
@@ -37,7 +35,7 @@ poetry -P Management run python -m Management.scripts.manager create_user \
 List all users and their roles. No additional arguments are required:
 
 ```
-poetry -P Management run python -m Management.scripts.manager list_users
+poetry -P Management run manager list_users
 ```
 
 ## Extending the CLI

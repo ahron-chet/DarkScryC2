@@ -1,9 +1,9 @@
 import argparse
 import asyncio
 
-from ..app.core.database import AsyncSessionLocal
-from ..app.schemas.user import UserCreate, UserRole
-from ..app.services.user_service import UserService
+from ..core.database import AsyncSessionLocal
+from ..schemas.user import UserCreate, UserRole
+from ..services.user_service import UserService
 
 
 async def list_users_command(args: argparse.Namespace) -> None:

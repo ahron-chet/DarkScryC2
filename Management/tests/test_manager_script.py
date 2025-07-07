@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from app.core.database import engine as db_engine
 from app.models.base import Base
 from app.models.user import User
-from scripts import manager
+from app.scripts import manager
 
 
 @pytest.mark.anyio
