@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     refresh_token_expire_days: int = Field(
         9, description="Refresh token expiration window in days"
     )
+    cors_origins: list[str] = Field([], description="Allowed CORS origins")
 
     model_config = {
         "env_file": None,
@@ -42,6 +43,8 @@ def get_settings() -> Settings:
 
     access_minutes = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "15"))
     refresh_days = int(os.getenv("JWT_REFRESH_TOKEN_EXPIRE_DAYS", "9"))
+    cors_env = os.getenv("MANAGEMENT_CORS_ORIGINS", "")
+    cors_origins = [c.strip() for c in cors_env.split(",") if c.strip()]
 
     return Settings(
         database_url=db_url,
@@ -49,4 +52,5 @@ def get_settings() -> Settings:
         debug=debug,
         access_token_expire_minutes=access_minutes,
         refresh_token_expire_days=refresh_days,
+        cors_origins=cors_origins,
     )
