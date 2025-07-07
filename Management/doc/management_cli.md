@@ -1,10 +1,23 @@
 # Management CLI
 
 `Management/scripts/manager.py` exposes a small command line interface for user
-administration. Run it with Poetry:
+administration. Because the script uses package-relative imports it must be
+executed as a module from the project root so that the `Management` package is
+on the Python path.
 
 ```bash
-poetry run python Management/scripts/manager.py <command> [options]
+# from the repository root
+poetry -P Management run python -m Management.scripts.manager <command> [options]
+```
+
+Before running any command be sure the management backend environment variables
+are configured. At minimum set `MANAGEMENT_DATABASE_URL` and
+`MANAGEMENT_SECRET_KEY` (they can also be placed in your shell profile or a
+`.env` file that you load manually):
+
+```bash
+export MANAGEMENT_DATABASE_URL="postgresql+asyncpg://user:pass@localhost/db"
+export MANAGEMENT_SECRET_KEY="change-me"
 ```
 
 ## Available commands
@@ -14,7 +27,7 @@ poetry run python Management/scripts/manager.py <command> [options]
 Create a new user in the database.
 
 ```
-poetry run python Management/scripts/manager.py create_user \
+poetry -P Management run python -m Management.scripts.manager create_user \
   --username alice --password Strong1! \
   --email alice@example.com --role reader
 ```
@@ -24,7 +37,7 @@ poetry run python Management/scripts/manager.py create_user \
 List all users and their roles. No additional arguments are required:
 
 ```
-poetry run python Management/scripts/manager.py list_users
+poetry -P Management run python -m Management.scripts.manager list_users
 ```
 
 ## Extending the CLI
