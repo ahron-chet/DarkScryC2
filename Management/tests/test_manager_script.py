@@ -78,3 +78,22 @@ async def test_list_users_cli(anyio_backend, capsys):
 
     await engine.dispose()
     await db_engine.dispose()
+
+
+@pytest.mark.anyio
+async def test_init_db_cli(anyio_backend):
+    engine = create_async_engine(os.environ["TEST_DATABASE_URL"])
+    async_session = async_sessionmaker(engine, expire_on_commit=False)
+
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+
+    parser = manager.build_parser()
+    init_args = parser.parse_args(["init_db"])
+    await init_args.func(init_args)
+
+    async with async_session() as session:
+        await session.execute(select(User))
+
+    await engine.dispose()
+    await db_engine.dispose()
