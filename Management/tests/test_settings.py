@@ -1,6 +1,6 @@
 import pytest
 
-from Management.app.core.settings import get_settings
+from app.core.settings import get_settings
 
 
 def test_settings_require_vars(monkeypatch):

@@ -3,10 +3,10 @@ import os
 import pytest
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-from Management.app.models.base import Base
-from Management.app.models.user import UserRole
-from Management.app.schemas.user import UserCreate, UserUpdate
-from Management.app.services.user_service import UserService
+from app.models.base import Base
+from app.models.user import UserRole
+from app.schemas.user import UserCreate, UserUpdate
+from app.services.user_service import UserService
 
 
 @pytest.mark.anyio

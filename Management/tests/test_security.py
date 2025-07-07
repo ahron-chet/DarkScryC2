@@ -8,13 +8,13 @@ os.environ.setdefault("MANAGEMENT_SECRET_KEY", "secret")
 import pytest
 from fastapi import HTTPException
 
-from Management.app.core.security import (
+from app.core.security import (
     create_access_token,
     create_refresh_token,
     required_role,
     validate_password_complexity,
 )
-from Management.app.models.user import User, UserRole
+from app.models.user import User, UserRole
 
 
 def test_create_access_token():

@@ -6,8 +6,8 @@ os.environ.setdefault(
 )
 os.environ.setdefault("MANAGEMENT_SECRET_KEY", "secret")
 
-from Management.app.models.agent import Agent
-from Management.app.models.user import User
+from app.models.agent import Agent
+from app.models.user import User
 
 
 def test_models_have_tables():

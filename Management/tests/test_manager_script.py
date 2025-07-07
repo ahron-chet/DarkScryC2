@@ -5,10 +5,10 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-from Management.app.core.database import engine as db_engine
-from Management.app.models.base import Base
-from Management.app.models.user import User
-from Management.scripts import manager
+from app.core.database import engine as db_engine
+from app.models.base import Base
+from app.models.user import User
+from scripts import manager
 
 
 @pytest.mark.anyio

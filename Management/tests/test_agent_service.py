@@ -3,10 +3,9 @@ import os
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from Management.app.models.agent import Agent
-from Management.app.models.base import Base
-from Management.app.schemas.agent import AgentCreate
-from Management.app.services.agent_service import AgentService
+from app.models.base import Base
+from app.schemas.agent import AgentCreate
+from app.services.agent_service import AgentService
 
 
 @pytest.mark.anyio
