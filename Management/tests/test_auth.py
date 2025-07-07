@@ -42,3 +42,29 @@ async def test_auth_flow(client: AsyncClient, db_session):
 async def test_protected_endpoint_requires_auth(client: AsyncClient):
     resp = await client.get("/users/")
     assert resp.status_code == 403
+
+
+async def test_inactive_user_token_forbidden(client: AsyncClient, db_session):
+    service = UserService()
+    user = await service.create(
+        db_session,
+        UserCreate(
+            username="inactive",
+            password="Str0ng!Pass",
+            email="inactive@example.com",
+            role=UserRole.ADMIN,
+        ),
+    )
+
+    login = await client.post(
+        "/auth/login",
+        json={"username": "inactive", "password": "Str0ng!Pass"},
+    )
+    token = login.json()["access_token"]
+
+    user.is_active = False
+    await db_session.commit()
+
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = await client.get("/users/", headers=headers)
+    assert resp.status_code == 403
