@@ -44,7 +44,6 @@ poetry run manager init_db
 Create a new user in the database.
 
 ```
-poetry -P Management run manager create_user \
 poetry run manager create_user \
   --username alice --password Strong1! \
   --email alice@example.com --role reader
