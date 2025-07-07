@@ -33,4 +33,4 @@ build-backend = "poetry.core.masonry.api"
 profile = "black"
 
 [tool.poetry.scripts]
-manager = "app.scripts.manager:main"
+manager = "scripts.manager:main"
