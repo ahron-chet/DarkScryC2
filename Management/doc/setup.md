@@ -13,6 +13,10 @@ This document describes how to set up the FastAPI Management backend.
    ```bash
    poetry run uvicorn app.main:app --reload
    ```
+5. Run database migrations:
+   ```bash
+   poetry run alembic upgrade head
+   ```
 
 Tests can be executed with:
 ```bash
