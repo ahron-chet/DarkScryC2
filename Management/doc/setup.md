@@ -8,6 +8,7 @@ This document describes how to set up the FastAPI Management backend.
    poetry install
    ```
 3. Configure environment variables as described in `.env.example`.
+   - `MANAGEMENT_CORS_ORIGINS` comma-separated list of allowed CORS origins
 4. Run the application:
    ```bash
    poetry run uvicorn app.main:app --reload
