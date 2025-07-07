@@ -7,7 +7,8 @@ from .settings import get_settings
 
 settings = get_settings()
 db_url = settings.database_url
-engine = create_async_engine(db_url, echo=settings.debug)
+# engine = create_async_engine(db_url, echo=settings.debug)
+engine = create_async_engine(db_url)
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
 
