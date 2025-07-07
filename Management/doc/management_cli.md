@@ -9,14 +9,14 @@ The `scripts/` directory now lives at the top level of the Management package so
 CLI utilities can be maintained separately from the FastAPI application code.
 
 ```bash
-poetry -P Management run manager <command> [options]
+poetry run manager <command> [options]
 ```
 
 Database migrations are handled with **Alembic**. Common commands:
 
 ```bash
-poetry -P Management run alembic revision --autogenerate -m "message"
-poetry -P Management run alembic upgrade head
+poetry run alembic revision --autogenerate -m "message"
+poetry run alembic upgrade head
 ```
 
 Before running any command be sure the management backend environment variables
@@ -36,7 +36,7 @@ export MANAGEMENT_SECRET_KEY="change-me"
 Create all database tables. Run this once before other commands.
 
 ```
-poetry -P Management run manager init_db
+poetry run manager init_db
 ```
 
 ### `create_user`
@@ -45,6 +45,7 @@ Create a new user in the database.
 
 ```
 poetry -P Management run manager create_user \
+poetry run manager create_user \
   --username alice --password Strong1! \
   --email alice@example.com --role reader
 ```
@@ -54,7 +55,7 @@ poetry -P Management run manager create_user \
 List all users and their roles. No additional arguments are required:
 
 ```
-poetry -P Management run manager list_users
+poetry run manager list_users
 ```
 
 ## Extending the CLI
