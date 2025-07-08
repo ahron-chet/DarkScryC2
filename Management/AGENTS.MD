@@ -74,6 +74,7 @@ When creating API endpoints, all schemas must be explicitly defined, validated, 
 * Secure sensitive endpoints properly using authentication and permission checks.
 * **Configurations and secrets** (JWT keys, database URIs, etc.) must be loaded securely via environment variables (`os.getenv`).
 * Centralize environment configuration in a dedicated `settings.py` file, leveraging `Pydantic BaseSettings`.
+* Document every new environment variable in `doc/settings.md` and add it to `Management/.env.example`.
 * Optimize database queries proactively to avoid the N+1 problem using appropriate loading techniques (e.g., `.options(selectinload(...))`).
 * Ensure asynchronous operations throughout the backend; avoid any synchronous database or I/O calls.
 
