@@ -39,12 +39,14 @@ def get_password_hash(password: str) -> str:
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     settings = get_settings()
     to_encode = data.copy()
-    expire = datetime.now(UTC) + (
+    now = datetime.now(UTC)
+    expire = now + (
         expires_delta or timedelta(minutes=settings.access_token_expire_minutes)
     )
     to_encode.update(
         {
             "exp": expire,
+            "iat": now,
             "iss": settings.jwt_issuer,
             "aud": settings.jwt_audience,
             "jti": str(uuid.uuid4()),
@@ -56,12 +58,12 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
 def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     settings = get_settings()
     to_encode = data.copy()
-    expire = datetime.now(UTC) + (
-        expires_delta or timedelta(days=settings.refresh_token_expire_days)
-    )
+    now = datetime.now(UTC)
+    expire = now + (expires_delta or timedelta(days=settings.refresh_token_expire_days))
     to_encode.update(
         {
             "exp": expire,
+            "iat": now,
             "iss": settings.jwt_issuer,
             "aud": settings.jwt_audience,
             "jti": str(uuid.uuid4()),
