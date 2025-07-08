@@ -32,7 +32,11 @@ async def refresh_token(data: RefreshTokenRequest) -> Token:
     settings = get_settings()
     try:
         payload = jwt.decode(
-            data.refresh_token, settings.secret_key, algorithms=["HS256"]
+            data.refresh_token,
+            settings.secret_key,
+            algorithms=["HS256"],
+            issuer=settings.jwt_issuer,
+            audience=settings.jwt_audience,
         )
         user_id = payload.get("sub")
         if user_id is None:

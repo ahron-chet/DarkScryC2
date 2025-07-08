@@ -42,7 +42,14 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     expire = datetime.now(UTC) + (
         expires_delta or timedelta(minutes=settings.access_token_expire_minutes)
     )
-    to_encode.update({"exp": expire})
+    to_encode.update(
+        {
+            "exp": expire,
+            "iss": settings.jwt_issuer,
+            "aud": settings.jwt_audience,
+            "jti": str(uuid.uuid4()),
+        }
+    )
     return jwt.encode(to_encode, settings.secret_key, algorithm="HS256")
 
 
@@ -52,7 +59,14 @@ def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None) 
     expire = datetime.now(UTC) + (
         expires_delta or timedelta(days=settings.refresh_token_expire_days)
     )
-    to_encode.update({"exp": expire})
+    to_encode.update(
+        {
+            "exp": expire,
+            "iss": settings.jwt_issuer,
+            "aud": settings.jwt_audience,
+            "jti": str(uuid.uuid4()),
+        }
+    )
     return jwt.encode(to_encode, settings.secret_key, algorithm="HS256")
 
 
@@ -63,7 +77,13 @@ async def get_current_user(
     settings = get_settings()
     token = credentials.credentials
     try:
-        payload = jwt.decode(token, settings.secret_key, algorithms=["HS256"])
+        payload = jwt.decode(
+            token,
+            settings.secret_key,
+            algorithms=["HS256"],
+            issuer=settings.jwt_issuer,
+            audience=settings.jwt_audience,
+        )
         user_id = payload.get("sub")
         if user_id is None:
             raise JWTError()
