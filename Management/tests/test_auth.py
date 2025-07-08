@@ -1,10 +1,9 @@
 import pytest
-from httpx import AsyncClient
-from jose import jwt
-
 from app.core.settings import get_settings
 from app.schemas.user import UserCreate, UserRole
 from app.services.user_service import UserService
+from httpx import AsyncClient
+from jose import jwt
 
 pytestmark = pytest.mark.anyio
 
@@ -40,6 +39,16 @@ async def test_auth_flow(client: AsyncClient, db_session):
     assert payload["iss"] == settings.jwt_issuer
     assert payload["aud"] == settings.jwt_audience
     assert payload.get("jti")
+    assert payload.get("iat")
+
+    refresh_payload = jwt.decode(
+        tokens["refresh_token"],
+        settings.secret_key,
+        algorithms=["HS256"],
+        issuer=settings.jwt_issuer,
+        audience=settings.jwt_audience,
+    )
+    assert refresh_payload.get("iat")
 
     refresh = await client.post(
         "/auth/refresh", json={"refresh_token": tokens["refresh_token"]}
