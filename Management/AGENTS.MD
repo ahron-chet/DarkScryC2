@@ -120,7 +120,7 @@ poetry install --no-interaction
 
   * Place tests within `Management/tests/`.
   * Ensure tests cover both successful and edge/error scenarios.
-  * Use the provided `TEST_DATABASE_URL` environment variable pointing to a dedicated PostgreSQL test database for running tests. **SQLite must never be used, even for tests.**
+  * Use the provided `TEST_DATABASE_URL` (it was initialed on your container) environment variable pointing to a dedicated PostgreSQL test database for running tests. **SQLite must never be used, even for tests.**
 
 * Always run tests locally before committing code:
 
