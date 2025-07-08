@@ -26,13 +26,19 @@ This `Management` directory contains the FastAPI implementation intended to repl
 * Organize code into modular directories clearly:
 
 ```
-Management/app/
-├── core/
-├── models/
-├── schemas/
-├── routers/
-├── controllers/
-└── services/
+Management
+├── app
+│   ├── controllers
+│   ├── core
+│   ├── middleware
+│   ├── models
+│   ├── routers
+│   ├── schemas
+│   └── services
+├── doc
+├── migrations
+├── scripts
+└── tests
 ```
 
 * Place **CRUD operations** and business logic within clearly defined, domain-specific service classes:
