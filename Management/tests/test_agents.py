@@ -1,90 +1,58 @@
 import pytest
 from httpx import AsyncClient
 
-from app.schemas.user import UserCreate, UserRole
-from app.services.user_service import UserService
+from app.models.user import UserRole
 
 pytestmark = pytest.mark.anyio
 
 
-async def test_agent_routes_crud_and_permissions(client: AsyncClient, db_session):
-    service = UserService()
-    await service.create(
-        db_session,
-        UserCreate(
-            username="admin",
-            password="Str0ng!Pass",
-            email="admin@example.com",
-            role=UserRole.ADMIN,
-        ),
-    )
-    await service.create(
-        db_session,
-        UserCreate(
-            username="op",
-            password="Str0ng!Pass",
-            email="op@example.com",
-            role=UserRole.OPERATOR,
-        ),
-    )
-    await service.create(
-        db_session,
-        UserCreate(
-            username="reader",
-            password="Str0ng!Pass",
-            email="reader@example.com",
-            role=UserRole.READER,
-        ),
-    )
+def _auth(token: str) -> dict[str, str]:
+    return {"Authorization": f"Bearer {token}"}
 
-    admin_token = (
-        await client.post(
-            "/auth/login", json={"username": "admin", "password": "Str0ng!Pass"}
-        )
-    ).json()["access_token"]
-    op_token = (
-        await client.post(
-            "/auth/login", json={"username": "op", "password": "Str0ng!Pass"}
-        )
-    ).json()["access_token"]
-    reader_token = (
-        await client.post(
-            "/auth/login", json={"username": "reader", "password": "Str0ng!Pass"}
-        )
-    ).json()["access_token"]
 
-    headers_admin = {"Authorization": f"Bearer {admin_token}"}
-    headers_op = {"Authorization": f"Bearer {op_token}"}
-    headers_reader = {"Authorization": f"Bearer {reader_token}"}
+async def test_operator_can_manage_agents(
+    client: AsyncClient, create_test_user, get_token
+):
+    await create_test_user("admin", UserRole.ADMIN)
+    await create_test_user("op", UserRole.OPERATOR)
+    admin_token = await get_token("admin")
+    op_token = await get_token("op")
 
     resp = await client.post(
         "/agents/",
         json={"host_name": "host1", "os": "linux"},
-        headers=headers_op,
+        headers=_auth(op_token),
     )
     assert resp.status_code == 201
     agent_id = resp.json()["agent_id"]
 
-    resp = await client.post(
-        "/agents/",
-        json={"host_name": "bad", "os": "linux"},
-        headers=headers_reader,
-    )
-    assert resp.status_code == 403
-
-    resp = await client.get("/agents/", headers=headers_op)
-    assert resp.status_code == 200
-
-    resp = await client.get(f"/agents/{agent_id}", headers=headers_op)
+    resp = await client.get(f"/agents/{agent_id}", headers=_auth(op_token))
     assert resp.status_code == 200
 
     resp = await client.put(
         f"/agents/{agent_id}",
         json={"host_name": "host2"},
-        headers=headers_op,
+        headers=_auth(op_token),
     )
     assert resp.status_code == 200
     assert resp.json()["host_name"] == "host2"
 
-    resp = await client.delete(f"/agents/{agent_id}", headers=headers_admin)
+    resp = await client.delete(f"/agents/{agent_id}", headers=_auth(admin_token))
     assert resp.status_code == 200
+    resp = await client.get(f"/agents/{agent_id}", headers=_auth(op_token))
+    assert resp.status_code == 404
+
+
+async def test_reader_cannot_create_agent(
+    client: AsyncClient, create_test_user, get_token
+):
+    await create_test_user("op", UserRole.OPERATOR)
+    await create_test_user("reader", UserRole.READER)
+    reader_token = await get_token("reader")
+
+    resp = await client.post(
+        "/agents/",
+        json={"host_name": "bad", "os": "linux"},
+        headers=_auth(reader_token),
+    )
+    assert resp.status_code == 403
