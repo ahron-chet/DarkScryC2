@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime, timezone
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -46,8 +47,15 @@ class UserService:
         result = await db.execute(select(User).where(User.username == username))
         user = result.scalar_one_or_none()
         if user and user.is_active and verify_password(password, user.password):
+            await self.update_last_login(db, user)
             return user
         return None
+
+    async def update_last_login(self, db: AsyncSession, user: User) -> None:
+        """Record the time of a successful login."""
+        user.last_login = datetime.now(timezone.utc)
+        await db.commit()
+        await db.refresh(user)
 
     async def get(self, db: AsyncSession, user_id: uuid.UUID) -> User | None:
         """Retrieve a user by their public ID."""

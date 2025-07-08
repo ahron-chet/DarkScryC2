@@ -1,16 +1,17 @@
 import pytest
+from httpx import AsyncClient
+from jose import jwt
+
 from app.core.settings import get_settings
 from app.schemas.user import UserCreate, UserRole
 from app.services.user_service import UserService
-from httpx import AsyncClient
-from jose import jwt
 
 pytestmark = pytest.mark.anyio
 
 
 async def test_auth_flow(client: AsyncClient, db_session):
     service = UserService()
-    await service.create(
+    user = await service.create(
         db_session,
         UserCreate(
             username="admin",
@@ -59,6 +60,10 @@ async def test_auth_flow(client: AsyncClient, db_session):
     headers = {"Authorization": f"Bearer {new_access}"}
     resp2 = await client.get("/users/", headers=headers)
     assert resp2.status_code == 200
+
+    await db_session.commit()
+    await db_session.refresh(user)
+    assert user.last_login is not None
 
 
 async def test_protected_endpoint_requires_auth(client: AsyncClient):
