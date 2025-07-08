@@ -50,3 +50,23 @@ async def db_session(prepare_database):
     _, async_session = prepare_database
     async with async_session() as session:
         yield session
+
+
+@pytest.fixture()
+async def create_test_user(db_session):
+    from tests.helpers import create_user
+
+    async def _creator(username: str, role, password: str = "Str0ng!Pass"):
+        return await create_user(db_session, username, password, role)
+
+    return _creator
+
+
+@pytest.fixture()
+async def get_token(client: AsyncClient):
+    from tests.helpers import login
+
+    async def _get(username: str, password: str = "Str0ng!Pass") -> str:
+        return await login(client, username, password)
+
+    return _get
