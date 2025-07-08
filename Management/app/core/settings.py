@@ -9,9 +9,21 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     """Application configuration loaded from environment variables."""
 
-    database_url: str = Field(..., description="Database connection URL")
-    secret_key: str = Field(..., description="JWT signing secret")
-    debug: bool = Field(False, description="Enable debug mode")
+    database_url: str = Field(
+        ..., 
+        description="Database connection URL", 
+        validation_alias="DATABASE_URL"
+    )
+    secret_key: str = Field(
+        ..., 
+        description="JWT signing secret", 
+        validation_alias="SECRET_KEY"
+    )
+    debug: bool = Field(
+        False, 
+        description="Enable debug mode", 
+        validation_alias="DEBUG"
+    )
     access_token_expire_minutes: int = Field(
         15,
         description="Access token expiration window in minutes",
@@ -32,15 +44,35 @@ class Settings(BaseSettings):
         description="Expected audience claim for JWTs",
         validation_alias="JWT_AUDIENCE",
     )
-    cors_origins: list[str] = Field([], description="Allowed CORS origins")
+    cors_origins: list[str] = Field(
+        [],
+        description="Allowed CORS origins",
+        validation_alias="CORS_ORIGINS"
+    )
 
     # Redis connection settings used for background task queue
-    redis_host: str = Field("redis", description="Redis server hostname")
-    redis_port: int = Field(6379, description="Redis server port")
-    redis_password: str | None = Field(None, description="Redis password")
-    arq_redis_db: int = Field(4, description="Database index for ARQ tasks")
+    redis_host: str = Field(
+        "redis", 
+        description="Redis server hostname",
+        validation_alias="REDIS_HOST"
+    )
+    redis_port: int = Field(
+        6379, 
+        description="Redis server port",
+        validation_alias="REDIS_PORT"
+    )
+    redis_password: str | None = Field(
+        None, 
+        description="Redis password",
+        validation_alias="REDIS_PASSWORD"
+    )
+    arq_redis_db: int = Field(
+        4, 
+        description="Database index for ARQ tasks",
+        validation_alias="ARQ_REDIS_DB"
+    )
 
-    model_config = ConfigDict(env_file=None, extra="ignore", env_prefix="MANAGEMENT_")
+    model_config = ConfigDict(env_file=None, extra="ignore", env_prefix="MANAGEMENT_", populate_by_name=True)
 
     @field_validator("cors_origins", mode="before")
     @classmethod
@@ -49,9 +81,15 @@ class Settings(BaseSettings):
             return [c.strip() for c in v.split(",") if c.strip()]
         return v
 
-
 @lru_cache()
 def get_settings() -> Settings:
     """Return application settings or raise if required variables are missing."""
 
-    return Settings()
+    settings = Settings()
+    if settings.debug:
+        settings.access_token_expire_minutes = 60 * 24
+
+    return settings
+
+
+

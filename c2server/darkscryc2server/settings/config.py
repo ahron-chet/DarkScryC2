@@ -4,17 +4,18 @@ import os
 import queue
 from logging.handlers import QueueHandler, QueueListener
 from ..Utils import getenv_nonempty
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 
 APP_NAME = 'DarkScryC2Server'
-ENV_FILE = "/env/c2server.env" #os.path.abspath(os.path.join(os.path.dirname(__file__), '../../.env'))
+ENV_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../.env'))
 
 # Load .env file
-# if not os.path.isfile(ENV_FILE):
-#     print(f"Environment file {ENV_FILE} does not exist.")
-#     sys.exit(1)
+if os.getenv('C2_DEBUG', 'false').upper() == "TRUE":
+    if not os.path.isfile(ENV_FILE):
+        print(f"Environment file {ENV_FILE} does not exist.")
+        sys.exit(1)
 
-# load_dotenv(ENV_FILE)
+    load_dotenv(ENV_FILE)
 
 # Logger setup
 internalapplogger = logging.getLogger(APP_NAME)
