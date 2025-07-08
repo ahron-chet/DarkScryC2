@@ -22,6 +22,16 @@ class Settings(BaseSettings):
         description="Refresh token expiration window in days",
         validation_alias="JWT_REFRESH_TOKEN_EXPIRE_DAYS",
     )
+    jwt_issuer: str = Field(
+        "management",
+        description="Expected issuer claim for JWTs",
+        validation_alias="JWT_ISSUER",
+    )
+    jwt_audience: str = Field(
+        "management-client",
+        description="Expected audience claim for JWTs",
+        validation_alias="JWT_AUDIENCE",
+    )
     cors_origins: list[str] = Field([], description="Allowed CORS origins")
 
     model_config = ConfigDict(env_file=None, extra="ignore", env_prefix="MANAGEMENT_")
