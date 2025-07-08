@@ -106,6 +106,14 @@ poetry run alembic revision --autogenerate -m "Describe change"
 
 Store the `migrations/` directory at the project root alongside `alembic.ini`.
 
+## 🕹️ Background Tasks with ARQ
+
+* Place asynchronous task functions in `app/tasks.py`.
+* Use `app.utils.tasks.get_task_executor()` to enqueue jobs from services.
+* Call `close_task_executors()` when shutting down the application to close the Redis connection gracefully.
+* In tests, patch `app.utils.tasks.get_task_executor` to return a fake executor instead of connecting to Redis.
+
+
 ---
 
 ## 🧪 Testing Guidelines

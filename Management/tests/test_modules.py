@@ -1,0 +1,89 @@
+import uuid
+
+import pytest
+from httpx import AsyncClient
+
+from app.models.user import UserRole
+
+pytestmark = pytest.mark.anyio
+
+
+def _auth(token: str) -> dict[str, str]:
+    return {"Authorization": f"Bearer {token}"}
+
+
+async def test_execution_and_collection_modules(
+    client: AsyncClient, create_test_user, get_token, monkeypatch
+):
+    await create_test_user("op", UserRole.OPERATOR)
+    token = await get_token("op")
+
+    resp = await client.post(
+        "/agents/",
+        json={"host_name": "host", "os": "linux"},
+        headers=_auth(token),
+    )
+    agent_id = resp.json()["agent_id"]
+
+    async def fake_remote_send_command(**kwargs):
+        from darkscryc2server.Models.remote_tools_schemas import ManagerResponse
+
+        return ManagerResponse(success=True, data={"result": "ok"})
+
+    monkeypatch.setattr(
+        "darkscryc2server.Utils.remote_utils.commands.remote_send_command",
+        fake_remote_send_command,
+    )
+    monkeypatch.setattr(
+        "app.services.modules.execution.remote_send_command",
+        fake_remote_send_command,
+    )
+    monkeypatch.setattr(
+        "app.services.modules.collection.remote_send_command",
+        fake_remote_send_command,
+    )
+
+    class DummyExecutor:
+        async def enqueue_job(self, *args, **kwargs):
+            class Job:
+                job_id = str(uuid.uuid4())
+
+            return Job()
+
+    async def fake_get_executor():
+        return DummyExecutor()
+
+    monkeypatch.setattr(
+        "app.utils.tasks.get_task_executor",
+        fake_get_executor,
+    )
+    monkeypatch.setattr(
+        "app.services.modules.execution.get_task_executor",
+        fake_get_executor,
+    )
+    monkeypatch.setattr(
+        "app.services.modules.collection.get_task_executor",
+        fake_get_executor,
+    )
+
+    resp = await client.post(
+        f"/agents/{agent_id}/modules/execution/shell/run_command",
+        json={"command": "whoami"},
+        headers=_auth(token),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["success"] is True
+
+    resp = await client.get(
+        f"/agents/{agent_id}/modules/execution/shell/start_shell",
+        headers=_auth(token),
+    )
+    assert resp.status_code == 200
+    assert "task_id" in resp.json()
+
+    resp = await client.get(
+        f"/agents/{agent_id}/modules/collection/machine/basic_machine_info",
+        headers=_auth(token),
+    )
+    assert resp.status_code == 200
+    assert "task_id" in resp.json()

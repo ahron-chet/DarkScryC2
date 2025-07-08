@@ -33,6 +33,13 @@ class UserRoutes(UserController):
     async def list(self) -> List[UserRead]:
         return await self.list_users()
 
+    @router.put("/me", response_model=UserRead)
+    async def update_me(
+        self, user_in: UserUpdate, current_user: User = Depends(get_current_user)
+    ) -> UserRead:
+        """Allow a user to update their own account."""
+        return await self.update_user(current_user.user_id, user_in)
+
     @router.get("/{user_id}", response_model=UserRead)
     async def read(self, user_id: uuid.UUID) -> UserRead:
         return await self.get_user(user_id)
@@ -44,13 +51,6 @@ class UserRoutes(UserController):
     )
     async def update(self, user_id: uuid.UUID, user_in: UserUpdate) -> UserRead:
         return await self.update_user(user_id, user_in)
-
-    @router.put("/me", response_model=UserRead)
-    async def update_me(
-        self, user_in: UserUpdate, current_user: User = Depends(get_current_user)
-    ) -> UserRead:
-        """Allow a user to update their own account."""
-        return await self.update_user(current_user.user_id, user_in)
 
     @router.delete(
         "/{user_id}",

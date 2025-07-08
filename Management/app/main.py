@@ -5,7 +5,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .core.database import init_db
 from .core.settings import get_settings
-from .routers import agents, auth, users
+from .routers import agents, auth, modules, users
+from .utils.tasks import close_task_executors
 
 settings = get_settings()
 
@@ -14,6 +15,7 @@ settings = get_settings()
 async def lifespan(app: FastAPI):
     await init_db()
     yield
+    await close_task_executors()
 
 
 app = FastAPI(title="Management API", debug=settings.debug, lifespan=lifespan)
@@ -30,3 +32,4 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(agents.router)
+app.include_router(modules.router)

@@ -34,6 +34,12 @@ class Settings(BaseSettings):
     )
     cors_origins: list[str] = Field([], description="Allowed CORS origins")
 
+    # Redis connection settings used for background task queue
+    redis_host: str = Field("redis", description="Redis server hostname")
+    redis_port: int = Field(6379, description="Redis server port")
+    redis_password: str | None = Field(None, description="Redis password")
+    arq_redis_db: int = Field(4, description="Database index for ARQ tasks")
+
     model_config = ConfigDict(env_file=None, extra="ignore", env_prefix="MANAGEMENT_")
 
     @field_validator("cors_origins", mode="before")
