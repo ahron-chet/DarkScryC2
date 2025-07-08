@@ -71,3 +71,35 @@ async def test_operator_cannot_create_user(
         headers=_auth_header(op_token),
     )
     assert resp.status_code == 403
+
+
+async def test_user_can_update_self(client: AsyncClient, create_test_user, get_token):
+    await create_test_user("admin", UserRole.ADMIN)
+    await create_test_user("reader", UserRole.READER)
+    reader_token = await get_token("reader")
+
+    resp = await client.put(
+        "/users/me",
+        json={"first_name": "Self"},
+        headers=_auth_header(reader_token),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["first_name"] == "Self"
+
+
+async def test_user_cannot_update_other_user(
+    client: AsyncClient, create_test_user, get_token
+):
+    await create_test_user("admin", UserRole.ADMIN)
+    await create_test_user("reader", UserRole.READER)
+    admin_token = await get_token("admin")
+    reader_token = await get_token("reader")
+
+    admin_list = await client.get("/users/", headers=_auth_header(admin_token))
+    admin_id = next(u["user_id"] for u in admin_list.json() if u["username"] == "admin")
+    resp = await client.put(
+        f"/users/{admin_id}",
+        json={"first_name": "Bad"},
+        headers=_auth_header(reader_token),
+    )
+    assert resp.status_code == 403
