@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "darkscryc2server"
+version = "0.1.0"
+description = "Refactored C2 server with WebSocket and management API"
+authors = ["DarkScry Team"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+websockets = "^12.0"
+fastapi = "^0.110.0"
+uvicorn = "^0.29.0"
+redis = {extras = ["asyncio"], version = "^5.0.0"}
+pydantic = "^2.7.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.1"
+
+[build-system]
+requires = ["poetry-core>=1.6"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+runserver = "main:main"
