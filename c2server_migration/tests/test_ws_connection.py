@@ -9,7 +9,7 @@ os.environ.setdefault("C2_SERVER_HOST", "127.0.0.1")
 os.environ.setdefault("C2_SERVER_PORT", "9100")
 os.environ.setdefault("REDIS_URL", "redis://localhost")
 
-from darkscryc2server.models.protocol import WsConnection
+from darkscryc2server.connections.ws import WsConnection
 
 
 @pytest.mark.asyncio

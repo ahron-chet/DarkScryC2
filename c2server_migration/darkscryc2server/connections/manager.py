@@ -4,7 +4,7 @@ import asyncio
 from typing import Dict
 
 from .redis import RedisClient
-from ..models.protocol import WsConnection
+from .ws import WsConnection
 
 class ConnectionManager:
     def __init__(self, redis_url: str) -> None:
