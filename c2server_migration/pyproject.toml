@@ -13,6 +13,7 @@ uvicorn = "^0.29.0"
 redis = {extras = ["asyncio"], version = "^5.0.0"}
 pydantic = "^2.7.1"
 pydantic-settings = "^2.10.1"
+uvloop = "^0.21.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1"

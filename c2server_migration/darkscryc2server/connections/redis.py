@@ -1,6 +1,4 @@
-from __future__ import annotations
 
-import asyncio
 from redis.asyncio import Redis
 
 class RedisClient:
