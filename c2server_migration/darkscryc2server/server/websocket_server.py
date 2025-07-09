@@ -33,7 +33,8 @@ class WebSocketServer:
             await server.wait_closed()
 
     async def handle_ws(self, websocket: WebSocketServerProtocol) -> None:
-        conn = WsConnection(websocket=websocket, id=websocket.path.strip("/"))
+        agent_id = websocket.path.removeprefix("/agent/").strip("/")
+        conn = WsConnection(websocket=websocket, id=agent_id)
         await self.conn_manager.register(conn)
         try:
             await websocket.wait_closed()

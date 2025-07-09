@@ -27,7 +27,7 @@ async def test_send_and_receive():
     server = await websockets.serve(handler, "localhost", 0)
     port = server.sockets[0].getsockname()[1]
     async with server:
-        async with websockets.connect(f"ws://localhost:{port}/a1") as ws:
+        async with websockets.connect(f"ws://localhost:{port}/agent/a1") as ws:
             msg = await ws.recv()
             assert msg == "ping"
             await ws.send("pong")

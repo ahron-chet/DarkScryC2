@@ -25,6 +25,13 @@ automatically for better performance:
 python main.py
 ```
 
+Agents should connect via WebSocket to `/agent/<id>` where `<id>` is a unique
+identifier for the agent. For example:
+
+```bash
+websocat ws://localhost:876/agent/agent123
+```
+
 ### Management WebSocket
 
 The management API exposes `/manager_ws` for interactive control. Example usage
