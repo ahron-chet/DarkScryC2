@@ -7,7 +7,7 @@ from websockets.server import WebSocketServerProtocol
 
 from ..config.settings import settings
 from ..connections.manager import ConnectionManager
-from ..models.protocol import WsConnection
+from ..connections.ws import WsConnection
 
 
 class WebSocketServer:
