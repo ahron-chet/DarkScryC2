@@ -20,10 +20,10 @@ class DummyManager:
     def __init__(self):
         self.connections = {"agent1": DummyConn()}
 
-    def get(self, id_):
+    async def get(self, id_):
         return self.connections.get(id_)
 
-    def list_all(self):
+    async def list_all(self):
         return self.connections
 
 
@@ -36,6 +36,7 @@ from darkscryc2server.core.connection import ConnectionManager
 
 def test_manager_ws_get_connections():
     app.dependency_overrides[ConnectionManager] = override_manager
+    app.state.conn_manager = override_manager()
     client = TestClient(app)
     with client.websocket_connect("/manager_ws") as ws:
         ws.send_json({"action": "get_connections"})
@@ -47,3 +48,4 @@ def test_manager_ws_get_connections():
         resp2 = ws.receive_json()
         assert resp2["data"]["result"] == "ok:cmd"
     app.dependency_overrides.clear()
+    app.state.conn_manager = None

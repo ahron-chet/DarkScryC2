@@ -25,10 +25,10 @@ class DummyManager:
     def __init__(self):
         self.connections = {"agent1": DummyConn()}
 
-    def get(self, id_):
+    async def get(self, id_):
         return self.connections.get(id_)
 
-    def list_all(self):
+    async def list_all(self):
         return self.connections
 
 
@@ -41,8 +41,10 @@ from darkscryc2server.core.connection import ConnectionManager
 
 def test_command_route():
     app.dependency_overrides[ConnectionManager] = override_manager
+    app.state.conn_manager = override_manager()
     client = TestClient(app)
     resp = client.post("/command/agent1", json={"command": "hello"})
     assert resp.status_code == 200
     assert resp.json()["result"] == 'resp:{"command":"hello","args":null}'
     app.dependency_overrides.clear()
+    app.state.conn_manager = None
