@@ -19,6 +19,11 @@ c2server_migration/
     └── utils/
 ```
 
+### Configuration
+
+Copy `.env.example` to `.env` and adjust values as needed. The server reads this
+file automatically when starting.
+
 Run the server using `python main.py`. On POSIX systems `uvloop` is enabled
 automatically for better performance:
 ```bash

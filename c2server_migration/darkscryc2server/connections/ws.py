@@ -5,6 +5,8 @@ from websockets.server import WebSocketServerProtocol
 
 @dataclass
 class WsConnection:
+    """Represents an active WebSocket connection to an agent."""
+
     websocket: WebSocketServerProtocol
     id: str
 
