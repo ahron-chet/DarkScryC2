@@ -7,6 +7,8 @@ from typing import Dict
 from redis.asyncio import Redis
 from websockets.server import WebSocketServerProtocol
 
+from ..utils.logging import get_logger
+
 
 @dataclass
 class WsConnection:
@@ -17,6 +19,7 @@ class WsConnection:
 
     def __post_init__(self) -> None:
         self.address = self.websocket.remote_address
+        self.logger = get_logger(__name__)
 
     async def close(self) -> None:
         if not self.websocket.closed:
@@ -30,6 +33,9 @@ class WsConnection:
         try:
             response = await self.websocket.recv()
         except Exception as exc:  # pragma: no cover - network failures
+            self.logger.exception(
+                "websocket closed during communication", extra={"conn_id": self.id}
+            )
             raise ConnectionError(f"WebSocket closed: {exc}")
         return response
 
@@ -72,6 +78,7 @@ class ConnectionManager:
         self.connections: Dict[str, WsConnection] = {}
         self._connect_task: asyncio.Task | None = None
         self._lock = asyncio.Lock()
+        self.logger = get_logger(__name__)
 
     async def wait_ready(self) -> None:
         if self._connect_task is None:
@@ -82,6 +89,7 @@ class ConnectionManager:
         await self.wait_ready()
         async with self._lock:
             self.connections[conn.id] = conn
+        self.logger.info("registered connection", extra={"conn_id": conn.id})
         await self.redis.set(f"connection:{conn.id}", conn.serialize())
 
     async def unregister(self, conn: WsConnection) -> None:
@@ -90,6 +98,7 @@ class ConnectionManager:
             self.connections.pop(conn.id, None)
         await conn.close()
         await self.redis.delete(f"connection:{conn.id}")
+        self.logger.info("unregistered connection", extra={"conn_id": conn.id})
 
     async def get(self, conn_id: str) -> WsConnection | None:
         async with self._lock:
