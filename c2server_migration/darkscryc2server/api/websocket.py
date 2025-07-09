@@ -1,16 +1,13 @@
-from __future__ import annotations
-
-import json
-
-from fastapi import Depends, WebSocket, WebSocketDisconnect
+from fastapi import Depends, WebSocket, WebSocketDisconnect, Request
 
 from ..core.connection import ConnectionManager
 from ..models.messages import ManagerAction, ManagerRequestWs, ManagerResponse
 
 
 async def manager_ws_endpoint(
-    websocket: WebSocket, manager: ConnectionManager = Depends()
+    websocket: WebSocket, request: Request,
 ):
+    manager: ConnectionManager = request.app.state.conn_manager
     await websocket.accept()
     try:
         while True:
