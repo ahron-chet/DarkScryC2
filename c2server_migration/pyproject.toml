@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Refactored C2 server with WebSocket and management API"
 authors = ["DarkScry Team"]
 readme = "README.md"
+packages = [{ include = "darkscryc2server" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
