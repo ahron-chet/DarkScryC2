@@ -27,8 +27,8 @@ async def test_handle_ws_registers_and_unregisters(fake_redis):
     ws = DummyWebSocket("/agent/agent1")
     task = asyncio.create_task(server.handle_ws(ws))
     await asyncio.sleep(0)
-    assert "agent1" in server.conn_manager.list_all()
+    assert "agent1" in (await server.conn_manager.list_all())
     await ws.close()
     await task
-    assert "agent1" not in server.conn_manager.list_all()
+    assert "agent1" not in (await server.conn_manager.list_all())
     assert ws.closed

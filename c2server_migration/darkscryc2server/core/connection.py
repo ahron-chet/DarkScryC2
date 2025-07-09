@@ -71,6 +71,7 @@ class ConnectionManager:
         self.redis = RedisClient(redis_url)
         self.connections: Dict[str, WsConnection] = {}
         self._connect_task: asyncio.Task | None = None
+        self._lock = asyncio.Lock()
 
     async def wait_ready(self) -> None:
         if self._connect_task is None:
@@ -79,17 +80,21 @@ class ConnectionManager:
 
     async def register(self, conn: WsConnection) -> None:
         await self.wait_ready()
-        self.connections[conn.id] = conn
-        await self.redis.set(f"connection:{conn.id}", conn.serialize())
+        async with self._lock:
+            self.connections[conn.id] = conn
+            await self.redis.set(f"connection:{conn.id}", conn.serialize())
 
     async def unregister(self, conn: WsConnection) -> None:
         await self.wait_ready()
-        self.connections.pop(conn.id, None)
-        await conn.close()
-        await self.redis.delete(f"connection:{conn.id}")
+        async with self._lock:
+            self.connections.pop(conn.id, None)
+            await conn.close()
+            await self.redis.delete(f"connection:{conn.id}")
 
-    def get(self, conn_id: str) -> WsConnection | None:
-        return self.connections.get(conn_id)
+    async def get(self, conn_id: str) -> WsConnection | None:
+        async with self._lock:
+            return self.connections.get(conn_id)
 
-    def list_all(self) -> Dict[str, WsConnection]:
-        return dict(self.connections)
+    async def list_all(self) -> Dict[str, WsConnection]:
+        async with self._lock:
+            return dict(self.connections)

@@ -8,7 +8,6 @@ import websockets
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 os.environ.setdefault("C2_SERVER_HOST", "127.0.0.1")
 os.environ.setdefault("C2_SERVER_PORT", "9100")
-os.environ.setdefault("C2_SERVER_REDIS_URL", "redis://localhost")
 
 from darkscryc2server.core.connection import WsConnection
 

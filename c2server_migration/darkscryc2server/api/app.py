@@ -1,4 +1,4 @@
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI, Request, WebSocket
 
 from ..core.config import settings
 from ..core.connection import ConnectionManager
@@ -13,10 +13,19 @@ def get_manager() -> ConnectionManager:
 
 setup_logging()
 app = FastAPI(title="C2 Management API")
-
-app.dependency_overrides[ConnectionManager] = get_manager
+app.state.conn_manager = get_manager()
 app.include_router(routes.router)
-app.add_api_websocket_route("/manager_ws", manager_ws_endpoint)
+
+
+async def _ws_proxy(websocket: WebSocket) -> None:
+    class _WSRequest:
+        def __init__(self, ws: WebSocket) -> None:
+            self.app = ws.app
+
+    await manager_ws_endpoint(websocket, _WSRequest(websocket))
+
+
+app.add_api_websocket_route("/manager_ws", _ws_proxy)
 
 
 @app.get("/health")

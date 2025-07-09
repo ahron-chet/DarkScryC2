@@ -2,15 +2,14 @@ from __future__ import annotations
 
 import json
 
-from fastapi import Depends, WebSocket, WebSocketDisconnect
+from fastapi import Request, WebSocket, WebSocketDisconnect
 
 from ..core.connection import ConnectionManager
 from ..models.messages import ManagerAction, ManagerRequestWs, ManagerResponse
 
 
-async def manager_ws_endpoint(
-    websocket: WebSocket, manager: ConnectionManager = Depends()
-):
+async def manager_ws_endpoint(websocket: WebSocket, request: Request):
+    manager: ConnectionManager = request.app.state.conn_manager
     await websocket.accept()
     try:
         while True:
@@ -25,7 +24,7 @@ async def manager_ws_endpoint(
                 )
                 continue
             if req.action == ManagerAction.GET_CONNECTIONS:
-                conns = list(manager.list_all().keys())
+                conns = list((await manager.list_all()).keys())
                 await websocket.send_text(
                     ManagerResponse(
                         success=True, data={"connections": conns}
@@ -39,7 +38,7 @@ async def manager_ws_endpoint(
                         ).model_dump_json()
                     )
                     continue
-                conn = manager.get(req.conn_id)
+                conn = await manager.get(req.conn_id)
                 if not conn:
                     await websocket.send_text(
                         ManagerResponse(

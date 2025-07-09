@@ -7,7 +7,6 @@ from fastapi.testclient import TestClient
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 os.environ.setdefault("C2_SERVER_HOST", "127.0.0.1")
 os.environ.setdefault("C2_SERVER_PORT", "9100")
-os.environ.setdefault("C2_SERVER_REDIS_URL", "redis://localhost")
 
 from darkscryc2server.api.app import app
 
@@ -25,10 +24,10 @@ class DummyManager:
     def __init__(self):
         self.connections = {"agent1": DummyConn()}
 
-    def get(self, id_):
+    async def get(self, id_):
         return self.connections.get(id_)
 
-    def list_all(self):
+    async def list_all(self):
         return self.connections
 
 
@@ -40,9 +39,10 @@ from darkscryc2server.core.connection import ConnectionManager
 
 
 def test_command_route():
-    app.dependency_overrides[ConnectionManager] = override_manager
+    original = app.state.conn_manager
+    app.state.conn_manager = DummyManager()
     client = TestClient(app)
     resp = client.post("/command/agent1", json={"command": "hello"})
     assert resp.status_code == 200
     assert resp.json()["result"] == 'resp:{"command":"hello","args":null}'
-    app.dependency_overrides.clear()
+    app.state.conn_manager = original

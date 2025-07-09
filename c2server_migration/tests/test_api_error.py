@@ -9,18 +9,19 @@ class EmptyManager(ConnectionManager):
     def __init__(self):
         pass
 
-    def get(self, id_):
+    async def get(self, id_):
         return None
 
-    def list_all(self):
+    async def list_all(self):
         return {}
 
 
 @pytest.fixture(autouse=True)
 def _override():
-    app.dependency_overrides[ConnectionManager] = EmptyManager
+    original = app.state.conn_manager
+    app.state.conn_manager = EmptyManager()
     yield
-    app.dependency_overrides.clear()
+    app.state.conn_manager = original
 
 
 def test_command_not_found():
