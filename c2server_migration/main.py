@@ -1,10 +1,11 @@
 import asyncio
-import uvloop
-import uvicorn
 
-from darkscryc2server.server.websocket_server import WebSocketServer
+import uvicorn
+import uvloop
+
 from darkscryc2server.api.app import app
-from darkscryc2server.config.settings import settings
+from darkscryc2server.core.config import settings
+from darkscryc2server.core.server import WebSocketServer
 
 
 def main() -> None:
@@ -15,7 +16,7 @@ def main() -> None:
 
     loop = asyncio.get_event_loop()
     loop.create_task(ws_server.start())
-    uvicorn.run(app, host=settings.c2_server_host, port=settings.c2_server_port)
+    uvicorn.run(app, host=settings.host, port=settings.port)
 
 
 if __name__ == "__main__":

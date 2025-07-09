@@ -1,15 +1,16 @@
 import asyncio
-import sys
 import os
-import websockets
+import sys
+
 import pytest
+import websockets
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 os.environ.setdefault("C2_SERVER_HOST", "127.0.0.1")
 os.environ.setdefault("C2_SERVER_PORT", "9100")
-os.environ.setdefault("REDIS_URL", "redis://localhost")
+os.environ.setdefault("C2_SERVER_REDIS_URL", "redis://localhost")
 
-from darkscryc2server.connections.ws import WsConnection
+from darkscryc2server.core.connection import WsConnection
 
 
 @pytest.mark.asyncio

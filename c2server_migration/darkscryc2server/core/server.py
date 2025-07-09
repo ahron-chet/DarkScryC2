@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-import ssl
 import asyncio
+import ssl
+
 import websockets
 from websockets.server import WebSocketServerProtocol
 
-from ..config.settings import settings
-from ..connections.manager import ConnectionManager
-from ..connections.ws import WsConnection
+from .config import settings
+from .connection import ConnectionManager, WsConnection
 
 
 class WebSocketServer:
@@ -23,7 +23,7 @@ class WebSocketServer:
         await self.conn_manager.wait_ready()
         server = await websockets.serve(
             self.handle_ws,
-            settings.c2_server_host,
+            settings.host,
             settings.ws_port,
             ssl=self.ssl_context,
             max_size=104857600,
