@@ -3,6 +3,7 @@ import ssl
 import websockets
 from websockets.server import WebSocketServerProtocol
 
+from ..utils.logging import get_logger
 from .config import settings
 from .connection import ConnectionManager, WsConnection
 
@@ -15,6 +16,7 @@ class WebSocketServer:
             self.ssl_context.load_cert_chain(settings.ssl_cert, settings.ssl_key)
         else:
             self.ssl_context = None
+        self.logger = get_logger(__name__)
 
     async def start(self) -> None:
         await self.conn_manager.wait_ready()
@@ -32,8 +34,10 @@ class WebSocketServer:
     async def handle_ws(self, websocket: WebSocketServerProtocol) -> None:
         agent_id = websocket.path.removeprefix("/agent/").strip("/")
         conn = WsConnection(websocket=websocket, id=agent_id)
+        self.logger.info("agent connected", extra={"conn_id": agent_id})
         await self.conn_manager.register(conn)
         try:
             await websocket.wait_closed()
         finally:
             await self.conn_manager.unregister(conn)
+            self.logger.info("agent disconnected", extra={"conn_id": agent_id})
