@@ -8,15 +8,16 @@ from darkscryc2server.core.config import settings
 from darkscryc2server.core.server import WebSocketServer
 
 
-def main() -> None:
-
-    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-
+async def _run_servers() -> None:
     ws_server = WebSocketServer()
+    config = uvicorn.Config(app, host=settings.host, port=settings.port)
+    api_server = uvicorn.Server(config)
+    await asyncio.gather(ws_server.start(), api_server.serve())
 
-    loop = asyncio.get_event_loop()
-    loop.create_task(ws_server.start())
-    uvicorn.run(app, host=settings.host, port=settings.port)
+
+def main() -> None:
+    uvloop.install()
+    asyncio.run(_run_servers())
 
 
 if __name__ == "__main__":
