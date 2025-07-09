@@ -12,6 +12,7 @@ async def _run_servers() -> None:
     ws_server = WebSocketServer()
     config = uvicorn.Config(app, host=settings.host, port=settings.port)
     api_server = uvicorn.Server(config)
+    app.state.conn_manager = ws_server.conn_manager
     await asyncio.gather(ws_server.start(), api_server.serve())
 
 
