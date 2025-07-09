@@ -1,5 +1,5 @@
 import asyncio
-import os
+import uvloop
 import uvicorn
 
 from darkscryc2server.server.websocket_server import WebSocketServer
@@ -8,9 +8,8 @@ from darkscryc2server.config.settings import settings
 
 
 def main() -> None:
-    if os.name == "posix":
-        import uvloop
-        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
     ws_server = WebSocketServer()
 
