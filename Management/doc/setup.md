@@ -17,6 +17,10 @@ This document describes how to set up the FastAPI Management backend.
    ```bash
    poetry run alembic upgrade head
    ```
+6. Start the background task worker:
+   ```bash
+   poetry run arq arq_worker.WorkerSettings
+   ```
 
 Tests can be executed with:
 ```bash

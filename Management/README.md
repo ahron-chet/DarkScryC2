@@ -42,7 +42,11 @@ Routers expose API endpoints using class‑based views. Authentication is enforc
 SQLAlchemy models in `app/models` follow the existing Django schema closely. Pydantic schemas in `app/schemas` provide validation and documentation for request and response bodies.
 
 ### Background Tasks
-Long‑running actions (e.g. requesting data from an agent) are scheduled through [ARQ](https://arq-docs.helpmanual.io/) using Redis. `app.utils.tasks` provides helpers to obtain a task executor and to gracefully close the connection on shutdown.
+Long‑running actions (e.g. requesting data from an agent) are scheduled through [ARQ](https://arq-docs.helpmanual.io/) using Redis. `app.utils.tasks` provides helpers to obtain a task executor and to gracefully close the connection on shutdown. A dedicated worker defined in `arq_worker.py` consumes these jobs. Start it with:
+
+```bash
+poetry run arq arq_worker.WorkerSettings
+```
 
 ## External Interactions
 
