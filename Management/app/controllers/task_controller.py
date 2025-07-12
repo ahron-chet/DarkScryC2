@@ -17,7 +17,11 @@ class TaskController:
         return TaskStatusOut(status=status, job_id=task_id)
 
     async def get_task_result(self, task_id: uuid.UUID) -> TaskResultOut:
-        return await self.service.get_result(task_id)
+        res =  await self.service.get_result(task_id)
+        status = res.result.get("success")
+        if status is not None:
+            res.success = status
+        return res
 
     async def revoke_task(self, task_id: uuid.UUID) -> Deleted:
         await self.service.revoke_task(task_id)

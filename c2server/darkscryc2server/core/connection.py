@@ -28,7 +28,7 @@ class WsConnection:
     def serialize(self) -> bytes:
         return str({"address": str(self.address), "type": "ws"}).encode()
 
-    async def send_and_receive(self, message: str) -> str:
+    async def send_and_receive(self, message: str):
         await self.websocket.send(message)
         try:
             response = await self.websocket.recv()

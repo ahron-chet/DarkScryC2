@@ -58,6 +58,8 @@ async def remote_send_command(
         r = await session().post(
             url=f"http://{host}:{port}/command/{agent_id}", json=req
         )
+        if r.status == 404:
+            return AgentResponse(success=False, data={"type":"Server Error"}, error=f"{agent_id} not found or not connected")
         resp_dict = await r.json()
         return AgentResponse(**resp_dict)
     except Exception as e:

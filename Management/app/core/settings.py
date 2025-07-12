@@ -7,7 +7,7 @@ class ArqSettings(BaseSettings):
     """Settings required only for ARQ worker processes."""
 
     redis_host: str = Field(
-        "redis",
+        "localhost",
         description="Redis server hostname",
         validation_alias="MANAGEMENT_REDIS_HOST",
     )

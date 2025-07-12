@@ -67,7 +67,7 @@ async def send_command(request: Request, agent_id: str, msg: CommandMessage):
             raise HTTPException(
                 status_code=400, detail="No response or connection closed"
             )
-        return {"result": result}
+        return loads(result)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

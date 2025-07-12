@@ -24,7 +24,7 @@ class TaskResultOut(BaseModel):
     """Detailed information about a finished job."""
 
     success: bool = Field(..., description="Whether the task succeeded")
-    result: Any = Field(..., description="Task result payload")
+    result: dict = Field(..., description="Task result payload")
     start_time: datetime = Field(..., description="When the task started")
     finish_time: datetime = Field(..., description="When the task finished")
     action: CommandIdentifiers | None = Field(

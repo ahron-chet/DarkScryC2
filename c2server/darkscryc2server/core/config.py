@@ -11,7 +11,7 @@ class Settings(BaseSettings):
 
     redis_host: str = Field("localhost", alias="C2_SERVER_REDIS_HOST")
     redis_password: str | None = Field(None, alias="C2_SERVER_REDIS_PASSWORD")
-    redis_db: int = Field(0, alias="C2_SERVER_REDIS_DB")
+    redis_db: int = Field(1, alias="C2_SERVER_REDIS_DB")
 
     ssl_cert: str | None = Field(None, alias="C2_SERVER_SSL_CERT")
     ssl_key: str | None = Field(None, alias="C2_SERVER_SSL_KEY")
