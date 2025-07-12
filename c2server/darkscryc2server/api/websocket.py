@@ -1,7 +1,7 @@
 from fastapi import Depends, WebSocket, WebSocketDisconnect
 
 from ..core.connection import ConnectionManager
-from ..models.messages import ManagerAction, ManagerRequestWs, ManagerResponse
+from ..models.messages import ManagerAction, ManagerRequestWs, AgentResponse
 
 
 async def manager_ws_endpoint(websocket: WebSocket) -> None:
@@ -14,7 +14,7 @@ async def manager_ws_endpoint(websocket: WebSocket) -> None:
                 req = ManagerRequestWs.model_validate_json(raw)
             except Exception as exc:
                 await websocket.send_text(
-                    ManagerResponse(
+                    AgentResponse(
                         success=False, error=f"Invalid request: {exc}"
                     ).model_dump_json()
                 )
@@ -22,14 +22,14 @@ async def manager_ws_endpoint(websocket: WebSocket) -> None:
             if req.action == ManagerAction.GET_CONNECTIONS:
                 conns = list((await manager.list_all()).keys())
                 await websocket.send_text(
-                    ManagerResponse(
+                    AgentResponse(
                         success=True, data={"connections": conns}
                     ).model_dump_json()
                 )
             elif req.action == ManagerAction.SEND_COMMAND:
                 if not req.conn_id or not req.command:
                     await websocket.send_text(
-                        ManagerResponse(
+                        AgentResponse(
                             success=False, error="Missing conn_id or command"
                         ).model_dump_json()
                     )
@@ -37,7 +37,7 @@ async def manager_ws_endpoint(websocket: WebSocket) -> None:
                 conn = await manager.get(req.conn_id)
                 if not conn:
                     await websocket.send_text(
-                        ManagerResponse(
+                        AgentResponse(
                             success=False, error=f"No such connection: {req.conn_id}"
                         ).model_dump_json()
                     )
@@ -45,17 +45,17 @@ async def manager_ws_endpoint(websocket: WebSocket) -> None:
                 try:
                     result = await conn.send_and_receive(req.command)
                     await websocket.send_text(
-                        ManagerResponse(
+                        AgentResponse(
                             success=True, data={"result": result}
                         ).model_dump_json()
                     )
                 except Exception as exc:
                     await websocket.send_text(
-                        ManagerResponse(success=False, error=str(exc)).model_dump_json()
+                        AgentResponse(success=False, error=str(exc)).model_dump_json()
                     )
             else:
                 await websocket.send_text(
-                    ManagerResponse(
+                    AgentResponse(
                         success=False, error=f"Unknown action: {req.action}"
                     ).model_dump_json()
                 )

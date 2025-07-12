@@ -9,8 +9,7 @@ from .execution import router as execution_router
 
 router = APIRouter(
     prefix="/agents/{agent_id}/modules",
-    tags=["modules"],
-    dependencies=[Depends(get_current_user)],
+    dependencies=[Depends(get_current_user)]
 )
 
 router.include_router(execution_router, prefix="/execution")

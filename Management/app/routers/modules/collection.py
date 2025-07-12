@@ -9,7 +9,7 @@ from ...core.security import required_role
 from ...models.user import UserRole
 from ...schemas.tasks import TaskOut
 
-router = APIRouter()
+router = APIRouter(tags=["collection"])
 
 
 @cbv(router)
