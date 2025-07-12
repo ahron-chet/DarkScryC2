@@ -15,10 +15,13 @@ class JsonFormatter(logging.Formatter):
         return json.dumps(data)
 
 
+logger = logging.getLogger("darkscryc2server")
+
+
 def setup_logging(level: int = logging.INFO) -> None:
     handler = logging.StreamHandler()
     handler.setFormatter(JsonFormatter())
-    root = logging.getLogger(__name__)
+    root = logging.getLogger()
     root.handlers.clear()
     root.addHandler(handler)
     root.setLevel(level)
