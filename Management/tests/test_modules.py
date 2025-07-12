@@ -1,9 +1,8 @@
 import uuid
 
 import pytest
-from httpx import AsyncClient
-
 from app.models.user import UserRole
+from httpx import AsyncClient
 
 pytestmark = pytest.mark.anyio
 
@@ -17,6 +16,21 @@ async def test_execution_and_collection_modules(
 ):
     await create_test_user("op", UserRole.OPERATOR)
     token = await get_token("op")
+
+    async def fake_get_connections():
+        return []
+
+    async def fake_get_connection(agent_id: str):
+        return {}
+
+    monkeypatch.setattr(
+        "app.controllers.agent_controller.remote_get_connections",
+        fake_get_connections,
+    )
+    monkeypatch.setattr(
+        "app.controllers.agent_controller.remote_get_connection",
+        fake_get_connection,
+    )
 
     resp = await client.post(
         "/agents/",

@@ -27,7 +27,10 @@ def _override():
 
 def test_command_not_found():
     client = TestClient(app)
-    resp = client.post("/command/unknown", json={"command": "hi"})
+    resp = client.post(
+        "/command/unknown",
+        json={"command": {"text": "hi"}, "action_id": 2},
+    )
     assert resp.status_code == 404
 
 
