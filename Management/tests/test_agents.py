@@ -1,6 +1,7 @@
 import pytest
-from app.models.user import UserRole
 from httpx import AsyncClient
+
+from app.models.user import UserRole
 
 pytestmark = pytest.mark.anyio
 
@@ -17,10 +18,17 @@ async def test_operator_can_manage_agents(
     admin_token = await get_token("admin")
     op_token = await get_token("op")
 
+    created_agent: dict[str, str | None] = {"id": None}
+    addr = "127.0.0.1"
+
     async def fake_get_connections():
+        if created_agent["id"]:
+            return [{"agent_id": created_agent["id"], "address": addr}]
         return []
 
     async def fake_get_connection(agent_id: str):
+        if agent_id == created_agent["id"]:
+            return {"address": addr, "type": "ws"}
         return {}
 
     monkeypatch.setattr(
@@ -39,11 +47,12 @@ async def test_operator_can_manage_agents(
     )
     assert resp.status_code == 201
     agent_id = resp.json()["agent_id"]
+    created_agent["id"] = agent_id
 
     resp = await client.get(f"/agents/{agent_id}", headers=_auth(op_token))
     assert resp.status_code == 200
     assert "is_active" in resp.json()
-    assert "address" in resp.json()
+    assert resp.json()["address"] == addr
 
     resp = await client.put(
         f"/agents/{agent_id}",
