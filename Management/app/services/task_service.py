@@ -19,7 +19,7 @@ class TaskService:
         redis = await get_task_executor()
         job = Job(task_id.hex, redis)
         info = await job.result_info()
-
+    
         result = (
             info.result if not isinstance(info.result, Exception) else str(info.result)
         )
