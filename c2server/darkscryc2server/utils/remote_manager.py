@@ -2,7 +2,7 @@ from os import getenv
 
 import aiohttp
 
-from ..models.messages import AgentResponse, CommandIdentifiers, CommandMessage
+from ..models.messages import AgentResponse, CommandIdentifiers, CommandMessage, ServerError
 
 _session = None
 
@@ -61,4 +61,4 @@ async def remote_send_command(
         resp_dict = await r.json()
         return AgentResponse(**resp_dict)
     except Exception as e:
-        raise e
+        return AgentResponse(success=False, data={"type":"Server Error"}, error=str(e))

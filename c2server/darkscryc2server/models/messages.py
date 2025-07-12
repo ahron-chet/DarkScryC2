@@ -36,3 +36,9 @@ class AgentResponse(BaseModel):
     success: bool
     data: dict | None = None
     error: str | None = None
+
+
+
+class ServerError(BaseModel):
+    type: str = "Server Error"
+    detail: str
