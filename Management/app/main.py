@@ -4,11 +4,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .core.database import init_db
-from .core.settings import get_settings
+from .core.settings import get_app_settings
 from .routers import agents, auth, modules, users
 from .utils.tasks import close_task_executors
 
-settings = get_settings()
+settings = get_app_settings()
 
 
 @asynccontextmanager

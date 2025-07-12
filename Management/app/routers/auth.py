@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..core.database import get_db
 from ..core.security import create_access_token, create_refresh_token
-from ..core.settings import get_settings
+from ..core.settings import get_app_settings
 from ..schemas.auth import Login, RefreshTokenRequest, Token
 from ..services import UserService
 
@@ -29,7 +29,7 @@ async def login(
 
 @router.post("/refresh", response_model=Token)
 async def refresh_token(data: RefreshTokenRequest) -> Token:
-    settings = get_settings()
+    settings = get_app_settings()
     try:
         payload = jwt.decode(
             data.refresh_token,

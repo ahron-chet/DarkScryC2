@@ -1,9 +1,9 @@
 from arq.connections import RedisSettings
 
-from app.core.settings import get_settings
+from app.core.settings import get_arq_settings
 from app.tasks import remote_send_command_task
 
-settings = get_settings()
+settings = get_arq_settings()
 
 
 class WorkerSettings:

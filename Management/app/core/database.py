@@ -3,9 +3,9 @@ from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from ..models.base import Base
-from .settings import get_settings
+from .settings import get_app_settings
 
-settings = get_settings()
+settings = get_app_settings()
 db_url = settings.database_url
 # engine = create_async_engine(db_url, echo=settings.debug)
 engine = create_async_engine(db_url)

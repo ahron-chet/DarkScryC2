@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..models.user import User, UserRole
 from .database import get_db
-from .settings import get_settings
+from .settings import get_app_settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
@@ -37,7 +37,7 @@ def get_password_hash(password: str) -> str:
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
-    settings = get_settings()
+    settings = get_app_settings()
     to_encode = data.copy()
     now = datetime.now(UTC)
     expire = now + (
@@ -56,7 +56,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
 
 
 def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
-    settings = get_settings()
+    settings = get_app_settings()
     to_encode = data.copy()
     now = datetime.now(UTC)
     expire = now + (expires_delta or timedelta(days=settings.refresh_token_expire_days))
@@ -76,7 +76,7 @@ async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: AsyncSession = Depends(get_db),
 ) -> User:
-    settings = get_settings()
+    settings = get_app_settings()
     token = credentials.credentials
     try:
         payload = jwt.decode(

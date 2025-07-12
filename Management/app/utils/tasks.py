@@ -5,7 +5,7 @@ from __future__ import annotations
 from arq import create_pool
 from arq.connections import RedisSettings
 
-from app.core.settings import get_settings
+from app.core.settings import get_arq_settings
 
 _redis_pool = None
 
@@ -14,7 +14,7 @@ async def get_task_executor():
     """Return a Redis connection pool for enqueueing jobs."""
     global _redis_pool
     if _redis_pool is None:
-        settings = get_settings()
+        settings = get_arq_settings()
         _redis_pool = await create_pool(
             RedisSettings(
                 host=settings.redis_host,

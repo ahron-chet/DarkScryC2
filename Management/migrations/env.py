@@ -14,7 +14,7 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-from app.core.settings import get_settings
+from app.core.settings import get_app_settings
 
 # add your model's MetaData object here
 # for 'autogenerate' support
@@ -24,7 +24,7 @@ from app.models.base import Base
 
 target_metadata = Base.metadata
 
-settings = get_settings()
+settings = get_app_settings()
 db_url = settings.database_url
 
 # other values from the config, defined by the needs of env.py,

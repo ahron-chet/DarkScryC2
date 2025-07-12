@@ -2,14 +2,14 @@ import pytest
 from httpx import AsyncClient
 from jose import jwt
 
-from app.core.settings import get_settings
+from app.core.settings import get_app_settings
 from app.models.user import UserRole
 
 pytestmark = pytest.mark.anyio
 
 
 def _decode(token: str) -> dict:
-    settings = get_settings()
+    settings = get_app_settings()
     return jwt.decode(
         token,
         settings.secret_key,
@@ -23,7 +23,7 @@ async def test_login_returns_tokens(client: AsyncClient, create_test_user, get_t
     await create_test_user("admin", UserRole.ADMIN)
     token = await get_token("admin")
     payload = _decode(token)
-    assert payload["iss"] == get_settings().jwt_issuer
+    assert payload["iss"] == get_app_settings().jwt_issuer
 
 
 async def test_refresh_flow(client: AsyncClient, create_test_user):
@@ -73,7 +73,7 @@ async def test_invalid_token_claims_rejected(
         "/auth/login", json={"username": "claims", "password": "Str0ng!Pass"}
     )
     refresh = login.json()["refresh_token"]
-    settings = get_settings()
+    settings = get_app_settings()
     payload = _decode(refresh)
     payload["aud"] = "bad-aud"
     bad_token = jwt.encode(payload, settings.secret_key, algorithm="HS256")
