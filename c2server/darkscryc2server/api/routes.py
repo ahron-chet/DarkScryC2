@@ -38,10 +38,8 @@ async def get_connection(request: Request, agent_id: str):
     return {"address": str(conn.address), "type": "ws"}
 
 
-@router.post("/command/{agent_id}")
-async def send_command(
-    request: Request, agent_id: str, msg: CommandMessage, response_model=AgentResponse
-):
+@router.post("/command/{agent_id}", response_model=AgentResponse)
+async def send_command(request: Request, agent_id: str, msg: CommandMessage):
     """Send a command message to a specific agent and return its response.
 
     Parameters
@@ -55,13 +53,14 @@ async def send_command(
 
     Returns
     -------
-    dict
-        A mapping with the key ``"result"`` containing the agent's response.
+    AgentResponse
+        The agent's structured response.
     """
     manager = _server(request)
     conn = await manager.get(agent_id)
     if not conn:
         raise HTTPException(status_code=404, detail="Agent not found")
+
     try:
         result_bytes = await conn.send_and_receive(msg.model_dump_json())
         if result_bytes is None:
@@ -69,9 +68,13 @@ async def send_command(
                 status_code=400, detail="No response or connection closed"
             )
         try:
-            return loads(result_bytes)
-        except Exception:
-            return {"result": result_bytes}
+            response_data = loads(result_bytes)
+            return AgentResponse(**response_data)
+        except Exception as parse_err:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Invalid response format: {parse_err}"
+            )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
