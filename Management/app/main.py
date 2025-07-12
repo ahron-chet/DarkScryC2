@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .core.database import init_db
 from .core.settings import get_app_settings
-from .routers import agents, auth, modules, users
+from .routers import agents, auth, modules, tasks, users
 from .utils.tasks import close_task_executors
 
 settings = get_app_settings()
@@ -33,3 +33,4 @@ app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(agents.router)
 app.include_router(modules.router)
+app.include_router(tasks.router)
