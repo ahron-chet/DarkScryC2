@@ -1,24 +1,24 @@
-from enum import Enum, IntEnum
+from enum import Enum
 
 from pydantic import BaseModel
-
+from enum import IntEnum
 
 class CommandIdentifiers(IntEnum):
-    START_SHELL_INSTANCE = 1
-    RUN_COMMAND = 2
-    GET_BASIC_MACHINE_INFO = 3
-    SNAP_FULL_DIRECTORY = 4
-    GET_FILE_BASE_64 = 5
-    UPLOAD_FILE_BASE_64 = 6
-    GET_WIFI_BAISIC_INFO = 7
-    FETCH_WEB_BROSER_CREDENTIALS = 8
-    ENUMERATE_PROCESSES = 9
+    START_SHELL_INSTANCE              = 1
+    RUN_COMMAND                       = 2
+    GET_BASIC_MACHINE_INFO            = 3
+    SNAP_FULL_DIRECTORY               = 4
+    GET_FILE_BASE_64                  = 5
+    UPLOAD_FILE_BASE_64               = 6
+    GET_WIFI_BAISIC_INFO              = 7
+    FETCH_WEB_BROSER_CREDENTIALS      = 8
+    ENUMERATE_PROCESSES               = 9
     SHELLCODE_INJECTION_REMOTE_THREAD = 10
 
 
 class CommandMessage(BaseModel):
-    command: str
-    args: dict | None = None
+    command: dict = None
+    action_id: CommandIdentifiers
 
 
 class ManagerAction(str, Enum):
@@ -34,5 +34,5 @@ class ManagerRequestWs(BaseModel):
 
 class AgentResponse(BaseModel):
     success: bool
-    data: dict | None = None
+    results: dict | None = None
     error: str | None = None
