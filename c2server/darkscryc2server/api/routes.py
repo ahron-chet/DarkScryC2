@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException, Request
 from json import loads
 
+from fastapi import APIRouter, HTTPException, Request
+
 from ..core.connection import ConnectionManager
-from ..models.messages import CommandMessage, AgentResponse
+from ..models.messages import AgentResponse, CommandMessage
 
 router = APIRouter()
 
@@ -28,7 +29,7 @@ async def list_connections(request: Request):
 
 
 @router.post("/command/{agent_id}")
-async def send_command(request: Request, agent_id: str, msg: CommandMessage, response_model=AgentResponse):
+async def send_command(request: Request, agent_id: str, msg: CommandMessage):
     """Send a command message to a specific agent and return its response.
 
     Parameters
@@ -50,13 +51,14 @@ async def send_command(request: Request, agent_id: str, msg: CommandMessage, res
     if not conn:
         raise HTTPException(status_code=404, detail="Agent not found")
     try:
-        result_bytes = await conn.send_and_receive(msg.model_dump_json())
-        if result_bytes is None:
-            raise HTTPException(status_code=400, detail="No response or connection closed")
-        return AgentResponse(**loads(result_bytes))
+        result = await conn.send_and_receive(msg.model_dump_json())
+        if result is None:
+            raise HTTPException(
+                status_code=400, detail="No response or connection closed"
+            )
+        return {"result": result}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))  
-
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 def _server(request: Request) -> ConnectionManager:

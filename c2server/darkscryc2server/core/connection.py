@@ -7,6 +7,8 @@ from typing import Dict
 from redis.asyncio import Redis
 from websockets.server import WebSocketServerProtocol
 
+from ..utils.logging import logger
+
 
 @dataclass
 class WsConnection:
@@ -20,6 +22,7 @@ class WsConnection:
 
     async def close(self) -> None:
         if not self.websocket.closed:
+            logger.info("closing websocket connection", extra={"conn_id": self.id})
             await self.websocket.close()
 
     def serialize(self) -> bytes:
@@ -82,12 +85,20 @@ class ConnectionManager:
         await self.wait_ready()
         async with self._lock:
             self.connections[conn.id] = conn
+        logger.info(
+            "registered connection",
+            extra={"conn_id": conn.id, "address": str(conn.address)},
+        )
         await self.redis.set(f"connection:{conn.id}", conn.serialize())
 
     async def unregister(self, conn: WsConnection) -> None:
         await self.wait_ready()
         async with self._lock:
             self.connections.pop(conn.id, None)
+        logger.info(
+            "unregistering connection",
+            extra={"conn_id": conn.id, "address": str(conn.address)},
+        )
         await conn.close()
         await self.redis.delete(f"connection:{conn.id}")
 
