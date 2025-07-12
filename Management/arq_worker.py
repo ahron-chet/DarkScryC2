@@ -14,5 +14,5 @@ class WorkerSettings:
         host=settings.redis_host,
         port=settings.redis_port,
         password=settings.redis_password,
-        database=settings.arq_redis_db,
+        database=settings.arq_redis_db
     )

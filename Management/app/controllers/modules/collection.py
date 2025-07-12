@@ -2,7 +2,7 @@ import uuid
 
 from fastapi import Depends
 
-from ...schemas.module import TaskOut
+from ...schemas.tasks import TaskOut
 from ...services.modules.collection import CollectionService
 
 

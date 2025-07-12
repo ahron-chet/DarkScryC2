@@ -1,4 +1,3 @@
-from __future__ import annotations
 
 import uuid
 
@@ -8,7 +7,7 @@ from fastapi_utils.cbv import cbv
 from ...controllers.modules.collection import CollectionController
 from ...core.security import required_role
 from ...models.user import UserRole
-from ...schemas.module import TaskOut
+from ...schemas.tasks import TaskOut
 
 router = APIRouter()
 

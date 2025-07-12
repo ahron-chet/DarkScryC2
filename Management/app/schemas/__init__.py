@@ -1,7 +1,7 @@
 from .agent import AgentCreate, AgentRead, AgentUpdate
 from .agent import Deleted as AgentDeleted
 from .auth import Login, Token
-from .module import RunCommandIn, TaskOut
+from .tasks import TaskOut
 from .user import Deleted, UserCreate, UserRead, UserUpdate
 
 __all__ = [
@@ -15,6 +15,5 @@ __all__ = [
     "AgentUpdate",
     "AgentRead",
     "AgentDeleted",
-    "RunCommandIn",
     "TaskOut",
 ]
