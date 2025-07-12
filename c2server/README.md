@@ -1,4 +1,4 @@
-# DarkScry C2 Server Migration
+# DarkScry C2 Server
 
 This directory contains the refactored WebSocket server and management API. It is designed to run independently from the legacy Django backend while providing the same communication features.
 
