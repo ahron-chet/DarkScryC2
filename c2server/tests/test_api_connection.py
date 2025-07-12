@@ -39,7 +39,9 @@ def test_get_single_connection():
 
     resp = client.get("/connections/agent1")
     assert resp.status_code == 200
-    assert resp.json()["address"] == "('10.0.0.1', 4444)"
+    data = resp.json()
+    assert data["agent_id"] == "agent1"
+    assert data["address"] == "('10.0.0.1', 4444)"
 
     resp2 = client.get("/connections/missing")
     assert resp2.status_code == 404
