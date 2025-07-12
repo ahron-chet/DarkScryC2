@@ -38,10 +38,22 @@ class AgentController:
             else:
                 conns = data
             if isinstance(conns, list):
-                return {str(cid): {} for cid in conns}
+                parsed: dict[str, dict] = {}
+                for item in conns:
+                    if isinstance(item, dict) and "agent_id" in item:
+                        parsed[str(item["agent_id"])] = {"address": item.get("address")}
+                    else:
+                        parsed[str(item)] = {}
+                return parsed
             return conns
         if isinstance(data, list):
-            return {str(cid): {} for cid in data}
+            parsed: dict[str, dict] = {}
+            for item in data:
+                if isinstance(item, dict) and "agent_id" in item:
+                    parsed[str(item["agent_id"])] = {"address": item.get("address")}
+                else:
+                    parsed[str(item)] = {}
+            return parsed
         return {}
 
     def _agent_to_schema(self, agent, connections: dict[str, dict]) -> AgentRead:
