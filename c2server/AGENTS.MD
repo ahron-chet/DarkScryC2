@@ -4,7 +4,7 @@ Here's the improved and streamlined version of your `AGENTS.md` document, clearl
 
 # DarkScry C2 WebSocket Server – Development Guide
 
-This directory (`c2server_migration/`) contains the refactored DarkScry C2 WebSocket server (c2server/) along with its associated FastAPI-based management API. It adheres strictly to modern asynchronous programming patterns.
+This directory (`c2server/`) contains the refactored DarkScry C2 WebSocket server (c2server/) along with its associated FastAPI-based management API. It adheres strictly to modern asynchronous programming patterns.
 The current `c2server` functions as an agent communication hub implemented in Python. It manages WebSocket connections from agents and provides a minimal management API via FastAPI. Configuration is handled entirely through environment variables, and Redis is used for tracking active connections.
 The objective is to fully reconstruct this module from the ground up, ensuring a clean, maintainable architecture. The design should explicitly keep the Management and C2 server as separate containers, promoting clear boundaries and scalability.
 
@@ -15,7 +15,7 @@ The objective is to fully reconstruct this module from the ground up, ensuring a
 This layout follows best practices, ensuring clear separation of concerns and maintainability:
 
 ```
-c2server_migration/
+c2server/
 ├── docker/                  # Dockerfile for containerization
 ├── main.py                  # Application entry point
 ├── darkscryc2server/
