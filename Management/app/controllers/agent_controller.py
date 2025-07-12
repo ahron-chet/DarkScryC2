@@ -28,10 +28,7 @@ class AgentController:
                 data = await remote_get_connections()
         except Exception:  # pragma: no cover - network failures
             return {}
-
-        if agent_id and data is not None:
-            return {agent_id: data}
-
+        print(data)
         if isinstance(data, dict):
             if "connections" in data:
                 conns = data["connections"]
