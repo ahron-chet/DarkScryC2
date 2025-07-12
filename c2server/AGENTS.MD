@@ -1,6 +1,3 @@
-Here's the improved and streamlined version of your `AGENTS.md` document, clearly structured and formatted to follow best practices:
-
----
 
 # DarkScry C2 WebSocket Server – Development Guide
 
