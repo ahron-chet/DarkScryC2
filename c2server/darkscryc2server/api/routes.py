@@ -25,7 +25,7 @@ async def list_connections(request: Request):
     """
     manager = _server(request)
     conns = await manager.list_all()
-    return list(conns.keys())
+    return [{"agent_id":k, "address": v.address} for k, v in conns.items()]
 
 
 @router.get("/connections/{agent_id}")

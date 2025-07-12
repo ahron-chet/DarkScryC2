@@ -21,7 +21,7 @@ async def remote_get_connections(host: str = None, port: int = 9100) -> list:
     """
     if host is None:
         host = getenv("C2_SERVER_HOST", "127.0.0.1")
-    r = await session().get(url=f"http://{host}:{port}/api/connections")
+    r = await session().get(url=f"http://{host}:{port}/connections")
     return await r.json()
 
 
@@ -31,7 +31,7 @@ async def remote_get_connection(
     """Retrieve details for a single connection."""
     if host is None:
         host = getenv("C2_SERVER_HOST", "127.0.0.1")
-    r = await session().get(url=f"http://{host}:{port}/api/connections/{agent_id}")
+    r = await session().get(url=f"http://{host}:{port}/connections/{agent_id}")
     if r.status == 404:
         return None
     return await r.json()
