@@ -2,10 +2,12 @@ from fastapi import Depends, WebSocket, WebSocketDisconnect
 
 from ..core.connection import ConnectionManager
 from ..models.messages import ManagerAction, ManagerRequestWs, ManagerResponse
+from ..utils.logging import get_logger
 
 
 async def manager_ws_endpoint(websocket: WebSocket) -> None:
     manager: ConnectionManager = websocket.app.state.conn_manager
+    logger = get_logger(__name__)
     await websocket.accept()
     try:
         while True:
@@ -50,6 +52,10 @@ async def manager_ws_endpoint(websocket: WebSocket) -> None:
                         ).model_dump_json()
                     )
                 except Exception as exc:
+                    logger.exception(
+                        "command execution failed",
+                        extra={"conn_id": req.conn_id},
+                    )
                     await websocket.send_text(
                         ManagerResponse(success=False, error=str(exc)).model_dump_json()
                     )
@@ -60,6 +66,6 @@ async def manager_ws_endpoint(websocket: WebSocket) -> None:
                     ).model_dump_json()
                 )
     except WebSocketDisconnect:
-        pass
+        logger.info("manager websocket disconnected")
     finally:
         await websocket.close()
