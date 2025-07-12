@@ -105,7 +105,7 @@ def required_role(role: UserRole) -> Callable[[User], User]:
     """Return dependency ensuring the current user has the given role."""
 
     async def _checker(user: User = Depends(get_current_user)) -> User:
-        if user.role != role.value and user.role != UserRole.ADMIN:
+        if user.role != role.value and user.role != UserRole.ADMIN.value:
             raise HTTPException(status_code=403, detail="Not authorized")
         return user
 

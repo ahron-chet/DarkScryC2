@@ -103,3 +103,17 @@ async def test_user_cannot_update_other_user(
         headers=_auth_header(reader_token),
     )
     assert resp.status_code == 403
+
+
+async def test_admin_token_allows_operator_routes(
+    client: AsyncClient, create_test_user, get_token
+):
+    await create_test_user("admin", UserRole.ADMIN)
+    admin_token = await get_token("admin")
+
+    resp = await client.post(
+        "/agents/",
+        json={"host_name": "adminhost", "os": "linux"},
+        headers=_auth_header(admin_token),
+    )
+    assert resp.status_code == 201
