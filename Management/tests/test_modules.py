@@ -26,20 +26,16 @@ async def test_execution_and_collection_modules(
     agent_id = resp.json()["agent_id"]
 
     async def fake_remote_send_command(**kwargs):
-        from darkscryc2server.Models.remote_tools_schemas import ManagerResponse
+        from darkscryc2server.models.messages import AgentResponse
 
-        return ManagerResponse(success=True, data={"result": "ok"})
+        return AgentResponse(success=True, results={"result": "ok"})
 
     monkeypatch.setattr(
-        "darkscryc2server.Utils.remote_utils.commands.remote_send_command",
+        "darkscryc2server.utils.remote_manager.remote_send_command",
         fake_remote_send_command,
     )
     monkeypatch.setattr(
         "app.services.modules.execution.remote_send_command",
-        fake_remote_send_command,
-    )
-    monkeypatch.setattr(
-        "app.services.modules.collection.remote_send_command",
         fake_remote_send_command,
     )
 
@@ -74,8 +70,9 @@ async def test_execution_and_collection_modules(
     assert resp.status_code == 200
     assert resp.json()["success"] is True
 
-    resp = await client.get(
+    resp = await client.post(
         f"/agents/{agent_id}/modules/execution/shell/start_shell",
+        json={},
         headers=_auth(token),
     )
     assert resp.status_code == 200
