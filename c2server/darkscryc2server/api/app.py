@@ -21,4 +21,12 @@ app.add_api_websocket_route("/manager_ws", manager_ws_endpoint)
 
 @app.get("/health")
 async def health():
+    """Simple health check endpoint used for monitoring.
+
+    Returns
+    -------
+    dict
+        Dictionary with a single ``"status"`` key indicating the API is running.
+    """
+
     return {"status": "ok"}
