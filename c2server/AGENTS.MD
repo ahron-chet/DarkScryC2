@@ -9,32 +9,33 @@ The objective is to fully reconstruct this module from the ground up, ensuring a
 
 ## 📁 Project Structure
 
-This layout follows best practices, ensuring clear separation of concerns and maintainability:
+Here's a clear and concise way to communicate your idea:
+
+---
+
+This project structure serves as an example of best practices for clear separation of concerns, maintainability, and scalability. Developers should follow these principles, using the provided layout as guidance. Feel free to extend existing directories or create new ones as needed, always aligning with the overall best practices and the conceptual structure shown here.
+
+**Recommended Directory Structure (directories only):**
 
 ```
 c2server/
-├── docker/                  # Dockerfile for containerization
-├── main.py                  # Application entry point
-├── darkscryc2server/
-│   ├── api/                 # Management API endpoints
-│   │   ├── routes.py
-│   │   └── websocket.py
-│   ├── core/                # Core business logic and components
-│   │   ├── config.py        # Pydantic configuration management
-│   │   ├── connection.py    # WebSocket and Redis connection handling
-│   │   ├── server.py        # WebSocket server core implementation
-│   │   └── security.py      # Security and authentication utilities
-│   ├── models/              # Pydantic data schemas and validation
-│   │   ├── messages.py
-│   │   └── schemas.py
-│   └── utils/               # Utility modules and common helpers
-│       ├── logging.py
-│       └── helpers.py
-└── tests/                   # Unit and integration tests
-    ├── unit/
-    └── integration/
-
+├── docker/                  # Docker containerization files
+├── darkscryc2server/        # Core application package
+│   ├── api/                 # API endpoints and routing
+│   ├── core/                # Core business logic components
+│   ├── models/              # Data models and schema definitions
+│   └── utils/               # Utility functions and common helpers
+└── tests/                   # Testing suites
+    ├── unit/                # Unit tests
+    └── integration/         # Integration tests
 ```
+
+**Guidelines:**
+
+* Maintain clear separation between layers (API, core logic, models, utilities).
+* Add or extend directories based on specific feature needs, ensuring new additions align conceptually with existing best practices.
+* Always prioritize readability, maintainability, and modularity.
+
 
 **Separation of concerns:**
 
