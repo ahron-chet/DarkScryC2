@@ -25,7 +25,7 @@ async def list_connections(request: Request):
     """
     manager = _server(request)
     conns = await manager.list_all()
-    return [{"agent_id":k, "address": v.address} for k, v in conns.items()]
+    return [{"agent_id": k, "address": v.address} for k, v in conns.items()]
 
 
 @router.get("/connections/{agent_id}")
@@ -35,7 +35,7 @@ async def get_connection(request: Request, agent_id: str):
     conn = await manager.get(agent_id)
     if not conn:
         raise HTTPException(status_code=404, detail="Agent not found")
-    return {"address": str(conn.address), "type": "ws"}
+    return {"agent_id": agent_id, "address": str(conn.address)}
 
 
 @router.post("/command/{agent_id}")

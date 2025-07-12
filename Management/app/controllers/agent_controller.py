@@ -23,35 +23,20 @@ class AgentController:
         """Return active connections from the C2 server."""
         try:
             if agent_id:
-                data = await remote_get_connection(agent_id)
-            else:
-                data = await remote_get_connections()
+                conn = await remote_get_connection(agent_id)
+                if not conn:
+                    return {}
+                return {agent_id: {"address": conn.get("address")}}
+
+            connections = await remote_get_connections()
         except Exception:  # pragma: no cover - network failures
             return {}
-        print(data)
-        if isinstance(data, dict):
-            if "connections" in data:
-                conns = data["connections"]
-            else:
-                conns = data
-            if isinstance(conns, list):
-                parsed: dict[str, dict] = {}
-                for item in conns:
-                    if isinstance(item, dict) and "agent_id" in item:
-                        parsed[str(item["agent_id"])] = {"address": item.get("address")}
-                    else:
-                        parsed[str(item)] = {}
-                return parsed
-            return conns
-        if isinstance(data, list):
-            parsed: dict[str, dict] = {}
-            for item in data:
-                if isinstance(item, dict) and "agent_id" in item:
-                    parsed[str(item["agent_id"])] = {"address": item.get("address")}
-                else:
-                    parsed[str(item)] = {}
-            return parsed
-        return {}
+
+        parsed: dict[str, dict] = {}
+        for item in connections:
+            if isinstance(item, dict) and "agent_id" in item:
+                parsed[str(item["agent_id"])] = {"address": item.get("address")}
+        return parsed
 
     def _agent_to_schema(self, agent, connections: dict[str, dict]) -> AgentRead:
         agent_id_str = str(agent.agent_id)
