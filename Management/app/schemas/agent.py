@@ -31,6 +31,14 @@ class AgentRead(BaseModel):
     onboarded_time: Optional[datetime] = Field(
         None, description="Time the agent was onboarded"
     )
+    is_active: bool = Field(
+        False,
+        description="Whether the agent currently has an active connection",
+    )
+    address: Optional[str] = Field(
+        None,
+        description="Last known remote address for the agent",
+    )
 
     model_config = ConfigDict(from_attributes=True)
 

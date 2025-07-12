@@ -1,7 +1,6 @@
 import pytest
-from httpx import AsyncClient
-
 from app.models.user import UserRole
+from httpx import AsyncClient
 
 pytestmark = pytest.mark.anyio
 
@@ -106,10 +105,25 @@ async def test_user_cannot_update_other_user(
 
 
 async def test_admin_token_allows_operator_routes(
-    client: AsyncClient, create_test_user, get_token
+    client: AsyncClient, create_test_user, get_token, monkeypatch
 ):
     await create_test_user("admin", UserRole.ADMIN)
     admin_token = await get_token("admin")
+
+    async def fake_get_connections():
+        return []
+
+    async def fake_get_connection(agent_id: str):
+        return {}
+
+    monkeypatch.setattr(
+        "app.controllers.agent_controller.remote_get_connections",
+        fake_get_connections,
+    )
+    monkeypatch.setattr(
+        "app.controllers.agent_controller.remote_get_connection",
+        fake_get_connection,
+    )
 
     resp = await client.post(
         "/agents/",

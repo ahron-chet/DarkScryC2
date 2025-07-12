@@ -1,7 +1,6 @@
 import os
 import sys
 
-import pytest
 from fastapi.testclient import TestClient
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -10,15 +9,12 @@ os.environ.setdefault("C2_SERVER_PORT", "9100")
 os.environ.setdefault("C2_SERVER_REDIS_URL", "redis://localhost")
 
 from darkscryc2server.api.app import app
+from darkscryc2server.core.connection import ConnectionManager
 
 
 class DummyConn:
     def __init__(self):
-        self.sent = None
-
-    async def send_and_receive(self, msg: str) -> str:
-        self.sent = msg
-        return "resp:" + msg
+        self.address = ("10.0.0.1", 4444)
 
 
 class DummyManager:
@@ -36,18 +32,17 @@ def override_manager() -> DummyManager:
     return DummyManager()
 
 
-from darkscryc2server.core.connection import ConnectionManager
-
-
-def test_command_route():
+def test_get_single_connection():
     app.dependency_overrides[ConnectionManager] = override_manager
     app.state.conn_manager = override_manager()
     client = TestClient(app)
-    resp = client.post(
-        "/command/agent1",
-        json={"command": {"text": "hello"}, "action_id": 2},
-    )
+
+    resp = client.get("/connections/agent1")
     assert resp.status_code == 200
-    assert resp.json()["result"] == ('resp:{"command":{"text":"hello"},"action_id":2}')
+    assert resp.json()["address"] == "('10.0.0.1', 4444)"
+
+    resp2 = client.get("/connections/missing")
+    assert resp2.status_code == 404
+
     app.dependency_overrides.clear()
     app.state.conn_manager = None
