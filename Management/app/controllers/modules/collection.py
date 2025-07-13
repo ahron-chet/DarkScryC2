@@ -1,9 +1,11 @@
+import json
 import uuid
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 
 from ...schemas.modules.collection import (
     FileCollectionRequest,
+    FileExplorerStreamResponse,
     UploadBase64FileRequest,
 )
 from ...schemas.tasks import TaskOut
@@ -24,6 +26,16 @@ class CollectionController:
     ) -> TaskOut:
         job_id = await self.service.stream_directory_task(agent_id, payload.path)
         return TaskOut(task_id=job_id)
+
+    async def stream_directory(
+        self, agent_id: uuid.UUID, payload: FileCollectionRequest
+    ) -> FileExplorerStreamResponse:
+        res = await self.service.stream_directory(agent_id, payload.path)
+        if not res.success or not res.data:
+            raise HTTPException(status_code=400, detail=res.error)
+        snapshot_str = res.data.get("directory_snapshot", "{}")
+        snapshot = json.loads(snapshot_str)
+        return FileExplorerStreamResponse(**snapshot)
 
     async def get_file_base64_job(
         self, agent_id: uuid.UUID, payload: FileCollectionRequest

