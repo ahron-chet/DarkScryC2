@@ -1,8 +1,9 @@
 import uuid
 
 import pytest
-from app.models.user import UserRole
 from httpx import AsyncClient
+
+from app.models.user import UserRole
 
 pytestmark = pytest.mark.anyio
 
@@ -94,6 +95,47 @@ async def test_execution_and_collection_modules(
 
     resp = await client.get(
         f"/agents/{agent_id}/modules/collection/machine/basic_machine_info",
+        headers=_auth(token),
+    )
+    assert resp.status_code == 200
+    assert "task_id" in resp.json()
+    monkeypatch.setattr(
+        "app.services.modules.collection.remote_send_command",
+        fake_remote_send_command,
+    )
+
+    resp = await client.post(
+        f"/agents/{agent_id}/modules/collection/files/stream_files_explorer",
+        json={"path": "/"},
+        headers=_auth(token),
+    )
+    assert resp.status_code == 200
+
+    resp = await client.post(
+        f"/agents/{agent_id}/modules/collection/files/get_file_base64",
+        json={"path": "/tmp/file.txt"},
+        headers=_auth(token),
+    )
+    assert resp.status_code == 200
+    assert "task_id" in resp.json()
+
+    resp = await client.post(
+        f"/agents/{agent_id}/modules/collection/files/upload_base64",
+        json={"path": "/tmp/file.txt", "file_base64": "Zg==", "file_name": "f.txt"},
+        headers=_auth(token),
+    )
+    assert resp.status_code == 200
+    assert "task_id" in resp.json()
+
+    resp = await client.get(
+        f"/agents/{agent_id}/modules/collection/passwords/wifi_basic_info",
+        headers=_auth(token),
+    )
+    assert resp.status_code == 200
+    assert "task_id" in resp.json()
+
+    resp = await client.get(
+        f"/agents/{agent_id}/modules/collection/process/enumerate_processes",
         headers=_auth(token),
     )
     assert resp.status_code == 200
