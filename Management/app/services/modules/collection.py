@@ -1,3 +1,4 @@
+import json
 import uuid
 
 from arq.jobs import Job
@@ -23,11 +24,19 @@ class CollectionService:
         return uuid.UUID(job.job_id)
 
     async def stream_directory(self, agent_id: uuid.UUID, path: str) -> AgentResponse:
-        return await remote_send_command(
+        resp = await remote_send_command(
             agent_id=str(agent_id),
             action_id=CommandIdentifiers.SNAP_FULL_DIRECTORY,
             command={"path": path},
         )
+        if resp.success and resp.data and "directory_snapshot" in resp.data:
+            try:
+                snapshot = json.loads(resp.data["directory_snapshot"])
+                resp.data = snapshot
+            except Exception as exc:
+                resp.success = False
+                resp.error = str(exc)
+        return resp
 
     async def get_file_base64_task(self, agent_id: uuid.UUID, path: str) -> uuid.UUID:
         executor = await get_task_executor()

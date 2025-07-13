@@ -1,3 +1,4 @@
+import json
 import uuid
 
 import pytest
@@ -41,9 +42,14 @@ async def test_execution_and_collection_modules(
     agent_id = resp.json()["agent_id"]
 
     async def fake_remote_send_command(**kwargs):
-        from darkscryc2server.models.messages import AgentResponse
+        from darkscryc2server.models.messages import AgentResponse, CommandIdentifiers
 
-        return AgentResponse(success=True, results={"result": "ok"})
+        if kwargs.get("action_id") == CommandIdentifiers.SNAP_FULL_DIRECTORY:
+            snapshot = {"Files": [], "Directories": {"Items": []}, "RootPath": "/"}
+            return AgentResponse(
+                success=True, data={"directory_snapshot": json.dumps(snapshot)}
+            )
+        return AgentResponse(success=True, data={"result": "ok"})
 
     monkeypatch.setattr(
         "darkscryc2server.utils.remote_manager.remote_send_command",
