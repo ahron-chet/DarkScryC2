@@ -105,10 +105,6 @@ async def test_execution_and_collection_modules(
     )
     assert resp.status_code == 200
     assert "task_id" in resp.json()
-    monkeypatch.setattr(
-        "app.services.modules.collection.remote_send_command",
-        fake_remote_send_command,
-    )
 
     resp = await client.post(
         f"/agents/{agent_id}/modules/collection/files/stream_files_explorer",
@@ -116,6 +112,7 @@ async def test_execution_and_collection_modules(
         headers=_auth(token),
     )
     assert resp.status_code == 200
+    assert "task_id" in resp.json()
 
     resp = await client.post(
         f"/agents/{agent_id}/modules/collection/files/get_file_base64",

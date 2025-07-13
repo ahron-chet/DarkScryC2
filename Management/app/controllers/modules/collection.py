@@ -4,7 +4,6 @@ from fastapi import Depends
 
 from ...schemas.modules.collection import (
     FileCollectionRequest,
-    FileExplorerStreamResponse,
     UploadBase64FileRequest,
 )
 from ...schemas.tasks import TaskOut
@@ -22,9 +21,9 @@ class CollectionController:
 
     async def stream_directory_job(
         self, agent_id: uuid.UUID, payload: FileCollectionRequest
-    ) -> FileExplorerStreamResponse:
-        resp = await self.service.stream_directory(agent_id, payload.path)
-        return FileExplorerStreamResponse(**resp.data)
+    ) -> TaskOut:
+        job_id = await self.service.stream_directory_task(agent_id, payload.path)
+        return TaskOut(task_id=job_id)
 
     async def get_file_base64_job(
         self, agent_id: uuid.UUID, payload: FileCollectionRequest
