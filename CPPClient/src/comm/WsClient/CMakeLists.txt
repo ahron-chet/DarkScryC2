@@ -4,7 +4,8 @@ target_include_directories(WsClient PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${websocketpp_SOURCE_DIR}
     ${asio_SOURCE_DIR}/asio/include
-    ${PROJECT_SOURCE_DIR}/modules
+    ${PROJECT_SOURCE_DIR}/src/core
+    ${PROJECT_SOURCE_DIR}/src/utils
 )
 
 if (WIN32)
