@@ -202,7 +202,21 @@ Match this style for search bars:
 * ❌ Don’t write modal logic inline in the render tree — extract when reusable
 
 ---
+🧪 QA Checklist
+Before merging or registering your panel:
 
+ Looks good in desktop and mobile
+
+ Table has horizontal scroll when needed
+
+ All user actions (upload, select, download) show feedback
+
+ No hardcoded error strings
+
+ Icons use Bootstrap or SVG
+
+ Cyber style is respected in layout & colors
+---
 ## 🧭 Future Modules Planned
 
 * [ ] Credential Harvesting (Windows Vault)
