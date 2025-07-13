@@ -93,28 +93,24 @@ class AppSettings(BaseSettings):
         description="Expected audience claim for JWTs",
         validation_alias="MANAGEMENT_JWT_AUDIENCE",
     )
-    cors_origins: list[str] = Field(
-        [],
-        description="Allowed CORS origins",
-        validation_alias="MANAGEMENT_CORS_ORIGINS",
+    cors_origins: str | list[str] = Field(
+        [], description="Allowed CORS origins", validation_alias="MANAGEMENT_CORS_ORIGINS"
     )
 
-    model_config = ConfigDict(env_file=None, extra="ignore", populate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True, extra="ignore", env_file=None)
 
-    @field_validator("cors_origins", mode="before")
-    @classmethod
-    def parse_cors_origins(cls, v):
+    # ➋ Convert a plain string to a list **after** env parsing
+    @field_validator("cors_origins", mode="after")
+    def _split_origins(cls, v):
         if isinstance(v, str):
             return [c.strip() for c in v.split(",") if c.strip()]
         return v
 
     @model_validator(mode="after")
-    def build_database_url(self) -> "AppSettings":
+    def _build_database_url(self) -> "AppSettings":
         if not self.database_url:
-            self.database_url = (
-                f"postgresql+asyncpg://{self.db_user}:{self.db_password}@"
-                f"{self.db_host}:{self.db_port}/{self.db_name}"
-            )
+            creds = f"{self.db_user}:{self.db_password}" if self.db_password else self.db_user
+            self.database_url = f"postgresql+asyncpg://{creds}@{self.db_host}:{self.db_port}/{self.db_name}"
         return self
 
 
