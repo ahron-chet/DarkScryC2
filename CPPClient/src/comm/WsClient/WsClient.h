@@ -20,6 +20,7 @@ namespace CppAgent {
         bool start();
         void stop();
         bool send(const std::string& msg);
+        const std::string& get_uri() const { return uri_; }
 
     private:
         using client = websocketpp::client<websocketpp::config::asio_client>;
