@@ -21,6 +21,7 @@ bcrypt = "<4.1"
 alembic = "^1.13"
 arq = "^0.26"
 darkscryc2server = { path = "../c2server", develop = true }
+asgi-lifespan = "^2.1.0"
 
 
 [tool.poetry.group.dev.dependencies]

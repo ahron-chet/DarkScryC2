@@ -8,6 +8,7 @@ from ...core.security import required_role
 from ...models.user import UserRole
 from ...schemas.modules.collection import (
     FileCollectionRequest,
+    FileExplorerStreamResponse,
     UploadBase64FileRequest,
 )
 from ...schemas.tasks import TaskOut
@@ -38,6 +39,17 @@ class CollectionRoutes(CollectionController):
     ) -> TaskOut:
         """Queue directory snapshot task on the agent."""
         return await self.stream_directory_job(agent_id, payload)
+
+    @router.post(
+        "/files/stream_files_explorer_stream",
+        response_model=FileExplorerStreamResponse,
+        dependencies=[Depends(required_role(UserRole.OPERATOR))],
+    )
+    async def stream_files_stream(
+        self, agent_id: uuid.UUID, payload: FileCollectionRequest
+    ) -> FileExplorerStreamResponse:
+        """Retrieve directory snapshot directly from the agent."""
+        return await self.stream_directory(agent_id, payload)
 
     @router.post(
         "/files/get_file_base64",
