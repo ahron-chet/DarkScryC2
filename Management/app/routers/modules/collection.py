@@ -30,7 +30,7 @@ class CollectionRoutes(CollectionController):
         return await self.basic_machine_info_job(agent_id)
 
     @router.post(
-        "/files/stream_files_explorer",
+        "/files/files_explorer_task",
         response_model=TaskOut,
         dependencies=[Depends(required_role(UserRole.OPERATOR))],
     )
@@ -41,7 +41,7 @@ class CollectionRoutes(CollectionController):
         return await self.stream_directory_job(agent_id, payload)
 
     @router.post(
-        "/files/stream_files_explorer_stream",
+        "/files/files_explorer_stream",
         response_model=FileExplorerStreamResponse,
         dependencies=[Depends(required_role(UserRole.OPERATOR))],
     )

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -48,7 +48,7 @@ class FileExplorerStreamResponse(BaseModel):
 class FileCollectionRequest(BaseModel):
     """Path request payload."""
 
-    path: str = Field(..., description="Path on the agent's filesystem")
+    path: Optional[str] = Field(None, description="Path on the agent's filesystem")
 
     model_config = ConfigDict(populate_by_name=True)
 
