@@ -1,5 +1,5 @@
 from enum import Enum, IntEnum
-
+from typing import Optional
 from pydantic import BaseModel
 
 
@@ -17,7 +17,7 @@ class CommandIdentifiers(IntEnum):
 
 
 class CommandMessage(BaseModel):
-    command: dict = None
+    command: Optional[dict] = None
     action_id: CommandIdentifiers
 
 

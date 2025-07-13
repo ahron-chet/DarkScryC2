@@ -60,7 +60,6 @@ async def send_command(request: Request, agent_id: str, msg: CommandMessage):
     conn = await manager.get(agent_id)
     if not conn:
         raise HTTPException(status_code=404, detail="Agent not found")
-
     try:
         result = await conn.send_and_receive(msg.model_dump_json())
         if result is None:
