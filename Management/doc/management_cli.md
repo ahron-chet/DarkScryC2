@@ -20,12 +20,17 @@ poetry run alembic upgrade head
 ```
 
 Before running any command be sure the management backend environment variables
-are configured. At minimum set `MANAGEMENT_DATABASE_URL` and
-`MANAGEMENT_SECRET_KEY` (they can also be placed in your shell profile or a
-`.env` file that you load manually):
+are configured. At minimum set the database connection values (`DB_NAME`,
+`DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`) and `MANAGEMENT_SECRET_KEY`
+(they can also be placed in your shell profile or a `.env` file that you load
+manually):
 
 ```bash
-export MANAGEMENT_DATABASE_URL="postgresql+asyncpg://user:pass@localhost/db"
+export DB_NAME=management
+export DB_USER=management
+export DB_PASSWORD=pass
+export DB_HOST=localhost
+export DB_PORT=5432
 export MANAGEMENT_SECRET_KEY="change-me"
 ```
 

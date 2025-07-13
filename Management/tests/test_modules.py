@@ -111,7 +111,7 @@ async def test_execution_and_collection_modules(
     assert "task_id" in resp.json()
 
     resp = await client.post(
-        f"/agents/{agent_id}/modules/collection/files/stream_files_explorer",
+        f"/agents/{agent_id}/modules/collection/files/files_explorer_task",
         json={"path": "/"},
         headers=_auth(token),
     )
@@ -119,7 +119,7 @@ async def test_execution_and_collection_modules(
     assert "task_id" in resp.json()
 
     resp = await client.post(
-        f"/agents/{agent_id}/modules/collection/files/stream_files_explorer_stream",
+        f"/agents/{agent_id}/modules/collection/files/files_explorer_stream",
         json={"path": "/"},
         headers=_auth(token),
     )

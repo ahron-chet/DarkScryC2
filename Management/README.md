@@ -51,7 +51,7 @@ poetry run arq arq_worker.WorkerSettings
 ## External Interactions
 
 * **`c2server`** – The management backend communicates with the Python server component located in `c2server/` via helper functions like `remote_send_command`. This is how agent modules are triggered or shell commands executed.
-* **PostgreSQL** – All persistent data is stored in a PostgreSQL database. Connection details are provided via environment variables (`MANAGEMENT_DATABASE_URL`).
+* **PostgreSQL** – All persistent data is stored in a PostgreSQL database. Connection details are provided via environment variables (`DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`).
 * **Redis** – Used for background job scheduling with ARQ (`MANAGEMENT_REDIS_*` variables).
 
 The environment variables required by the service are documented in `doc/settings.md`.

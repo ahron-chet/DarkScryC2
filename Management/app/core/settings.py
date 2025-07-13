@@ -1,5 +1,6 @@
 from functools import lru_cache
-from pydantic import ConfigDict, Field, field_validator
+
+from pydantic import ConfigDict, Field, field_validator, model_validator
 from pydantic_settings import BaseSettings
 
 
@@ -32,10 +33,35 @@ class ArqSettings(BaseSettings):
 class AppSettings(BaseSettings):
     """Main application settings, required only for application processes."""
 
-    database_url: str = Field(
-        ...,
+    database_url: str | None = Field(
+        None,
         description="Database connection URL",
         validation_alias="MANAGEMENT_DATABASE_URL",
+    )
+    db_user: str = Field(
+        "default_user",
+        description="Database username",
+        validation_alias="DB_USER",
+    )
+    db_name: str = Field(
+        "default_db_name",
+        description="Database name",
+        validation_alias="DB_NAME",
+    )
+    db_host: str = Field(
+        "localhost",
+        description="Database host",
+        validation_alias="DB_HOST",
+    )
+    db_port: int = Field(
+        5432,
+        description="Database port",
+        validation_alias="DB_PORT",
+    )
+    db_password: str = Field(
+        "",
+        description="Database password",
+        validation_alias="DB_PASSWORD",
     )
     secret_key: str = Field(
         ...,
@@ -82,8 +108,18 @@ class AppSettings(BaseSettings):
             return [c.strip() for c in v.split(",") if c.strip()]
         return v
 
+    @model_validator(mode="after")
+    def build_database_url(self) -> "AppSettings":
+        if not self.database_url:
+            self.database_url = (
+                f"postgresql+asyncpg://{self.db_user}:{self.db_password}@"
+                f"{self.db_host}:{self.db_port}/{self.db_name}"
+            )
+        return self
+
 
 # Separate cached getters:
+
 
 @lru_cache()
 def get_arq_settings() -> ArqSettings:
