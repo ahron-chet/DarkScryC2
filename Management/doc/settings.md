@@ -2,7 +2,11 @@
 
 The FastAPI backend reads configuration from environment variables. Copy `.env.example` to `.env` and adjust the values for your environment.
 
-- `MANAGEMENT_DATABASE_URL` – PostgreSQL connection string used by the application.
+- `DB_NAME` – name of the PostgreSQL database.
+- `DB_USER` – database username.
+- `DB_PASSWORD` – password for the database user.
+- `DB_HOST` – hostname of the PostgreSQL server.
+- `DB_PORT` – port of the PostgreSQL server.
 - `MANAGEMENT_SECRET_KEY` – secret value used for signing JWT tokens.
 - `MANAGEMENT_DEBUG` – enable debug mode when set to `True`.
 - `MANAGEMENT_CORS_ORIGINS` – comma separated list of allowed CORS origins.

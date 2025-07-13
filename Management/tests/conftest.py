@@ -4,9 +4,15 @@ import warnings
 import pytest
 from asgi_lifespan import LifespanManager
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy.engine.url import make_url
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-os.environ.setdefault("MANAGEMENT_DATABASE_URL", os.environ["TEST_DATABASE_URL"])
+test_url = make_url(os.environ["TEST_DATABASE_URL"])
+os.environ.setdefault("DB_HOST", test_url.host or "localhost")
+os.environ.setdefault("DB_PORT", str(test_url.port or 5432))
+os.environ.setdefault("DB_USER", test_url.username or "postgres")
+os.environ.setdefault("DB_PASSWORD", test_url.password or "")
+os.environ.setdefault("DB_NAME", test_url.database or "test_db")
 os.environ.setdefault("MANAGEMENT_SECRET_KEY", "secret")
 
 warnings.filterwarnings("ignore", category=DeprecationWarning, module=".*passlib.*")
@@ -24,10 +30,15 @@ def anyio_backend() -> str:
 async def prepare_database(monkeypatch):
     engine = create_async_engine(os.environ["TEST_DATABASE_URL"])
     async_session = async_sessionmaker(engine, expire_on_commit=False)
-    monkeypatch.setattr("app.core.database.engine", engine, raising=False)
+
+    class _TestDBConfig:
+        def __init__(self, engine, sessionmaker):
+            self.engine = engine
+            self.sessionmaker = sessionmaker
+
     monkeypatch.setattr(
-        "app.core.database.AsyncSessionLocal",
-        async_session,
+        "app.core.database.get_db_config",
+        lambda: _TestDBConfig(engine, async_session),
         raising=False,
     )
     async with engine.begin() as conn:
