@@ -1,8 +1,10 @@
+import json
 import uuid
 
 import pytest
-from app.models.user import UserRole
 from httpx import AsyncClient
+
+from app.models.user import UserRole
 
 pytestmark = pytest.mark.anyio
 
@@ -40,9 +42,14 @@ async def test_execution_and_collection_modules(
     agent_id = resp.json()["agent_id"]
 
     async def fake_remote_send_command(**kwargs):
-        from darkscryc2server.models.messages import AgentResponse
+        from darkscryc2server.models.messages import AgentResponse, CommandIdentifiers
 
-        return AgentResponse(success=True, results={"result": "ok"})
+        if kwargs.get("action_id") == CommandIdentifiers.SNAP_FULL_DIRECTORY:
+            snapshot = {"Files": [], "Directories": {"Items": []}, "RootPath": "/"}
+            return AgentResponse(
+                success=True, data={"directory_snapshot": json.dumps(snapshot)}
+            )
+        return AgentResponse(success=True, data={"result": "ok"})
 
     monkeypatch.setattr(
         "darkscryc2server.utils.remote_manager.remote_send_command",
@@ -94,6 +101,44 @@ async def test_execution_and_collection_modules(
 
     resp = await client.get(
         f"/agents/{agent_id}/modules/collection/machine/basic_machine_info",
+        headers=_auth(token),
+    )
+    assert resp.status_code == 200
+    assert "task_id" in resp.json()
+
+    resp = await client.post(
+        f"/agents/{agent_id}/modules/collection/files/stream_files_explorer",
+        json={"path": "/"},
+        headers=_auth(token),
+    )
+    assert resp.status_code == 200
+    assert "task_id" in resp.json()
+
+    resp = await client.post(
+        f"/agents/{agent_id}/modules/collection/files/get_file_base64",
+        json={"path": "/tmp/file.txt"},
+        headers=_auth(token),
+    )
+    assert resp.status_code == 200
+    assert "task_id" in resp.json()
+
+    resp = await client.post(
+        f"/agents/{agent_id}/modules/collection/files/upload_base64",
+        json={"path": "/tmp/file.txt", "file_base64": "Zg==", "file_name": "f.txt"},
+        headers=_auth(token),
+    )
+    assert resp.status_code == 200
+    assert "task_id" in resp.json()
+
+    resp = await client.get(
+        f"/agents/{agent_id}/modules/collection/passwords/wifi_basic_info",
+        headers=_auth(token),
+    )
+    assert resp.status_code == 200
+    assert "task_id" in resp.json()
+
+    resp = await client.get(
+        f"/agents/{agent_id}/modules/collection/process/enumerate_processes",
         headers=_auth(token),
     )
     assert resp.status_code == 200
