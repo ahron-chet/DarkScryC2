@@ -59,9 +59,11 @@ add_compile_definitions(ASIO_STANDALONE _WEBSOCKETPP_CPP11_STL_)
 # ----------------------------------------------------------------------
 # 🧩 Internal Modules
 # ----------------------------------------------------------------------
-add_subdirectory(modules/Logger)
-add_subdirectory(modules/WsClient)
-add_subdirectory(modules/CommandHandler)
+add_subdirectory(src/utils/Logger)
+add_subdirectory(src/comm/WsClient)
+add_subdirectory(src/core/CommandHandler)
+add_subdirectory(src/attacks)
+add_subdirectory(src/mitre)
 
 # ----------------------------------------------------------------------
 # 🚀 Main Executable
@@ -70,11 +72,14 @@ file(GLOB_RECURSE APP_SRCS CONFIGURE_DEPENDS src/*.cpp src/*.h)
 
 add_executable(DarkScryCpp ${APP_SRCS})
 
-target_link_libraries(DarkScryCpp PRIVATE Logger WsClient CommandHandler)
+target_link_libraries(DarkScryCpp PRIVATE Logger WsClient CommandHandler Attacks Mitre)
 
 target_include_directories(DarkScryCpp PRIVATE
-    ${PROJECT_SOURCE_DIR}/src
-    ${PROJECT_SOURCE_DIR}/modules
+    ${PROJECT_SOURCE_DIR}/src/comm
+    ${PROJECT_SOURCE_DIR}/src/core
+    ${PROJECT_SOURCE_DIR}/src/utils
+    ${PROJECT_SOURCE_DIR}/src/attacks
+    ${PROJECT_SOURCE_DIR}/src/mitre
 )
 
 enable_compiler_warnings(DarkScryCpp)
@@ -91,14 +96,17 @@ if(BUILD_TESTING)
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     FetchContent_MakeAvailable(googletest)
 
-    file(GLOB TEST_SRCS CONFIGURE_DEPENDS tests/*.cpp)
+    file(GLOB_RECURSE TEST_SRCS CONFIGURE_DEPENDS tests/*.cpp)
 
     add_executable(unit_tests ${TEST_SRCS})
 
-    target_link_libraries(unit_tests PRIVATE Logger WsClient CommandHandler GTest::gtest_main)
+    target_link_libraries(unit_tests PRIVATE Logger WsClient CommandHandler Attacks Mitre GTest::gtest_main)
     target_include_directories(unit_tests PRIVATE
-        ${PROJECT_SOURCE_DIR}/src
-        ${PROJECT_SOURCE_DIR}/modules
+        ${PROJECT_SOURCE_DIR}/src/comm
+        ${PROJECT_SOURCE_DIR}/src/core
+        ${PROJECT_SOURCE_DIR}/src/utils
+        ${PROJECT_SOURCE_DIR}/src/attacks
+        ${PROJECT_SOURCE_DIR}/src/mitre
     )
 
     target_compile_features(unit_tests PUBLIC cxx_std_17)
