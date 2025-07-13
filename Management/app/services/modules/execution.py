@@ -18,7 +18,7 @@ class ExecutionService:
         return await remote_send_command(
             agent_id=str(agent_id),
             action_id=CommandIdentifiers.RUN_COMMAND, 
-            command=command.model_dump_json()
+            command=command.model_dump()
         )
 
 

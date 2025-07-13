@@ -27,7 +27,7 @@ class Program
 						ClientPort = 8765
 					});
 
-                                        wsclient = new WsClient($"ws://localhost:8765/{Config.agent_id}");
+                                        wsclient = new WsClient($"ws://localhost:8765/agent/{Config.agent_id}");
 
                                         Task[] tasks = { manager.StartAllAsync(), wsclient.StartAsync() };
                                         await Task.WhenAll(tasks);
@@ -39,7 +39,7 @@ class Program
 		}
 		else
 		{
-			wsclient = new WsClient($"ws://{Config.ServerIp}:876/{Config.agent_id}");
+			wsclient = new WsClient($"ws://{Config.ServerIp}:876/agent/{Config.agent_id}");
 			await wsclient.StartAsync();
 		}
 	}

