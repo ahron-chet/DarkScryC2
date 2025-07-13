@@ -1,19 +1,21 @@
 import uuid
 
+from app.schemas.modules.execution import RunCommand, StartShellCommand
+from darkscryc2server.models.messages import AgentResponse
 from fastapi import Depends
 
 from ...schemas.tasks import TaskOut
 from ...services.modules.execution import ExecutionService
-from app.schemas.modules.execution import StartShellCommand, RunCommand
 
-from darkscryc2server.models.messages import AgentResponse
 
 class ExecutionController:
     """Controller for execution module operations."""
 
     service: ExecutionService = Depends(ExecutionService)
 
-    async def start_shell_task(self, agent_id: uuid.UUID, command: StartShellCommand) -> TaskOut:
+    async def start_shell_task(
+        self, agent_id: uuid.UUID, command: StartShellCommand
+    ) -> TaskOut:
         job_id = await self.service.start_shell_task(agent_id=agent_id, command=command)
         return TaskOut(task_id=job_id)
 

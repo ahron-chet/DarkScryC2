@@ -9,7 +9,7 @@ techniques commonly observed in real-world intrusions.
 
 This repository contains:
 - **c2server** – Python based server component providing agent communication channels and a FastAPI manager.
-- **django** – Django project used for management APIs and asynchronous workers.
+- **Management** – FastAPI service replacing the old Django backend.
 - **frontend** – A Next.js application providing the web interface.
 - **client** – Proof-of-concept C# agent implementation and tools used for the simulation.
 - **dockerfiles** and **docker-compose** files to run the stack.
@@ -20,8 +20,7 @@ This repository contains:
 c2server/    # Python server, FastAPI manager and WebSocket/TCP handling
 client/      # C# client source
 CPPClient/   # C++ rewrite built with CMake (work in progress)
-django/      # Django backend project API Manaement
-Management/  # New Managment on going migration from django
+Management/  # FastAPI management backend
 frontend/    # Next.js frontend
 Dockerfiles/ # Additional worker images
 ```
@@ -34,11 +33,10 @@ The framework is split into several cooperating services:
   connections over legacy TCP or WebSocket and stores their state in Redis. A
   built-in FastAPI application exposes management APIs used by the other
   components.
-- **Django backend** – provides REST endpoints and asynchronous task execution
-  through `arqworker`. It stores agent metadata in PostgreSQL and relies on the
-  server component to execute actions.
-- **Next.js frontend** – a React based dashboard that talks to the Django APIs
-  for operator interaction.
+- **Management API** – FastAPI service that handles authentication, task
+  scheduling with ARQ and stores agent metadata in PostgreSQL.
+- **Next.js frontend** – a React based dashboard that communicates with the
+  management API for operator interaction.
 - **C# client** – prototype Windows agent written in C#.
 - **C++ client** – ongoing port built with CMake and using `websocketpp` for networking.
 
@@ -61,8 +59,8 @@ through the REST or WebSocket APIs. Core capabilities include:
   browser, enabling operation when direct network access is blocked.
 - Simulation tasks are mapped to MITRE ATT&CK techniques for realistic scenarios.
 
-All operations are queued by the Django backend which persists task results in
-the database while the server component handles the low level transport.
+All operations are queued by the management service which persists task results
+in the database while the server component handles the low level transport.
 
 
 ## Running with Docker
@@ -76,7 +74,7 @@ docker compose up --build
 This will start:
 
 - `c2server` on ports `1234` (legacy TCP) and `876` (WebSocket) with a FastAPI manager on port `9100`.
-- `django` API on port `8000` using PostgreSQL and Redis.
+- `management` API on port `8000` using PostgreSQL and Redis.
 - `frontend` on port `3000`.
 - supporting `redis`, `postgres`, and an `arqworker` container.
 
@@ -93,10 +91,9 @@ poetry install
 # run the FastAPI manager with the server
 poetry run python c2server/test.py
 
-# run Django migrations and start the development server
-cd django
-poetry run python DarkScryC2Managment/manage.py migrate
-poetry run uvicorn DarkScryC2Managment.asgi:application --reload
+# run the management API with auto-reload
+cd Management
+poetry run uvicorn app.main:app --reload --port 8000
 
 # start the frontend
 cd frontend
@@ -106,7 +103,7 @@ npm run dev
 
 ## Environment configuration
 
-The `.env.example` file documents all required environment variables including Redis connection, server component host/port and Django database settings. Copy it to `.env` and adjust the values for your environment.
+The `.env.example` file documents all required environment variables including Redis connection, server and management settings. Copy it to `.env` and adjust the values for your environment.
 
 ## Testing
 

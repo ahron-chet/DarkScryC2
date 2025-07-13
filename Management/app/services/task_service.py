@@ -1,10 +1,9 @@
 import uuid
 
-from arq.jobs import Job, JobStatus
-from darkscryc2server.models.messages import CommandIdentifiers
-
 from app.schemas.tasks import TaskResultOut
 from app.utils.tasks import get_task_executor
+from arq.jobs import Job, JobStatus
+from darkscryc2server.models.messages import CommandIdentifiers
 
 
 class TaskService:
@@ -19,7 +18,7 @@ class TaskService:
         redis = await get_task_executor()
         job = Job(task_id.hex, redis)
         info = await job.result_info()
-    
+
         result = (
             info.result if not isinstance(info.result, Exception) else str(info.result)
         )

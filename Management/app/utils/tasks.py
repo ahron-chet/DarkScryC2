@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
+from app.core.settings import get_arq_settings
 from arq import create_pool
 from arq.connections import RedisSettings
-
-from app.core.settings import get_arq_settings
 
 _redis_pool = None
 
@@ -20,7 +19,7 @@ async def get_task_executor():
                 host=settings.redis_host,
                 port=settings.redis_port,
                 password=settings.redis_password,
-                database=settings.arq_redis_db
+                database=settings.arq_redis_db,
             )
         )
     return _redis_pool

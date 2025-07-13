@@ -1,6 +1,6 @@
 import uuid
-from app.schemas.modules.execution import StartShellCommand, RunCommand
 
+from app.schemas.modules.execution import RunCommand, StartShellCommand
 from darkscryc2server.models.messages import AgentResponse
 from fastapi import APIRouter, Depends
 from fastapi_utils.cbv import cbv
@@ -22,7 +22,9 @@ class ExecutionRoutes(ExecutionController):
         response_model=TaskOut,
         dependencies=[Depends(required_role(UserRole.OPERATOR))],
     )
-    async def start_shell(self, agent_id: uuid.UUID, command: StartShellCommand) -> TaskOut:
+    async def start_shell(
+        self, agent_id: uuid.UUID, command: StartShellCommand
+    ) -> TaskOut:
         """Start an interactive shell session on the specified agent."""
         return await self.start_shell_task(agent_id, command)
 

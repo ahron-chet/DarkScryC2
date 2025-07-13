@@ -1,15 +1,13 @@
 """Routers for agent modules."""
 
-from fastapi import APIRouter, Depends
-
 from app.core.security import get_current_user
+from fastapi import APIRouter, Depends
 
 from .collection import router as collection_router
 from .execution import router as execution_router
 
 router = APIRouter(
-    prefix="/agents/{agent_id}/modules",
-    dependencies=[Depends(get_current_user)]
+    prefix="/agents/{agent_id}/modules", dependencies=[Depends(get_current_user)]
 )
 
 router.include_router(execution_router, prefix="/execution")

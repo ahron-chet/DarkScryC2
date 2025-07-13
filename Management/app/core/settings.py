@@ -94,7 +94,9 @@ class AppSettings(BaseSettings):
         validation_alias="MANAGEMENT_JWT_AUDIENCE",
     )
     cors_origins: str | list[str] = Field(
-        [], description="Allowed CORS origins", validation_alias="MANAGEMENT_CORS_ORIGINS"
+        [],
+        description="Allowed CORS origins",
+        validation_alias="MANAGEMENT_CORS_ORIGINS",
     )
 
     model_config = ConfigDict(populate_by_name=True, extra="ignore", env_file=None)
@@ -109,7 +111,11 @@ class AppSettings(BaseSettings):
     @model_validator(mode="after")
     def _build_database_url(self) -> "AppSettings":
         if not self.database_url:
-            creds = f"{self.db_user}:{self.db_password}" if self.db_password else self.db_user
+            creds = (
+                f"{self.db_user}:{self.db_password}"
+                if self.db_password
+                else self.db_user
+            )
             self.database_url = f"postgresql+asyncpg://{creds}@{self.db_host}:{self.db_port}/{self.db_name}"
         return self
 

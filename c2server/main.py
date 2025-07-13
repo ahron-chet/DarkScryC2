@@ -2,7 +2,6 @@ import asyncio
 
 import uvicorn
 import uvloop
-
 from darkscryc2server.api.app import app
 from darkscryc2server.core.config import settings
 from darkscryc2server.core.server import WebSocketServer

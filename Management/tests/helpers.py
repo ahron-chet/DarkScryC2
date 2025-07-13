@@ -1,8 +1,7 @@
-from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.schemas.user import UserCreate, UserRole
 from app.services.user_service import UserService
+from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 async def create_user(

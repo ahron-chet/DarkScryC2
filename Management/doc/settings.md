@@ -1,6 +1,7 @@
 # Management Environment Settings
 
 The FastAPI backend reads configuration from environment variables. Copy `.env.example` to `.env` and adjust the values for your environment.
+The authoritative list of settings is defined in `app/core/settings.py`.
 
 - `DB_NAME` – name of the PostgreSQL database.
 - `DB_USER` – database username.

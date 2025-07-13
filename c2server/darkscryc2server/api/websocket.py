@@ -1,7 +1,7 @@
 from fastapi import Depends, WebSocket, WebSocketDisconnect
 
 from ..core.connection import ConnectionManager
-from ..models.messages import ManagerAction, ManagerRequestWs, AgentResponse
+from ..models.messages import AgentResponse, ManagerAction, ManagerRequestWs
 
 
 async def manager_ws_endpoint(websocket: WebSocket) -> None:

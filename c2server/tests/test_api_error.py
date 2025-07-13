@@ -1,8 +1,7 @@
 import pytest
-from fastapi.testclient import TestClient
-
 from darkscryc2server.api.app import app
 from darkscryc2server.core.connection import ConnectionManager
+from fastapi.testclient import TestClient
 
 
 class EmptyManager(ConnectionManager):

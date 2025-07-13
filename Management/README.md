@@ -55,6 +55,7 @@ poetry run arq arq_worker.WorkerSettings
 * **Redis** – Used for background job scheduling with ARQ (`MANAGEMENT_REDIS_*` variables).
 
 The environment variables required by the service are documented in `doc/settings.md`.
+Default values and descriptions are maintained in `app/core/settings.py`.
 
 ## Development Notes
 

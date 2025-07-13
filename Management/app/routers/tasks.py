@@ -2,15 +2,14 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Depends
-from fastapi import status as http_status
-from fastapi_utils.cbv import cbv
-
 from app.controllers.task_controller import TaskController
 from app.core.security import get_current_user, required_role
 from app.models.user import UserRole
 from app.schemas.tasks import TaskResultOut, TaskStatusOut
 from app.schemas.user import Deleted
+from fastapi import APIRouter, Depends
+from fastapi import status as http_status
+from fastapi_utils.cbv import cbv
 
 router = APIRouter(
     prefix="/tasks", tags=["tasks"], dependencies=[Depends(get_current_user)]

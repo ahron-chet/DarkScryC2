@@ -1,9 +1,8 @@
 import pytest
-from httpx import AsyncClient
-from jose import jwt
-
 from app.core.settings import get_app_settings
 from app.models.user import UserRole
+from httpx import AsyncClient
+from jose import jwt
 
 pytestmark = pytest.mark.anyio
 

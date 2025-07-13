@@ -1,10 +1,9 @@
 import uuid
 
-from fastapi import Depends
-
 from app.schemas.tasks import TaskResultOut, TaskStatusOut
 from app.schemas.user import Deleted
 from app.services.task_service import TaskService
+from fastapi import Depends
 
 
 class TaskController:
@@ -17,7 +16,7 @@ class TaskController:
         return TaskStatusOut(status=status, job_id=task_id)
 
     async def get_task_result(self, task_id: uuid.UUID) -> TaskResultOut:
-        res =  await self.service.get_result(task_id)
+        res = await self.service.get_result(task_id)
         status = res.result.get("success")
         if status is not None:
             res.success = status

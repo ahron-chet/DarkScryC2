@@ -17,16 +17,16 @@ class Settings(BaseSettings):
     ssl_key: str | None = Field(None, alias="C2_SERVER_SSL_KEY")
 
     model_config = SettingsConfigDict(
-        env_file=None, 
-        env_file_encoding="utf-8",
-        extra="ignore"
+        env_file=None, env_file_encoding="utf-8", extra="ignore"
     )
 
     @computed_field
     @property
     def redis_url(self) -> str:
         if self.redis_password:
-            return f"redis://:{self.redis_password}@{self.redis_host}:6379/{self.redis_db}"
+            return (
+                f"redis://:{self.redis_password}@{self.redis_host}:6379/{self.redis_db}"
+            )
         return f"redis://{self.redis_host}:6379/{self.redis_db}"
 
 

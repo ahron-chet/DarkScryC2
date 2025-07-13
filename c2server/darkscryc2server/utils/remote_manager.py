@@ -2,7 +2,12 @@ from os import getenv
 
 import aiohttp
 
-from ..models.messages import AgentResponse, CommandIdentifiers, CommandMessage, ServerError
+from ..models.messages import (
+    AgentResponse,
+    CommandIdentifiers,
+    CommandMessage,
+    ServerError,
+)
 
 _session = None
 
@@ -59,8 +64,12 @@ async def remote_send_command(
             url=f"http://{host}:{port}/command/{agent_id}", json=req
         )
         if r.status == 404:
-            return AgentResponse(success=False, data={"type":"Server Error"}, error=f"{agent_id} not found or not connected")
+            return AgentResponse(
+                success=False,
+                data={"type": "Server Error"},
+                error=f"{agent_id} not found or not connected",
+            )
         resp_dict = await r.json()
         return AgentResponse(**resp_dict)
     except Exception as e:
-        return AgentResponse(success=False, data={"type":"Server Error"}, error=str(e))
+        return AgentResponse(success=False, data={"type": "Server Error"}, error=str(e))

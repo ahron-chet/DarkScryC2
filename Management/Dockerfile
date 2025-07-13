@@ -1,18 +1,16 @@
 FROM python:3.11-slim
 
 RUN apt-get update && apt-get install -y gcc libpq-dev curl && rm -rf /var/lib/apt/lists/*
+
 RUN curl -sSL https://install.python-poetry.org | python3 -
 ENV PATH="/root/.local/bin:$PATH"
 
 WORKDIR /app
 
 COPY pyproject.toml poetry.lock* /app/
-RUN poetry install --only main --no-interaction --no-ansi
+RUN poetry install --no-interaction --no-ansi --only main
 
-COPY darkscryc2server /app/darkscryc2server
-COPY main.py /app/
+COPY . /app
 
-EXPOSE 876
-EXPOSE 9100
-
-CMD ["poetry", "run", "python", "main.py"]
+EXPOSE 8000
+CMD ["poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

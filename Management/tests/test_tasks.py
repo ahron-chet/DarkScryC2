@@ -2,11 +2,10 @@ import uuid
 from datetime import datetime
 
 import pytest
-from arq.jobs import JobStatus
-from httpx import AsyncClient
-
 from app.models.user import UserRole
 from app.schemas.tasks import TaskResultOut
+from arq.jobs import JobStatus
+from httpx import AsyncClient
 
 pytestmark = pytest.mark.anyio
 

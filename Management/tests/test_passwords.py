@@ -1,8 +1,7 @@
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.schemas.user import UserCreate, UserRole
 from app.services.user_service import UserService
+from sqlalchemy.ext.asyncio import AsyncSession
 
 pytestmark = pytest.mark.anyio
 
