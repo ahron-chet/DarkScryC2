@@ -20,7 +20,7 @@ services:
       C2_SERVER_REDIS_DB: "${C2_SERVER_REDIS_DB}"
 
     command: >
-      poetry run python test.py
+      poetry run python main.py
 
     depends_on:
       - redis
