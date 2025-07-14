@@ -1,14 +1,14 @@
 import argparse
 import asyncio
 
-from app.core.database import AsyncSessionLocal, init_db
+from app.core.database import get_db_config, init_db
 from app.schemas.user import UserCreate, UserRole
 from app.services.user_service import UserService
 
 
 async def list_users_command(args: argparse.Namespace) -> None:
     """List all users."""
-    async with AsyncSessionLocal() as session:
+    async with get_db_config().sessionmaker() as session:
         service = UserService()
         users = await service.list(session)
         for user in users:
@@ -17,7 +17,8 @@ async def list_users_command(args: argparse.Namespace) -> None:
 
 async def create_user_command(args: argparse.Namespace) -> None:
     """Create a new user from CLI arguments."""
-    async with AsyncSessionLocal() as session:
+    print(get_db_config().settings.database_url)
+    async with get_db_config().sessionmaker() as session:
         service = UserService()
         user_in = UserCreate(
             username=args.username,
