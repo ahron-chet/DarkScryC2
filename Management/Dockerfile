@@ -1,4 +1,4 @@
-
+# django/Dockerfile
 
 FROM python:3.10-slim
 
@@ -19,7 +19,7 @@ WORKDIR /app
 #   /app/c2server/pyproject.toml
 RUN mkdir -p /app/Management /app/c2server
 
-COPY django/pyproject.toml Management/poetry.lock* /app/Management/
+COPY Management/pyproject.toml Management/poetry.lock* /app/Management/
 COPY c2server/pyproject.toml c2server/poetry.lock* /app/c2server/
 
 # We have NOT copied the code yet—just the metadata.
@@ -45,8 +45,14 @@ COPY . /app
 WORKDIR /app/Management
 RUN poetry install --no-root --no-interaction --no-ansi
 
+
+WORKDIR /app
+# Copy the entrypoint script
+COPY Management/docker-entrypoint.sh /app/
+RUN chmod +x /app/docker-entrypoint.sh
+
 WORKDIR /app/Management
 
-RUN poetry run python manage.py collectstatic --noinput || true
+EXPOSE 8000
 
-CMD ["poetry", "run", "arq", "arq_worker.WorkerSettings"]
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
