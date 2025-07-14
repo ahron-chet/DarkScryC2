@@ -1,6 +1,6 @@
 
 
-FROM python:3.10-slim
+FROM python:3.11.9-slim
 
 RUN apt-get update && apt-get install -y gcc libpq-dev curl && rm -rf /var/lib/apt/lists/*
 
@@ -19,7 +19,7 @@ WORKDIR /app
 #   /app/c2server/pyproject.toml
 RUN mkdir -p /app/Management /app/c2server
 
-COPY django/pyproject.toml Management/poetry.lock* /app/Management/
+COPY Management/pyproject.toml Management/poetry.lock* /app/Management/
 COPY c2server/pyproject.toml c2server/poetry.lock* /app/c2server/
 
 # We have NOT copied the code yet—just the metadata.
