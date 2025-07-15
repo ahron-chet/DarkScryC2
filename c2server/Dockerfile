@@ -11,7 +11,7 @@ WORKDIR /app
 COPY pyproject.toml poetry.lock* /app/
 RUN poetry install --no-root --no-interaction --no-ansi
 
-# Copy the rest of your code (including test.py)
+
 COPY . /app
 
 # Expose main manager port (if you’d like to be explicit):
@@ -19,4 +19,3 @@ EXPOSE 9100
 EXPOSE 1234
 EXPOSE 876
 
-# CMD ["poetry", "run", "python", "test.py"]
