@@ -55,6 +55,9 @@ poetry run arq arq_worker.WorkerSettings
 * **Redis** – Used for background job scheduling with ARQ (`MANAGEMENT_REDIS_*` variables).
 
 The environment variables required by the service are documented in `doc/settings.md`.
+When running with Docker Compose, set `C2_SERVER_HOST` to `c2server` so the backend can
+communicate with the C2 server container. The default port can be overridden via
+`C2_SERVER_PORT`.
 
 ## Development Notes
 
