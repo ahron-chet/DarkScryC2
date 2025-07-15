@@ -61,6 +61,9 @@ services:
       MANAGEMENT_CORS_ORIGINS: "${MANAGEMENT_CORS_ORIGINS}"
       MANAGEMENT_JWT_AUDIENCE: "${MANAGEMENT_JWT_AUDIENCE}"
 
+      DB_PASSWORD_FILE: "/run/secrets/db_password"
+    
+
 
 
     command: >

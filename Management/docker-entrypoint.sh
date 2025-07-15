@@ -1,42 +1,39 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 set -e
 
 echo "[management-entrypoint] Starting..."
 
-PASSWORD_FILE="/run/secrets/db_password"
+PASSWORD_FILE="${DB_PASSWORD_FILE:-/run/secrets/db_password}"
 
-# 1) Ephemeral DB password logic
-if [ -z "$DB_PASSWORD" ]; then
-  echo "[management-entrypoint] No DB_PASSWORD provided. Generating ephemeral..."
-  mkdir -p /run/secrets
-  openssl rand -base64 32 > "$PASSWORD_FILE"
+# Check if the password file exists and is not empty
+if [ -s "$PASSWORD_FILE" ]; then
+  echo "[management-entrypoint] Existing DB password found. Using it."
   export DB_PASSWORD="$(cat "$PASSWORD_FILE")"
 else
-  echo "[management-entrypoint] Using user-provided DB_PASSWORD=$DB_PASSWORD"
-  if [ ! -f "$PASSWORD_FILE" ]; then
-    mkdir -p /run/secrets
-    echo "$DB_PASSWORD" > "$PASSWORD_FILE"
-  fi
+  echo "[management-entrypoint] No existing DB password found. Generating a new one..."
+  mkdir -p "$(dirname "$PASSWORD_FILE")"
+  openssl rand -base64 32 > "$PASSWORD_FILE"
+  export DB_PASSWORD="$(cat "$PASSWORD_FILE")"
 fi
 
-echo "[management-entrypoint] Final DB_PASSWORD=$DB_PASSWORD"
+echo "[management-entrypoint] Final DB_PASSWORD=${DB_PASSWORD}"
 
 
+echo "[management-entrypoint] Runing DB migration"
+poetry run alembic upgrade head
 # 3) Create or update superuser
-if [ -z "$SUPER_USER_NAME" ]; then
-  export SUPER_USER_NAME=admin
-fi
-if [ -z "$SUPER_USER_EMAIL" ]; then
-  export SUPER_USER_EMAIL=admin@darkscryc2.com
-fi
-if [ -z "$SUPER_USER_PASSWORD" ]; then
-  export SUPER_USER_PASSWORD="$(openssl rand -base64 16)"
-fi
+SUPER_USER_NAME="${SUPER_USER_NAME:-admin}"
+SUPER_USER_EMAIL="${SUPER_USER_EMAIL:-admin@darkscryc2.com}"
+SUPER_USER_PASSWORD="${SUPER_USER_PASSWORD:-$(openssl rand -base64 16)}"
 
 echo "[management-entrypoint] Creating/updating superuser..."
 
-poetry run manager create_user --username "$SUPER_USER_NAME" --password "$SUPER_USER_PASSWORD" --email "$SUPER_USER_EMAIL" --role admin
+poetry run manager create_user \
+    --username "$SUPER_USER_NAME" \
+    --password "$SUPER_USER_PASSWORD" \
+    --email "$SUPER_USER_EMAIL" \
+    --role admin
 
 echo "[management-entrypoint] ==========================================="
 echo "[management-entrypoint] 👤 Username: ${SUPER_USER_NAME}"
@@ -44,5 +41,5 @@ echo "[management-entrypoint] 🔑 Password: ${SUPER_USER_PASSWORD}"
 echo "[management-entrypoint] 📧 Email:    ${SUPER_USER_EMAIL}"
 echo "[management-entrypoint] ==========================================="
 
-# 4) Exec the main command
+# Execute the provided CMD
 exec "$@"
