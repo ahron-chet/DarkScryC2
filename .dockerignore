@@ -1,0 +1,31 @@
+# General
+.git
+.gitignore
+
+# Environment files
+.env
+.env.*
+!*.env.example
+
+# Python caches
+**/__pycache__/
+**/*.py[cod]
+
+# Node modules and build output
+**/node_modules
+frontend/.next
+frontend/.turbo
+
+# Tests
+**/tests/
+
+# Unused directories
+CPPClient/
+client/
+django (old management)/
+
+# Misc
+*.log
+*.sqlite*
+*.db
+*.pytest_cache/

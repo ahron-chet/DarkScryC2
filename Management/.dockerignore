@@ -1,0 +1,19 @@
+# Ignore git metadata and environment files
+.git
+.env
+.env.*
+!*.env.example
+
+# Python caches and logs
+__pycache__/
+*.py[cod]
+*.log
+*.db
+*.sqlite*
+
+# Node modules (if any)
+node_modules/
+
+# Tests
+/tests/
+

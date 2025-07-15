@@ -1,0 +1,17 @@
+# Git and environment files
+.git
+.env
+.env.*
+!*.env.example
+
+# Node modules and build output
+node_modules/
+.next/
+.turbo/
+
+# Logs and caches
+npm-debug.log*
+.yarn/cache
+
+# Tests
+/tests/
