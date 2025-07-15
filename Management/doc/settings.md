@@ -18,6 +18,9 @@ The FastAPI backend reads configuration from environment variables. Copy `.env.e
 - `MANAGEMENT_REDIS_PORT` – port of the Redis server.
 - `MANAGEMENT_REDIS_PASSWORD` – password for the Redis server, if required.
 - `MANAGEMENT_ARQ_REDIS_DB` – Redis database index used for ARQ jobs.
+- `C2_SERVER_HOST` – hostname of the `c2server` container the management API uses
+  to issue commands.
+- `C2_SERVER_PORT` – port of the c2server management API.
 - `TEST_DATABASE_URL` – database used when running the test suite.
 
 JWT access and refresh tokens now include the following claims:
