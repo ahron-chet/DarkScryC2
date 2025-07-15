@@ -1,0 +1,16 @@
+# Ignore git and environment artifacts
+.git
+.env
+.env.*
+!*.env.example
+
+# Python caches and venvs
+__pycache__/
+*.py[cod]
+*.log
+*.db
+*.sqlite*
+
+# Tests
+/tests/
+
