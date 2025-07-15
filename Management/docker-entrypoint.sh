@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/bash
+
 set -e
 
 echo "[management-entrypoint] Starting..."
@@ -21,9 +22,6 @@ fi
 
 echo "[management-entrypoint] Final DB_PASSWORD=$DB_PASSWORD"
 
-# 2) Migrate
-echo "[management-entrypoint] Running migrations..."
-poetry run python manage.py migrate --noinput
 
 # 3) Create or update superuser
 if [ -z "$SUPER_USER_NAME" ]; then
