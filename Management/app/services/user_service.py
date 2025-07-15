@@ -93,8 +93,13 @@ class UserService:
         await db.commit()
         await db.refresh(user)
         return user
+    
+    async def get_by_username(self, session: AsyncSession, username: str) -> User | None:
+        result = await session.execute(select(User).where(User.username == username))
+        return result.scalar_one_or_none()
 
     async def delete(self, db: AsyncSession, user: User) -> None:
         """Delete a user record."""
         await db.delete(user)
         await db.commit()
+

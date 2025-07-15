@@ -16,18 +16,27 @@ async def list_users_command(args: argparse.Namespace) -> None:
 
 
 async def create_user_command(args: argparse.Namespace) -> None:
-    """Create a new user from CLI arguments."""
-    print(get_db_config().settings.database_url)
+    """Create or update user from CLI arguments."""
     async with get_db_config().sessionmaker() as session:
         service = UserService()
-        user_in = UserCreate(
+
+        existing_user = await service.get_by_username(session, args.username)
+        user_data = UserCreate(
             username=args.username,
             password=args.password,
             email=args.email,
             role=UserRole(args.role),
         )
-        user = await service.create(session, user_in)
-        print(f"Created user {user.username} with id {user.user_id}")
+
+        if existing_user:
+            # Update the existing user
+            user = await service.update(session, existing_user.user_id, user_data)
+            print(f"Updated user {user.username} with id {user.user_id}")
+        else:
+            # Create a new user
+            user = await service.create(session, user_data)
+            print(f"Created user {user.username} with id {user.user_id}")
+
 
 
 async def init_db_command(args: argparse.Namespace) -> None:

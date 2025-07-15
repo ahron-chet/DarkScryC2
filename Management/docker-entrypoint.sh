@@ -19,10 +19,32 @@ fi
 
 echo "[management-entrypoint] Final DB_PASSWORD=${DB_PASSWORD}"
 
+# Wait for DB to become available
+DB_HOST="${DB_HOST:-db}"
+DB_PORT="${DB_PORT:-5432}"
+MAX_RETRIES=10
+RETRY_INTERVAL=5
+retries=0
 
-echo "[management-entrypoint] Runing DB migration"
+echo "[management-entrypoint] Checking DB connection at ${DB_HOST}:${DB_PORT}..."
+
+until nc -z "$DB_HOST" "$DB_PORT" || [ "$retries" -eq "$MAX_RETRIES" ]; do
+  echo "[management-entrypoint] DB not ready yet. Waiting ${RETRY_INTERVAL}s... (retry: $((retries+1)))"
+  retries=$((retries + 1))
+  sleep "$RETRY_INTERVAL"
+done
+
+if [ "$retries" -eq "$MAX_RETRIES" ]; then
+  echo "[management-entrypoint] ❌ Could not connect to DB after ${MAX_RETRIES} attempts."
+  exit 1
+fi
+
+echo "[management-entrypoint] DB is up!"
+
+echo "[management-entrypoint] Running DB migration"
 poetry run alembic upgrade head
-# 3) Create or update superuser
+
+# Create or update superuser
 SUPER_USER_NAME="${SUPER_USER_NAME:-admin}"
 SUPER_USER_EMAIL="${SUPER_USER_EMAIL:-admin@darkscryc2.com}"
 SUPER_USER_PASSWORD="${SUPER_USER_PASSWORD:-$(openssl rand -base64 16)}"
