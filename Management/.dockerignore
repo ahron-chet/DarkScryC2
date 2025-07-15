@@ -11,9 +11,7 @@ __pycache__/
 *.db
 *.sqlite*
 
-# Node modules (if any)
-node_modules/
 
 # Tests
 /tests/
-
+.venv/

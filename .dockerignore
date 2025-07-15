@@ -1,6 +1,6 @@
 # General
 .git
-.gitignore
+
 
 # Environment files
 .env
@@ -29,3 +29,4 @@ django (old management)/
 *.sqlite*
 *.db
 *.pytest_cache/
+*.venv/
