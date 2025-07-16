@@ -21,8 +21,8 @@ RUN poetry lock --no-interaction --no-ansi
 WORKDIR /app
 COPY . /app
 
-# Explicitly set the entrypoint script permission (file already copied above)
-RUN chmod +x /app/Management/docker-entrypoint.sh
+RUN chmod +x /app/Management/docker-entrypoint.sh \
+    && chmod +x /app/Management/start.sh
 
 WORKDIR /app/Management
 RUN poetry install --no-interaction --no-ansi
