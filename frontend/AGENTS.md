@@ -1,6 +1,4 @@
-Based on our full conversation and the system you've been building, here's a full and professional `AGENTS.md` spec file for **frontend AI agents** contributing to your project:
 
----
 
 # 📁 AGENTS.md
 
@@ -211,13 +209,15 @@ Match this style for search bars:
 
 ---
 
-## 💬 Questions?
+# ✅ Before Committing
 
-If you're unsure about a panel, styling, or best practice:
+Run these checks and fix any errors:
 
-> **Default to Bootstrap**, **Orbitron**, and **modular cards**.
-> Or ask `Aharon Chetrit` 😎
-
+```bash
+npx tsc --noEmit                         # TypeScript errors
+npx eslint . --ext .ts,.tsx             # Code + Tailwind class issues
+```
+fix any ts error
 ---
 
 Would you like me to export this as a downloadable `AGENTS.md` file?
