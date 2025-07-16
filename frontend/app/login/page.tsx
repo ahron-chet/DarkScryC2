@@ -11,13 +11,13 @@ import "./login.css";
 
 export default function LoginPage() {
 
-  const [callbackUrl, setCallbackUrl] = useState("/");
+  const [callbackUrl, setCallbackUrl] = useState("/index");
   const router = useRouter();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
-      setCallbackUrl(params.get("callbackUrl") || "/");
+      setCallbackUrl(params.get("callbackUrl") || "/index");
     }
   }, []);
   const [username, setUsername] = useState("");
