@@ -1,7 +1,7 @@
 "use client";
 
 import Sidebar from "@/components/Sidebar";
-import Script from "next/script";
+import useRequireAuth from "@/lib/hooks/useRequireAuth";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -13,6 +13,7 @@ export default function WithSidebarLayout({
 }: {
   children: React.ReactNode;
 }) {
+  useRequireAuth();
   return (
     <>
       {/* <Script

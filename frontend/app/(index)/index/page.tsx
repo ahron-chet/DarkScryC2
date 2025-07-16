@@ -1,11 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
 import api from "@/lib/apiClient";
-import useRequireAuth from "@/lib/hooks/useRequireAuth";
 import "./test.css";
 
 export default function TestPage() {
-  useRequireAuth();
   const [data, setData] = useState(null);
 
   useEffect(() => {
