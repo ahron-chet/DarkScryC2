@@ -1,7 +1,7 @@
 "use client";
 export const dynamic = "force-dynamic";
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "@/lib/apiClient";
 import { useRouter } from "next/navigation";
 import { setTokens } from "@/lib/authClient";
 import Script from 'next/script';
@@ -30,13 +30,10 @@ export default function LoginPage() {
     setMessage("");
     setIsLoading(true);
     try {
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_MANAGEMENT_API_URL}/auth/login`,
-        {
-          username,
-          password,
-        }
-      );
+      const res = await api.post("/auth/login", {
+        username,
+        password,
+      });
       setTokens(res.data.access_token, res.data.refresh_token);
       router.push(callbackUrl);
     } catch (err) {
