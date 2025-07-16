@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import api from "@/lib/apiClient";
 import "./test.css";
 
-export default function TestPage() {
+export default function IndexPage() {
   const [data, setData] = useState(null);
 
   useEffect(() => {

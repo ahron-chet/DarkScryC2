@@ -1,3 +1,4 @@
+import api from './apiClient';
 export const getAccessToken = (): string | null => {
   if (typeof window === 'undefined') return null;
   return localStorage.getItem('accessToken');
@@ -25,4 +26,22 @@ export const logout = () => {
   if (typeof window !== 'undefined') {
     window.location.href = '/login';
   }
+};
+
+export const ensureValidTokens = async (): Promise<boolean> => {
+  const access = getAccessToken();
+  if (access) return true;
+
+  const refresh = getRefreshToken();
+  if (refresh) {
+    try {
+      const res = await api.post('/auth/refresh', { refresh_token: refresh });
+      setTokens(res.data.access_token, res.data.refresh_token);
+      return true;
+    } catch {
+      clearTokens();
+    }
+  }
+
+  return false;
 };
