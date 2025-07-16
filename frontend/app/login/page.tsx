@@ -1,9 +1,9 @@
 "use client";
 export const dynamic = "force-dynamic";
-import { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
+import api from "@/lib/apiClient";
 import { useRouter } from "next/navigation";
-import { setTokens } from "@/lib/authClient";
+import { ensureValidTokens, setTokens } from "@/lib/authClient";
 import Script from 'next/script';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./login.css";
@@ -11,35 +11,48 @@ import "./login.css";
 
 export default function LoginPage() {
 
-  const [callbackUrl, setCallbackUrl] = useState("/");
+  const [callbackUrl, setCallbackUrl] = useState("/index");
   const router = useRouter();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
-      setCallbackUrl(params.get("callbackUrl") || "/");
+      setCallbackUrl(params.get("callbackUrl") || "/index");
     }
   }, []);
+
+  // If tokens are already stored, redirect immediately
+  useEffect(() => {
+    const redirectIfLoggedIn = async () => {
+      const ok = await ensureValidTokens();
+      if (ok) {
+        router.replace(callbackUrl);
+      }
+    };
+
+    if (typeof window !== "undefined") {
+      redirectIfLoggedIn();
+    }
+  }, [callbackUrl, router]);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  async function handleSubmit(e: any) {
+  async function handleSubmit(
+    e: React.FormEvent<HTMLFormElement>
+  ) {
     e.preventDefault();
     setMessage("");
     setIsLoading(true);
     try {
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_MANAGEMENT_API_URL}/auth/login`,
-        {
-          username,
-          password,
-        }
-      );
+      const res = await api.post("/auth/login", {
+        username,
+        password,
+      });
       setTokens(res.data.access_token, res.data.refresh_token);
       router.push(callbackUrl);
-    } catch (err) {
+    } catch {
       setMessage("Invalid credentials or server error");
     } finally {
       setIsLoading(false);
