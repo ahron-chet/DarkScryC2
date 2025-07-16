@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import api from "@/lib/apiClient";
+import { ensureValidTokens } from "@/lib/authClient";
 import "./test.css";
 
 export default function IndexPage() {
@@ -8,6 +9,8 @@ export default function IndexPage() {
 
   useEffect(() => {
     (async () => {
+      const ok = await ensureValidTokens();
+      if (!ok) return;
       try {
         const res = await api.get("/agents");
         setData(res.data);

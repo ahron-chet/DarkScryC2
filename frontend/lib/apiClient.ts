@@ -1,8 +1,10 @@
 import axios from 'axios';
 import { getAccessToken, getRefreshToken, setTokens, clearTokens } from './authClient';
 
+const baseURL = (process.env.NEXT_PUBLIC_MANAGEMENT_API_URL || '').replace(/\/$/, '');
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_MANAGEMENT_API_URL,
+  baseURL,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -32,7 +34,7 @@ api.interceptors.response.use(
       if (refresh) {
         try {
           const res = await axios.post(
-            `${process.env.NEXT_PUBLIC_MANAGEMENT_API_URL}/auth/refresh`,
+            `${baseURL}/auth/refresh`,
             { refresh_token: refresh }
           );
           setTokens(res.data.access_token, res.data.refresh_token);
