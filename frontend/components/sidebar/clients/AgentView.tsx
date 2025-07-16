@@ -40,7 +40,10 @@ export default function AgentView({ agent }: AgentViewProps) {
   let panelContent = null;
   switch (activeModule) {
     case "shell":
-      api.get(`/agents/${agent.agent_id}/modules/execution/shell/start_shell`);
+      api.post(
+        `/agents/${agent.agent_id}/modules/execution/shell/start_shell`,
+        {}
+      );
       panelContent = <ShellPanel agent={agent} />;
       break;
     case "modules-test":
