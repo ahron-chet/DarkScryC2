@@ -46,7 +46,7 @@ export default function LoginPage() {
     setMessage("");
     setIsLoading(true);
     try {
-      const res = await api.post("/auth/login", {
+      const res = await api.post<{ access_token: string; refresh_token: string }>("/auth/login", {
         username,
         password,
       });

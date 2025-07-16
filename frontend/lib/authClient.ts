@@ -35,7 +35,7 @@ export const ensureValidTokens = async (): Promise<boolean> => {
   const refresh = getRefreshToken();
   if (refresh) {
     try {
-      const res = await api.post('/auth/refresh', { refresh_token: refresh });
+      const res = await api.post<{ access_token: string; refresh_token: string }>('/auth/refresh', { refresh_token: refresh });
       setTokens(res.data.access_token, res.data.refresh_token);
       return true;
     } catch {

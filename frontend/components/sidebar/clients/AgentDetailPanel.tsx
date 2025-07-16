@@ -31,29 +31,27 @@ export default function AgentDetailPanel({ agent }: AgentDetailPanelProps) {
 
 
   useEffect(() => {
-    let mounted = true;
+    const controller = new AbortController();
     (async () => {
       try {
         setLoading(true);
         setError(null);
 
+
         const endpoint = `/agents/${agent.agent_id}/modules/collection/machine/basic_mashine_info`;
-        const resp = await runFetchUntilComplete(endpoint);
+        const resp = await runFetchUntilComplete(endpoint, controller.signal);
         const data = resp?.result?.data?.result;
-        if (mounted) {
-          setMachineInfo(data);
-          setLoading(false);
-        }
+        setMachineInfo(data);
+        setLoading(false);
       } catch (err: any) {
+        if (err.name === 'AbortError') return;
         console.error("Error fetching agent detail:", err);
-        if (mounted) {
-          setError("Failed to load machine info");
-          setLoading(false);
-        }
+        setError("Failed to load machine info");
+        setLoading(false);
       }
     })();
     return () => {
-      mounted = false;
+      controller.abort();
     };
   }, []);
   if (loading) {

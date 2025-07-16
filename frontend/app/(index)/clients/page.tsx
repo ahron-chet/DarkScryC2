@@ -21,8 +21,8 @@ export default function ClientsPage() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await api.get("/agents");
-        setAgents(res.data || []);
+        const res = await api.get<Agent[]>("/agents");
+        setAgents(res.data);
       } catch (err) {
         console.error("Error fetching agents:", err);
       }

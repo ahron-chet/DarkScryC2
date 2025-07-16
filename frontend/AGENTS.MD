@@ -1,14 +1,3 @@
-Based on our full conversation and the system you've been building, here's a full and professional `AGENTS.md` spec file for **frontend AI agents** contributing to your project:
-
----
-
-# 📁 AGENTS.md
-
-> **Frontend Agent Instruction Manual**
-> *Last updated: 2025-07-09*
-
----
-
 ## 🎯 Purpose
 
 This repository powers a cyber intelligence and offensive operations panel. Frontend agents are responsible for creating modular, responsive, and cyber-themed UI components for security operators. The design aesthetic must evoke a **high-tech, stealthy, futuristic** dashboard while remaining intuitive and Bootstrap-compliant.
@@ -225,13 +214,14 @@ Before merging or registering your panel:
 
 ---
 
-## 💬 Questions?
+**Pre-commit Checklist:**
 
-If you're unsure about a panel, styling, or best practice:
+Before committing your code, always run:
 
-> **Default to Bootstrap**, **Orbitron**, and **modular cards**.
-> Or ask `Aharon Chetrit` 😎
+```bash
+npx tsc --noEmit
+npm run lint
+```
 
----
+Do **not** ignore any errors—especially TypeScript errors. If an error genuinely cannot be resolved, clearly document the reason in your Pull Request.
 
-Would you like me to export this as a downloadable `AGENTS.md` file?
