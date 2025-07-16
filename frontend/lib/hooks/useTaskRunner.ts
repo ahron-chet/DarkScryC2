@@ -6,22 +6,27 @@ interface TaskStatus {
   status: string;
 }
 
-interface TaskResult {
-  result?: { data?: { result?: any } };
+interface TaskResultOut {
+  success: boolean;
+  result: unknown;
+  start_time: string;
+  finish_time: string;
+  action: string | null;
+  job_id: string;
 }
 
 
 export default function useTaskRunner() {
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    const authGetApi = useCallback(async <T = any>(url: string): Promise<T> => {
+  const authGetApi = useCallback(async <T = any>(url: string): Promise<T> => {
         const res = await api.get<T>(url);
         return res.data;
     }, []);
-    const [error, setError] = useState<any>(null);
-    const [result, setResult] = useState<any>(null);
+  const [error, setError] = useState<unknown>(null);
+  const [result, setResult] = useState<TaskResultOut | null>(null);
   
-    const getTaskResults = useCallback(async (taskId: string, signal?: AbortSignal) => {
+  const getTaskResults = useCallback(async <T = any>(taskId: string, signal?: AbortSignal): Promise<T> => {
       try {
         if (!taskId) throw new Error("Task ID is required");
 
@@ -36,7 +41,7 @@ export default function useTaskRunner() {
           }
         };
 
-        const checkStatus = async (resolve: (data: any) => void, reject: (err: any) => void) => {
+        const checkStatus = async (resolve: (data: T) => void, reject: (err: unknown) => void) => {
           if (signal?.aborted) {
             clearTimer();
             return reject(new Error('Task polling cancelled'));
@@ -46,10 +51,10 @@ export default function useTaskRunner() {
           try {
             const statusData = await authGetApi<TaskStatus>(`/tasks/${taskId}/status`);
             if (statusData.status === "complete") {
-              const data = await authGetApi<TaskResult>(`/tasks/${taskId}/result`);
+              const data = await authGetApi<TaskResultOut>(`/tasks/${taskId}/result`);
               setResult(data);
               clearTimer();
-              return resolve(data.result?.data?.result);
+              return resolve((data.result as { data?: { result?: T } } | undefined)?.data?.result as T);
             } else if (statusData.status === "failed") {
               clearTimer();
               return reject(new Error(`Task ${taskId} failed.`));
@@ -67,7 +72,7 @@ export default function useTaskRunner() {
           }
         };
 
-        return new Promise<any>((resolve, reject) => {
+        return new Promise<T>((resolve, reject) => {
           const abortListener = () => {
             clearTimer();
             reject(new Error('Task polling cancelled'));
@@ -78,7 +83,7 @@ export default function useTaskRunner() {
           }
           checkStatus(resolve, reject);
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         setError(err);
         throw err;
       }
