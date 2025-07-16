@@ -18,7 +18,7 @@ export default function ClientsCardList({ agents, onActivate }: ClientsCardListP
   return (
     <div className="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
       {agents.map((agent) => {
-        const osKey = (agent.Os || "").toLowerCase();
+        const osKey = (agent.os || "").toLowerCase();
         const iconSrc = 
           osKey.includes("win") ? OS_ICONS.windows :
           osKey.includes("mac") ? OS_ICONS.mac :
@@ -40,9 +40,9 @@ export default function ClientsCardList({ agents, onActivate }: ClientsCardListP
                 {/* Client info */}
                 <div className="flex-grow-1">
                   <h5 className="card-title mb-1 text-info">
-                    {agent.HostName}
+                    {agent.host_name}
                   </h5>
-                  <p className="card-text mb-0"><strong>OS:</strong> {agent.Os}</p>
+                  <p className="card-text mb-0"><strong>OS:</strong> {agent.os}</p>
                 </div>
                 {/* Action button */}
                 <div>
