@@ -54,7 +54,7 @@ export default function FileExplorerPanel({ agent }: FileExplorerPanelProps) {
   // On mount => load root
   useEffect(() => {
     fetchDirectory([]);
-  }, [agent.AgentId]);
+  }, [agent.agent_id]);
 
   async function fetchDirectory(segments: string[]) {
     try {
@@ -65,7 +65,7 @@ export default function FileExplorerPanel({ agent }: FileExplorerPanelProps) {
 
       // The server expects a POST with { path }, returning { RootPath, Directories, Files }
       const response = await axiosAuth.post<FileExplorerResponse>(
-        `/agents/${agent.AgentId}/modules/collection/files/stream_files_explorer`,
+        `/agents/${agent.agent_id}/modules/collection/files/stream_files_explorer`,
         { path: pathString }
       );
 
@@ -161,7 +161,7 @@ export default function FileExplorerPanel({ agent }: FileExplorerPanelProps) {
 
         // POST to server
         const currentPath = segmentsToPath(pathSegments);
-        const response = await axiosAuth.post<any>(`/agents/${agent.AgentId}/modules/collection/files/upload_base64`, {
+        const response = await axiosAuth.post<any>(`/agents/${agent.agent_id}/modules/collection/files/upload_base64`, {
           path: currentPath,
           file_base64: base64Data,
           file_name: file.name
@@ -325,7 +325,7 @@ export default function FileExplorerPanel({ agent }: FileExplorerPanelProps) {
       {selectedFile && (
         <FileDetailModal
           file={selectedFile}
-          agentId={agent.AgentId}
+          agent_id={agent.agent_id}
           onClose={() => setSelectedFile(null)}
         />
       )}

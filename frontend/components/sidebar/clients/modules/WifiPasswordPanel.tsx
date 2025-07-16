@@ -26,7 +26,7 @@ export default function WifiPasswordsPanel({ agent }: WifiPasswordsPanelProps) {
 
   useEffect(() => {
     fetchWifiPasswords();
-  }, [agent.AgentId]);
+  }, [agent.agent_id]);
 
   async function fetchWifiPasswords() {
     try {
@@ -34,7 +34,7 @@ export default function WifiPasswordsPanel({ agent }: WifiPasswordsPanelProps) {
       setError(null);
 
       // Example: GET or POST. If GET:
-      const response = await authAxios.get<any>(`/agents/${agent.AgentId}/modules/collection/passwords/wifi_baisc_info`);
+      const response = await authAxios.get<any>(`/agents/${agent.agent_id}/modules/collection/passwords/wifi_baisc_info`);
       const data: WifiPasswordRecord[] = await getTaskResults(response.data.task_id);
 
       setWifiList(data || []);

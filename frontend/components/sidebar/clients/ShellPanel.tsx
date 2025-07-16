@@ -23,7 +23,7 @@ export default function ShellPanel({ agent }: ShellPanelProps) {
 
   // Connect to your shell WebSocket
   const { sendMessage, connectionStatus } = useShellWebSocket({
-    agentId: agent.AgentId,
+    agent_id: agent.agent_id,
     accessToken,
     onMessage: (serverMsg: string) => {
       setChatLog((prev) => [...prev, { role: "server", text: serverMsg }]);

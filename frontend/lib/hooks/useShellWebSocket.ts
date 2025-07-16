@@ -2,17 +2,17 @@
 import { useEffect, useRef, useState } from "react";
 
 interface UseShellWebSocketProps {
-    agentId: string;
+    agent_id: string;
     accessToken: string;
     onMessage: (msg: string) => void;
 }
 
 /**
- * A custom React hook that connects to ws://127.0.0.1:8000/ws/shell/{agentId}/?token=...
+ * A custom React hook that connects to ws://127.0.0.1:8000/ws/shell/{agent_id}/?token=...
  * and handles sending/receiving messages in a shell chat context.
  */
 export function useShellWebSocket({
-    agentId,
+    agent_id,
     accessToken,
     onMessage,
 }: UseShellWebSocketProps) {
@@ -20,7 +20,7 @@ export function useShellWebSocket({
     const socketRef = useRef<WebSocket | null>(null);
 
     useEffect(() => {
-        const socketUrl = `${process.env.NEXT_PUBLIC_WS_URL}/ws/shell/${agentId}/?token=${accessToken}`;
+        const socketUrl = `${process.env.NEXT_PUBLIC_WS_URL}/ws/shell/${agent_id}/?token=${accessToken}`;
 
         setConnectionStatus("Connecting");
         const ws = new WebSocket(socketUrl);
@@ -28,7 +28,7 @@ export function useShellWebSocket({
 
         ws.onopen = () => {
             setConnectionStatus("Connected");
-            console.log(`WebSocket open for agent ${agentId}`);
+            console.log(`WebSocket open for agent ${agent_id}`);
         };
         ws.onmessage = (event) => {
           

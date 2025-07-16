@@ -7,7 +7,7 @@ interface ClientsTabsBarProps {
   openAgents: Agent[];
   activeTab: string;
   onTabClick: (tabId: string) => void;
-  onCloseAgent: (agentId: string) => void;
+  onCloseAgent: (agent_id: string) => void;
 }
 
 /**
@@ -31,21 +31,21 @@ export default function ClientsTabsBar({
       </button>
 
       {openAgents.map((agent) => {
-        const isActive = agent.AgentId === activeTab;
+        const isActive = agent.agent_id === activeTab;
         return (
           <div
             className={`btn-group btn-group-sm ${isActive ? "active-tab-group" : ""}`}
-            key={agent.AgentId}
+            key={agent.agent_id}
           >
             <button
               className={`btn ${isActive ? "btn-primary" : "btn-secondary"}`}
-              onClick={() => onTabClick(agent.AgentId)}
+              onClick={() => onTabClick(agent.agent_id)}
             >
               {agent.HostName}
             </button>
             <button
               className={`btn ${isActive ? "btn-primary" : "btn-secondary"}`}
-              onClick={() => onCloseAgent(agent.AgentId)}
+              onClick={() => onCloseAgent(agent.agent_id)}
             >
               <i className="bi bi-x" />
             </button>

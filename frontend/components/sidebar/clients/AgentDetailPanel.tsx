@@ -37,7 +37,7 @@ export default function AgentDetailPanel({ agent }: AgentDetailPanelProps) {
         setLoading(true);
         setError(null);
 
-        const endpoint = `/agents/${agent.AgentId}/modules/collection/machine/basic_mashine_info`;
+        const endpoint = `/agents/${agent.agent_id}/modules/collection/machine/basic_mashine_info`;
         const resp = await runFetchUntilComplete(endpoint);
         const data = resp?.result?.data?.result;
         if (mounted) {

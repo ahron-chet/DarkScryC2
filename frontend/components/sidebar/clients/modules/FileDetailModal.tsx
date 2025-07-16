@@ -14,11 +14,11 @@ interface FileItem {
 
 interface FileDetailModalProps {
     file: FileItem;
-    agentId: string;
+    agent_id: string;
     onClose: () => void;
 }
 
-export default function FileDetailModal({ file, agentId, onClose }: FileDetailModalProps) {
+export default function FileDetailModal({ file, agent_id, onClose }: FileDetailModalProps) {
     const [downloadLoading, setDownloadLoading] = useState(false);
     const [downloadError, setDownloadError] = useState<string | null>(null);
     const { getTaskResults, error: task_error, result: task_result } = useTaskRunner();
@@ -28,7 +28,7 @@ export default function FileDetailModal({ file, agentId, onClose }: FileDetailMo
         try {
             setDownloadLoading(true);
             setDownloadError(null);
-            const response = await axiosAuth.post<any>(`/agents/${agentId}/modules/collection/files/get_file_base64`,{
+            const response = await axiosAuth.post<any>(`/agents/${agent_id}/modules/collection/files/get_file_base64`,{
                 path: file.Path
             })
             const data = await getTaskResults(response.data.task_id)

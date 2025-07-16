@@ -51,7 +51,7 @@ export default function WebCredentialsPanel({ agent }: WebCredentialsPanelProps)
 
   useEffect(() => {
     fetchWebCredentials();
-  }, [agent.AgentId]);
+  }, [agent.agent_id]);
 
   // ---------- FETCH LOGIC ----------
   async function fetchWebCredentials() {
@@ -61,7 +61,7 @@ export default function WebCredentialsPanel({ agent }: WebCredentialsPanelProps)
 
       // 1) Trigger a POST => poll results
       const response = await axiosAuth.post<any>(
-        `/agents/${agent.AgentId}/modules/collection/passwords/collect_web_credentials`,
+        `/agents/${agent.agent_id}/modules/collection/passwords/collect_web_credentials`,
         { cred_type: 0 } 
       );
       const resp: WebCredentialResponse = await getTaskResults(response.data.task_id);

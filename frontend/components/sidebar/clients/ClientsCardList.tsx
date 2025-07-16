@@ -26,7 +26,7 @@ export default function ClientsCardList({ agents, onActivate }: ClientsCardListP
           "/images/windows.svg"; // default fallback
 
         return (
-          <div className="col" key={agent.AgentId}>
+          <div className="col" key={agent.agent_id}>
             <div className="card client-card h-100 text-white">
               <div className="card-body d-flex align-items-center">
                 {/* OS icon (optional) */}

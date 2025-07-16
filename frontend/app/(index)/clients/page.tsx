@@ -15,7 +15,7 @@ export default function ClientsPage() {
   const [agents, setAgents] = useState<Agent[]>([]);
   // Agents that have been "activated" and appear as separate tabs
   const [openAgents, setOpenAgents] = useState<Agent[]>([]);
-  // Current tab: "all" or an AgentId
+  // Current tab: "all" or an agent_id
   const [activeTab, setActiveTab] = useState<string>("all");
 
   useEffect(() => {
@@ -33,16 +33,16 @@ export default function ClientsPage() {
   function handleActivate(agent: Agent) {
     if (!agent.is_active) return; // If agent isn't truly active, ignore or show message
     setOpenAgents((prev) => {
-      const alreadyOpen = prev.some((a) => a.AgentId === agent.AgentId);
+      const alreadyOpen = prev.some((a) => a.agent_id === agent.agent_id);
       return alreadyOpen ? prev : [...prev, agent];
     });
-    setActiveTab(agent.AgentId);
+    setActiveTab(agent.agent_id);
   }
 
   /** Close a specific agent tab. */
-  function handleCloseAgent(agentId: string) {
-    setOpenAgents((prev) => prev.filter((a) => a.AgentId !== agentId));
-    if (activeTab === agentId) setActiveTab("all");
+  function handleCloseAgent(agent_id: string) {
+    setOpenAgents((prev) => prev.filter((a) => a.agent_id !== agent_id));
+    if (activeTab === agent_id) setActiveTab("all");
   }
 
   // Decide what content to show below the tab bar
@@ -52,7 +52,7 @@ export default function ClientsPage() {
       <ClientsCardList agents={agents} onActivate={handleActivate} />
     );
   } else {
-    const selectedAgent = openAgents.find((a) => a.AgentId === activeTab);
+    const selectedAgent = openAgents.find((a) => a.agent_id === activeTab);
     mainContent = selectedAgent ? (
       <AgentView agent={selectedAgent} />
     ) : (

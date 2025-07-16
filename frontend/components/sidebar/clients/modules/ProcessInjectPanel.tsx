@@ -38,7 +38,7 @@ export default function ProcessInjectPanel({ agent, injection_type }: ProcessInj
 
     useEffect(() => {
         fetchProcesses();
-    }, [agent.AgentId]);
+    }, [agent.agent_id]);
 
     async function fetchProcesses() {
         try {
@@ -46,7 +46,7 @@ export default function ProcessInjectPanel({ agent, injection_type }: ProcessInj
             setError(null);
 
             const resp = await authAxios.get<any>(
-                `/agents/${agent.AgentId}/modules/collection/process/enumerate_processes`
+                `/agents/${agent.agent_id}/modules/collection/process/enumerate_processes`
             );
             const processes = await getTaskResults(resp.data.task_id);
             setProcessList(processes || []);
