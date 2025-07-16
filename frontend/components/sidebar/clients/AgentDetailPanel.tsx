@@ -38,9 +38,8 @@ export default function AgentDetailPanel({ agent }: AgentDetailPanelProps) {
         setError(null);
 
 
-        const endpoint = `/agents/${agent.agent_id}/modules/collection/machine/basic_mashine_info`;
-        const resp = await runFetchUntilComplete(endpoint, controller.signal);
-        const data = resp?.result?.data?.result;
+        const endpoint = `/agents/${agent.agent_id}/modules/collection/machine/basic_machine_info`;
+        const data = await runFetchUntilComplete(endpoint, controller.signal);
         setMachineInfo(data);
         setLoading(false);
       } catch (err: any) {
