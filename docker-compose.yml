@@ -18,6 +18,7 @@ services:
       C2_SERVER_HOST: "${C2_SERVER_HOST}"
       C2_SERVER_PORT: "${C2_SERVER_PORT}"
       C2_SERVER_REDIS_DB: "${C2_SERVER_REDIS_DB}"
+      C2_SERVER_DEBUG: "${DARKSCRY_DEBUG:-false}"
 
     command: >
       poetry run python main.py
@@ -60,6 +61,7 @@ services:
       MANAGEMENT_JWT_ISSUER: "${MANAGEMENT_JWT_ISSUER}"
       MANAGEMENT_CORS_ORIGINS: "${MANAGEMENT_CORS_ORIGINS}"
       MANAGEMENT_JWT_AUDIENCE: "${MANAGEMENT_JWT_AUDIENCE}"
+      MANAGEMENT_DEBUG: "${DARKSCRY_DEBUG:-false}"
 
       DB_PASSWORD_FILE: "/run/secrets/db_password"
       C2_SERVER_HOST: "c2server"
@@ -69,7 +71,7 @@ services:
 
 
     command: >
-      poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000
+      poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   
   redis:
@@ -116,6 +118,7 @@ services:
         NEXT_PUBLIC_WS_URL: "${NEXT_PUBLIC_WS_URL}"
         NEXTAUTH_URL: "${NEXTAUTH_URL}"
         NEXTAUTH_SECRET: "${NEXTAUTH_SECRET}"
+        DARKSCRY_DEBUG: "${DARKSCRY_DEBUG:-false}"
     container_name: darkscry_frontend
     
     ports:
@@ -123,6 +126,9 @@ services:
 
     depends_on:
       - management
+
+    environment:
+      DARKSCRY_DEBUG: "${DARKSCRY_DEBUG:-false}"
 
 
     restart: unless-stopped

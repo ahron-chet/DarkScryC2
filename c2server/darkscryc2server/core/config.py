@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     port: int = Field(9100, alias="C2_SERVER_PORT")
     ws_port: int = Field(876, alias="C2_SERVER_WS_PORT")
 
+    debug: bool = Field(False, alias="C2_SERVER_DEBUG")
+
     redis_host: str = Field("localhost", alias="C2_SERVER_REDIS_HOST")
     redis_password: str | None = Field(None, alias="C2_SERVER_REDIS_PASSWORD")
     redis_db: int = Field(1, alias="C2_SERVER_REDIS_DB")
@@ -17,16 +19,16 @@ class Settings(BaseSettings):
     ssl_key: str | None = Field(None, alias="C2_SERVER_SSL_KEY")
 
     model_config = SettingsConfigDict(
-        env_file=None, 
-        env_file_encoding="utf-8",
-        extra="ignore"
+        env_file=None, env_file_encoding="utf-8", extra="ignore"
     )
 
     @computed_field
     @property
     def redis_url(self) -> str:
         if self.redis_password:
-            return f"redis://:{self.redis_password}@{self.redis_host}:6379/{self.redis_db}"
+            return (
+                f"redis://:{self.redis_password}@{self.redis_host}:6379/{self.redis_db}"
+            )
         return f"redis://{self.redis_host}:6379/{self.redis_db}"
 
 
