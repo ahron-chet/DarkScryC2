@@ -72,7 +72,7 @@ This repository powers a cyber intelligence and offensive operations panel. Fron
 ### 🔍 File Explorer
 
 * Fetches via:
-  `POST /agents/:agent_id/modules/collection/files/stream_files_explorer`
+  `POST /agents/:agent_id/modules/collection/files/files_explorer_stream`
 * Displays directories + files in a `grid`, styled with `.file-explorer-item`.
 * Uses:
 

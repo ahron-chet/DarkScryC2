@@ -65,7 +65,7 @@ export default function FileExplorerPanel({ agent }: FileExplorerPanelProps) {
 
       // The server expects a POST with { path }, returning { RootPath, Directories, Files }
       const response = await axiosAuth.post<FileExplorerResponse>(
-        `/agents/${agent.agent_id}/modules/collection/files/stream_files_explorer`,
+        `/agents/${agent.agent_id}/modules/collection/files/files_explorer_stream`,
         { path: pathString }
       );
 
