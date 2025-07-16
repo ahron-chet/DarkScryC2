@@ -8,7 +8,7 @@ import ShellPanel from "./ShellPanel";
 import ModulesTestPanel from "./modules/TestPanel";
 import ModulesWifiPasswordsPanel from "./modules/WifiPasswordPanel";
 import { initAgentViewDropdowns } from "lib/custome_effects"
-import useAuthApi from "@/lib/fetchApiClient";
+import api from "@/lib/apiClient";
 import FileExplorerPanel from "./modules/FileExplorerPanel";
 import WebCredentialsPanel from "./modules/WebCredentialsPanel";
 import ProcessInjectPanel from "./modules/ProcessInjectPanel";
@@ -35,13 +35,12 @@ export default function AgentView({ agent }: AgentViewProps) {
     setActiveModule(moduleKey);
   }
 
-  const { authGetApi } = useAuthApi()
 
   // Decide which content to render
   let panelContent = null;
   switch (activeModule) {
     case "shell":
-      authGetApi(`/agents/${agent.AgentId}/modules/execution/shell/start_shell`)
+      api.get(`/agents/${agent.AgentId}/modules/execution/shell/start_shell`);
       panelContent = <ShellPanel agent={agent} />;
       break;
     case "modules-test":

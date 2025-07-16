@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import { Agent } from "@/lib/types";
-import { useSession } from "next-auth/react";
+import { getAccessToken } from "@/lib/authClient";
 import { useShellWebSocket } from "@/lib/hooks/useShellWebSocket";
 
 interface ShellPanelProps {
@@ -10,8 +10,7 @@ interface ShellPanelProps {
 
 
 export default function ShellPanel({ agent }: ShellPanelProps) {
-  const { data: session } = useSession();
-  const accessToken = session?.user?.accessToken || "";
+  const accessToken = getAccessToken() || "";
 
   // Shell Type (File dropdown)
   const [shellType, setShellType] = useState<"powershell" | "cmd">("powershell");

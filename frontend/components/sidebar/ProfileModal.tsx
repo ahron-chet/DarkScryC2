@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { IUser } from "@/lib/useUserApi";
 import useUserApi from "@/lib/useUserApi";
-import { signOut } from "next-auth/react";
+import { logout } from "@/lib/authClient";
 
 
 interface UserProfileModalProps {
@@ -21,7 +21,7 @@ export default function UserProfileModal({
         if (!confirm("Are you sure you want to delete this account?")) return;
         // await deleteUser(user.user_id);
         onClose();
-        signOut();
+        logout();
     }
 
     return (
@@ -173,7 +173,7 @@ export default function UserProfileModal({
                             <button
                                 type="button"
                                 className="btn btn-outline-secondary me-auto"
-                                onClick={() => { signOut() }}
+                                onClick={() => { logout() }}
                             >
                                 Sign Out
                             </button>
