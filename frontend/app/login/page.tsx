@@ -1,7 +1,9 @@
 "use client";
-import { useState } from "react";
-import { signIn } from "next-auth/react";
-import { useRouter ,useSearchParams} from "next/navigation";
+export const dynamic = "force-dynamic";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import { setTokens } from "@/lib/authClient";
 import Script from 'next/script';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./login.css";
@@ -9,35 +11,38 @@ import "./login.css";
 
 export default function LoginPage() {
 
-  const searchParams = useSearchParams();
-
-  // If the user was redirected to /login?callbackUrl=...
-  // NextAuth sets that so we know where to go after successful sign in
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const [callbackUrl, setCallbackUrl] = useState("/");
   const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      setCallbackUrl(params.get("callbackUrl") || "/");
+    }
+  }, []);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  async function handleSubmit(e:any) {
+  async function handleSubmit(e: any) {
     e.preventDefault();
     setMessage("");
     setIsLoading(true);
-    const result = await signIn("credentials", {
-      username,
-      password,
-      redirect: false,
-      callbackUrl,
-    });
-
-    setIsLoading(false);
-    if (result?.ok) {
-      // Successful login
-      router.push(result.url || callbackUrl);
-    } else {
-      // Failed login
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_MANAGEMENT_API_URL}/auth/login`,
+        {
+          username,
+          password,
+        }
+      );
+      setTokens(res.data.access_token, res.data.refresh_token);
+      router.push(callbackUrl);
+    } catch (err) {
       setMessage("Invalid credentials or server error");
+    } finally {
+      setIsLoading(false);
     }
   }
 

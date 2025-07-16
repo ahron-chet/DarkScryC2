@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useSession, signOut } from "next-auth/react";
+import JWT from "jsonwebtoken";
 import useUserApi, { IUser } from "lib/useUserApi";
 import UserProfileModal from "./ProfileModal";
+import { getAccessToken, logout } from "@/lib/authClient";
 
 export default function UserDropdown() {
   const [fullName, setFullName] = useState("Loading...");
@@ -13,45 +14,36 @@ export default function UserDropdown() {
   const [showProfile, setShowProfile] = useState(false);
 
   const { getUser } = useUserApi();
-
-  const { data: session, status } = useSession()
-  // Sign-out logic
-  const handleSignOut = async () => {
-    await signOut();
+  const handleSignOut = () => {
+    logout();
   };
 
-  // 1) Fetch /api/me to get the user_id
+  // 1) Decode token to get user_id
   useEffect(() => {
-    if (!session?.user.accessToken){
-      return;
+    const token = getAccessToken();
+    if (!token) return;
+    const decoded = JWT.decode(token) as { sub?: string } | null;
+    if (decoded && decoded.sub) {
+      setUserId(decoded.sub);
     }
-    fetch("/api/me")
-      .then((res) => {
-        if (!res.ok) throw new Error("Not authenticated");
-        return res.json();
-      })
-      .then((data) => {
-        if (data.user_id) {
-          setUserId(data.user_id);
-        }
-        // For quick display in the dropdown:
-        const firstName = data.first_name || "Unknown";
-        const lastName = data.last_name || "";
-        setFullName(`${firstName} ${lastName}`);
-        setUserRole(data.role || "Unknown");
-      })
-      .catch(() => {
-        setFullName("Unknown");
-        setUserRole("Unknown");
-      });
-  }, [session?.user.accessToken]);
+  }, []);
 
   // 2) If we have a user_id, load the user from the API
   useEffect(() => {
     if (userId) {
       getUser(userId)
-        .then((fetchedUser) => setUserData(fetchedUser))
-        .catch((err) => console.error("Failed to get user data", err));
+        .then((fetchedUser) => {
+          setUserData(fetchedUser);
+          const firstName = fetchedUser.first_name || "Unknown";
+          const lastName = fetchedUser.last_name || "";
+          setFullName(`${firstName} ${lastName}`);
+          setUserRole(fetchedUser.role || "Unknown");
+        })
+        .catch((err) => {
+          console.error("Failed to get user data", err);
+          setFullName("Unknown");
+          setUserRole("Unknown");
+        });
     }
   }, [userId]);
 

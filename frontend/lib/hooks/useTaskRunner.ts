@@ -1,10 +1,13 @@
 "use client";
 import { useState, useCallback } from "react";
-import useAuthApi from "lib/fetchApiClient";
+import api from "../apiClient";
 
 
 export default function useTaskRunner() {
-    const { authGetApi } = useAuthApi();
+    const authGetApi = async (url: string) => {
+        const res = await api.get(url);
+        return res.data;
+    };
     const [error, setError] = useState(null);
     const [result, setResult] = useState(null);
   

@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { Agent } from "@/lib/types";
-import useTaskRunner from "@/lib/hooks/useTaskRunnerold";
+import useTaskRunner from "@/lib/hooks/useTaskRunner";
 
 interface AgentDetailPanelProps {
   agent: Agent;

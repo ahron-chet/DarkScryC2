@@ -1,10 +1,10 @@
 "use client"; // This ensures the component runs on the client side
 
-import { signOut } from "next-auth/react";
+import { logout } from "@/lib/authClient";
 
 export default function LogoutButton() {
   return (
-    <button onClick={() => signOut()} className="btn btn-danger">
+    <button onClick={() => logout()} className="btn btn-danger">
       Sign Out
     </button>
   );
