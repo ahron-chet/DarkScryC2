@@ -3,7 +3,12 @@ export const dynamic = "force-dynamic";
 import React, { useState, useEffect } from "react";
 import api from "@/lib/apiClient";
 import { useRouter } from "next/navigation";
-import { setTokens } from "@/lib/authClient";
+import {
+  getAccessToken,
+  getRefreshToken,
+  setTokens,
+  clearTokens,
+} from "@/lib/authClient";
 import Script from 'next/script';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./login.css";
@@ -20,6 +25,32 @@ export default function LoginPage() {
       setCallbackUrl(params.get("callbackUrl") || "/index");
     }
   }, []);
+
+  // If tokens are already stored, redirect immediately
+  useEffect(() => {
+    const redirectIfLoggedIn = async () => {
+      const access = getAccessToken();
+      if (access) {
+        router.replace(callbackUrl);
+        return;
+      }
+      const refresh = getRefreshToken();
+      if (refresh) {
+        try {
+          const res = await api.post("/auth/refresh", { refresh_token: refresh });
+          setTokens(res.data.access_token, res.data.refresh_token);
+          router.replace(callbackUrl);
+          return;
+        } catch {
+          clearTokens();
+        }
+      }
+    };
+
+    if (typeof window !== "undefined") {
+      redirectIfLoggedIn();
+    }
+  }, [callbackUrl, router]);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
