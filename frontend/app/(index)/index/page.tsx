@@ -1,16 +1,15 @@
 "use client";
 import { useState, useEffect } from "react";
 import api from "@/lib/apiClient";
-import { ensureValidTokens } from "@/lib/authClient";
+import useRequireAuth from "@/lib/hooks/useRequireAuth";
 import "./test.css";
 
 export default function IndexPage() {
   const [data, setData] = useState(null);
+  useRequireAuth();
 
   useEffect(() => {
     (async () => {
-      const ok = await ensureValidTokens();
-      if (!ok) return;
       try {
         const res = await api.get("/agents");
         setData(res.data);
