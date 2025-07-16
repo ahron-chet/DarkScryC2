@@ -1,14 +1,3 @@
-Based on our full conversation and the system you've been building, here's a full and professional `AGENTS.md` spec file for **frontend AI agents** contributing to your project:
-
----
-
-# 📁 AGENTS.md
-
-> **Frontend Agent Instruction Manual**
-> *Last updated: 2025-07-09*
-
----
-
 ## 🎯 Purpose
 
 This repository powers a cyber intelligence and offensive operations panel. Frontend agents are responsible for creating modular, responsive, and cyber-themed UI components for security operators. The design aesthetic must evoke a **high-tech, stealthy, futuristic** dashboard while remaining intuitive and Bootstrap-compliant.
