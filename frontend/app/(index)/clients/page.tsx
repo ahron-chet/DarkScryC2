@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import api from "@/lib/apiClient";
-import { getAccessToken } from "@/lib/authClient";
+import useRequireAuth from "@/lib/hooks/useRequireAuth";
 import { Agent } from "@/lib/types";
 
 import ClientsTabsBar from "@/components/sidebar/clients/ClientsTabsBar";
@@ -14,6 +14,7 @@ import "./clients.css";
 
 export default function ClientsPage() {
 
+  useRequireAuth();
   const [agents, setAgents] = useState<Agent[]>([]);
   // Agents that have been "activated" and appear as separate tabs
   const [openAgents, setOpenAgents] = useState<Agent[]>([]);
@@ -21,8 +22,6 @@ export default function ClientsPage() {
   const [activeTab, setActiveTab] = useState<string>("all");
 
   useEffect(() => {
-    const token = getAccessToken();
-    if (!token) return;
     (async () => {
       try {
         const res = await api.get("/agents");

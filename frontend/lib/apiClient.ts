@@ -6,6 +6,13 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+const redirectToLogin = () => {
+  if (typeof window !== 'undefined') {
+    const cb = encodeURIComponent(window.location.pathname);
+    window.location.href = `/login?callbackUrl=${cb}`;
+  }
+};
+
 api.interceptors.request.use((config) => {
   const token = getAccessToken();
   if (token && config.headers) {
@@ -18,7 +25,8 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    const status = error.response?.status;
+    if (status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       const refresh = getRefreshToken();
       if (refresh) {
@@ -32,11 +40,13 @@ api.interceptors.response.use(
           return api(originalRequest);
         } catch {
           clearTokens();
-          if (typeof window !== 'undefined') {
-            window.location.href = '/login';
-          }
+          redirectToLogin();
         }
+      } else {
+        redirectToLogin();
       }
+    } else if (status === 403) {
+      redirectToLogin();
     }
     return Promise.reject(error);
   }
