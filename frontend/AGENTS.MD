@@ -225,13 +225,14 @@ Before merging or registering your panel:
 
 ---
 
-## 💬 Questions?
+**Pre-commit Checklist:**
 
-If you're unsure about a panel, styling, or best practice:
+Before committing your code, always run:
 
-> **Default to Bootstrap**, **Orbitron**, and **modular cards**.
-> Or ask `Aharon Chetrit` 😎
+```bash
+npx tsc --noEmit
+npm run lint
+```
 
----
+Do **not** ignore any errors—especially TypeScript errors. If an error genuinely cannot be resolved, clearly document the reason in your Pull Request.
 
-Would you like me to export this as a downloadable `AGENTS.md` file?
