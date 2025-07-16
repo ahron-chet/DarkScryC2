@@ -30,7 +30,7 @@ api.interceptors.response.use(
           setTokens(res.data.access_token, res.data.refresh_token);
           originalRequest.headers['Authorization'] = `Bearer ${res.data.access_token}`;
           return api(originalRequest);
-        } catch (_) {
+        } catch {
           clearTokens();
           if (typeof window !== 'undefined') {
             window.location.href = '/login';

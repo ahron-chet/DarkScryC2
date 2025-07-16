@@ -1,6 +1,6 @@
 "use client";
 export const dynamic = "force-dynamic";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import api from "@/lib/apiClient";
 import { useRouter } from "next/navigation";
 import { setTokens } from "@/lib/authClient";
@@ -25,7 +25,9 @@ export default function LoginPage() {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  async function handleSubmit(e: any) {
+  async function handleSubmit(
+    e: React.FormEvent<HTMLFormElement>
+  ) {
     e.preventDefault();
     setMessage("");
     setIsLoading(true);
@@ -36,7 +38,7 @@ export default function LoginPage() {
       });
       setTokens(res.data.access_token, res.data.refresh_token);
       router.push(callbackUrl);
-    } catch (err) {
+    } catch {
       setMessage("Invalid credentials or server error");
     } finally {
       setIsLoading(false);
