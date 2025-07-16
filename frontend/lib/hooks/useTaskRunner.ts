@@ -2,12 +2,20 @@
 import { useState, useCallback, useRef } from "react";
 import api from "../apiClient";
 
+interface TaskStatus {
+  status: string;
+}
+
+interface TaskResult {
+  result?: { data?: { result?: any } };
+}
+
 
 export default function useTaskRunner() {
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    const authGetApi = useCallback(async (url: string) => {
-        const res = await api.get(url);
+    const authGetApi = useCallback(async <T = any>(url: string): Promise<T> => {
+        const res = await api.get<T>(url);
         return res.data;
     }, []);
     const [error, setError] = useState<any>(null);
@@ -36,9 +44,9 @@ export default function useTaskRunner() {
 
           attempts++;
           try {
-            const statusData = await authGetApi(`/tasks/${taskId}/status`);
+            const statusData = await authGetApi<TaskStatus>(`/tasks/${taskId}/status`);
             if (statusData.status === "complete") {
-              const data = await authGetApi(`/tasks/${taskId}/result`);
+              const data = await authGetApi<TaskResult>(`/tasks/${taskId}/result`);
               setResult(data);
               clearTimer();
               return resolve(data.result?.data?.result);
@@ -79,7 +87,7 @@ export default function useTaskRunner() {
     const runFetchUntilComplete = useCallback(
       async (endpoint: string, signal?: AbortSignal) => {
         try {
-          const resp = await authGetApi(endpoint);
+          const resp = await authGetApi<{ task_id?: string }>(endpoint);
           const taskId = resp?.task_id;
           if (!taskId) throw new Error('No task_id returned');
           return await getTaskResults(taskId, signal);
