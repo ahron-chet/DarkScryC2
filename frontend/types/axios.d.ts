@@ -11,5 +11,6 @@ declare module 'axios' {
   // For Axios v1.x, `AxiosRequestConfig` has a generic for the request body.
   interface AxiosRequestConfig<T = any> {
     data?: T;
+    _retry?: boolean;
   }
 }
