@@ -41,7 +41,7 @@ export default function ClientsTabsBar({
               className={`btn ${isActive ? "btn-primary" : "btn-secondary"}`}
               onClick={() => onTabClick(agent.agent_id)}
             >
-              {agent.HostName}
+              {agent.host_name}
             </button>
             <button
               className={`btn ${isActive ? "btn-primary" : "btn-secondary"}`}

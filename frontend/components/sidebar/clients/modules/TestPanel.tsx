@@ -13,7 +13,7 @@ export default function ModulesTestPanel({ agent }: ModulesTestPanelProps) {
       <div className="card-body">
         <h4 className="card-title text-warning">Test Module</h4>
         <p className="card-text">
-          This is a placeholder "Test" module for agent <strong>{agent.HostName}</strong>.
+          This is a placeholder "Test" module for agent <strong>{agent.host_name}</strong>.
         </p>
       </div>
     </div>
