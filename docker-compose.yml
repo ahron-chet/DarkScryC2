@@ -102,6 +102,9 @@ services:
       MANAGEMENT_REDIS_PASSWORD: "${REDIS_PASSWORD:-}"
       MANAGEMENT_REDIS_PORT: "6379"
       MANAGEMENT_ARQ_REDIS_DB: "${MANAGEMENT_ARQ_REDIS_DB:-4}"
+
+      C2_SERVER_HOST: "c2server"
+      C2_SERVER_PORT: "${C2_SERVER_PORT:-9100}"
     depends_on:
       - redis
 
