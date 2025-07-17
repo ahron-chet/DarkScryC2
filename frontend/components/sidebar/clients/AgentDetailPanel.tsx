@@ -32,27 +32,40 @@ export default function AgentDetailPanel({ agent }: AgentDetailPanelProps) {
 
   useEffect(() => {
     const controller = new AbortController();
+  
     (async () => {
       try {
         setLoading(true);
         setError(null);
-
-
+  
         const endpoint = `/agents/${agent.agent_id}/modules/collection/machine/basic_machine_info`;
-        const data = await runFetchUntilComplete(endpoint, controller.signal);
-        setMachineInfo(data);
+        const response = await runFetchUntilComplete(endpoint, controller.signal);
+  
+        const machineInfo = (response as { machine_info?: BasicMachineInfo })?.machine_info;
+  
+        if (!machineInfo) {
+          throw new Error("Machine info is missing in response");
+        }
+  
+        setMachineInfo(machineInfo);
         setLoading(false);
       } catch (err: any) {
-        if (err.name === 'AbortError') return;
+        if (err.name === 'TaskCancelledError') {
+          return;
+        }
         console.error("Error fetching agent detail:", err);
         setError("Failed to load machine info");
         setLoading(false);
       }
     })();
+  
     return () => {
       controller.abort();
     };
-  }, []);
+  }, [agent.agent_id, runFetchUntilComplete]);
+  
+  
+  
   if (loading) {
     // A Bootstrap spinner with custom text
     return (

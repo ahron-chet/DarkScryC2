@@ -64,13 +64,13 @@ export default function FileExplorerPanel({ agent }: FileExplorerPanelProps) {
       const pathString = segmentsToPath(segments);
 
       // The server expects a POST with { path }, returning { RootPath, Directories, Files }
-      const response = await axiosAuth.post<FileExplorerResponse>(
+      const response = await axiosAuth.post<any>(
         `/agents/${agent.agent_id}/modules/collection/files/files_explorer_stream`,
         { path: pathString }
       );
 
       
-      const newData = response.data;
+      const newData = JSON.parse(response.data);
       // Convert server's RootPath to segments
       const newSegs = pathToSegments(newData.RootPath);
 
