@@ -16,17 +16,24 @@ interface TaskResultOut {
 }
 
 
+export class TaskCancelledError extends Error {
+  constructor(message = 'Task polling cancelled') {
+    super(message);
+    this.name = 'TaskCancelledError';
+  }
+}
+
 export default function useTaskRunner() {
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const authGetApi = useCallback(async <T = any>(url: string): Promise<T> => {
+  const authGetApi = useCallback(async <T = unknown>(url: string): Promise<T> => {
         const res = await api.get<T>(url);
         return res.data;
     }, []);
   const [error, setError] = useState<unknown>(null);
   const [result, setResult] = useState<TaskResultOut | null>(null);
   
-  const getTaskResults = useCallback(async <T = any>(taskId: string, signal?: AbortSignal): Promise<T> => {
+  const getTaskResults = useCallback(async <T = unknown>(taskId: string, signal?: AbortSignal): Promise<T> => {
       try {
         if (!taskId) throw new Error("Task ID is required");
 
@@ -73,15 +80,44 @@ export default function useTaskRunner() {
         };
 
         return new Promise<T>((resolve, reject) => {
-          const abortListener = () => {
-            clearTimer();
-            reject(new Error('Task polling cancelled'));
-          };
-          if (signal) {
-            if (signal.aborted) return abortListener();
-            signal.addEventListener('abort', abortListener, { once: true });
+          if (!signal) {
+            return checkStatus(
+              (data) => {
+                clearTimer();
+                resolve(data);
+              },
+              (err) => {
+                clearTimer();
+                reject(err);
+              }
+            );
           }
-          checkStatus(resolve, reject);
+
+          function abortListener() {
+            cleanup();
+            reject(new TaskCancelledError());
+          }
+          function cleanup() {
+            clearTimer();
+            signal!.removeEventListener('abort', abortListener);
+          }
+
+          if (signal.aborted) {
+            return abortListener();
+          }
+
+          signal.addEventListener('abort', abortListener, { once: true });
+
+          checkStatus(
+            (data) => {
+              cleanup();
+              resolve(data);
+            },
+            (err) => {
+              cleanup();
+              reject(err);
+            }
+          );
         });
       } catch (err: unknown) {
         setError(err);
