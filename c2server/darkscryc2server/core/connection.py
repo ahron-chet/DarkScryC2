@@ -19,6 +19,7 @@ class WsConnection:
 
     def __post_init__(self) -> None:
         self.address = self.websocket.remote_address
+        self._io_lock = asyncio.Lock()
 
     async def close(self) -> None:
         if not self.websocket.closed:
@@ -27,14 +28,16 @@ class WsConnection:
 
     def serialize(self) -> bytes:
         return str({"address": str(self.address), "type": "ws"}).encode()
+    
 
     async def send_and_receive(self, message: str):
-        await self.websocket.send(message)
-        try:
-            response = await self.websocket.recv()
-        except Exception as exc:  # pragma: no cover - network failures
-            raise ConnectionError(f"WebSocket closed: {exc}")
-        return response
+        async with self._io_lock:
+            await self.websocket.send(message)
+            try:
+                response = await self.websocket.recv()
+            except Exception as exc:
+                raise ConnectionError(f"WebSocket closed: {exc}")
+            return response
 
 
 class RedisClient:
