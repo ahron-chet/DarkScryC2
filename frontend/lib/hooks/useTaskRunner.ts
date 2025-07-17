@@ -59,6 +59,7 @@ export default function useTaskRunner() {
             const statusData = await authGetApi<TaskStatus>(`/tasks/${taskId}/status`);
             if (statusData.status === "complete") {
               const data = await authGetApi<TaskResultOut>(`/tasks/${taskId}/result`);
+              console.log(data);
               setResult(data);
               clearTimer();
               return resolve((data.result as { data?: { result?: T } } | undefined)?.data?.result as T);
