@@ -13,9 +13,17 @@ from ..schemas.modules.execution import RunCommand
 router = APIRouter()
 
 
+import logging
+
+
+logger = logging.getLogger(__name__)
+
 async def _authenticate_ws(websocket: WebSocket) -> bool:
     token = websocket.query_params.get("token")
+    print(str(websocket.query_params))
+
     if not token:
+        print("WebSocket authentication failed: No token provided")
         return False
     settings = get_app_settings()
     try:
@@ -27,8 +35,10 @@ async def _authenticate_ws(websocket: WebSocket) -> bool:
             audience=settings.jwt_audience,
         )
         return True
-    except JWTError:
+    except JWTError as exc:
+        print(f"WebSocket authentication failed: JWT error: {exc}")
         return False
+
 
 
 @router.websocket("/ws/shell/{agent_id}")

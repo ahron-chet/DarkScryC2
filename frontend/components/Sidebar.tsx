@@ -18,7 +18,7 @@ export default function Sidebar() {
   }
   useEffect(() => {
     (async () => {
-      const products = await side_bar_effect();
+        await side_bar_effect();
     })()
   }, [])
 

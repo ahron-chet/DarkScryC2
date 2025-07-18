@@ -2,7 +2,7 @@ import argparse
 import asyncio
 
 from app.core.database import get_db_config, init_db
-from app.schemas.user import UserCreate, UserRole
+from app.schemas.user import UserCreate, UserRole, UserUpdate
 from app.services.user_service import UserService
 
 
@@ -21,21 +21,26 @@ async def create_user_command(args: argparse.Namespace) -> None:
         service = UserService()
 
         existing_user = await service.get_by_username(session, args.username)
-        user_data = UserCreate(
-            username=args.username,
-            password=args.password,
-            email=args.email,
-            role=UserRole(args.role),
-        )
 
         if existing_user:
-            # Update the existing user
-            user = await service.update(session, existing_user.user_id, user_data)
+            user_update_data = UserUpdate(
+                username=args.username,
+                password=args.password,
+                email=args.email,
+                role=UserRole(args.role),
+            )
+            user = await service.update(session, existing_user, user_update_data)
             print(f"Updated user {user.username} with id {user.user_id}")
         else:
-            # Create a new user
-            user = await service.create(session, user_data)
+            user_create_data = UserCreate(
+                username=args.username,
+                password=args.password,
+                email=args.email,
+                role=UserRole(args.role),
+            )
+            user = await service.create(session, user_create_data)
             print(f"Created user {user.username} with id {user.user_id}")
+
 
 
 
