@@ -62,6 +62,9 @@ add_compile_definitions(ASIO_STANDALONE _WEBSOCKETPP_CPP11_STL_)
 add_subdirectory(src/utils/Logger)
 add_subdirectory(src/comm/WsClient)
 add_subdirectory(src/core/CommandHandler)
+if(WIN32)
+add_subdirectory(src/utils/win32)
+endif()
 add_subdirectory(src/attacks)
 add_subdirectory(src/mitre)
 
@@ -69,6 +72,10 @@ add_subdirectory(src/mitre)
 # 🚀 Main Executable
 # ----------------------------------------------------------------------
 file(GLOB_RECURSE APP_SRCS CONFIGURE_DEPENDS src/*.cpp src/*.h)
+if(NOT WIN32)
+    list(FILTER APP_SRCS EXCLUDE REGEX "/win32/")
+    list(FILTER APP_SRCS EXCLUDE REGEX "/attacks/execution/")
+endif()
 
 add_executable(DarkScryCpp ${APP_SRCS})
 
@@ -78,6 +85,8 @@ target_include_directories(DarkScryCpp PRIVATE
     ${PROJECT_SOURCE_DIR}/src/comm
     ${PROJECT_SOURCE_DIR}/src/core
     ${PROJECT_SOURCE_DIR}/src/utils
+    $<$<PLATFORM_ID:Windows>:${PROJECT_SOURCE_DIR}/src/utils/win32>
+    $<$<PLATFORM_ID:Windows>:${PROJECT_SOURCE_DIR}/src/attacks/execution/shell_service>
     ${PROJECT_SOURCE_DIR}/src/attacks
     ${PROJECT_SOURCE_DIR}/src/mitre
 )
@@ -105,6 +114,8 @@ if(BUILD_TESTING)
         ${PROJECT_SOURCE_DIR}/src/comm
         ${PROJECT_SOURCE_DIR}/src/core
         ${PROJECT_SOURCE_DIR}/src/utils
+        $<$<PLATFORM_ID:Windows>:${PROJECT_SOURCE_DIR}/src/utils/win32>
+        $<$<PLATFORM_ID:Windows>:${PROJECT_SOURCE_DIR}/src/attacks/execution/shell_service>
         ${PROJECT_SOURCE_DIR}/src/attacks
         ${PROJECT_SOURCE_DIR}/src/mitre
     )

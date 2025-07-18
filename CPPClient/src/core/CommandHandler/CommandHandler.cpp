@@ -2,8 +2,40 @@
 #include "Logger/GlobalLogger.h"
 #include <algorithm>
 #include <rapidjson/document.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/stringbuffer.h>
 
 using namespace CppAgent;
+
+namespace {
+std::string make_response(bool success,
+                          const std::string* output = nullptr,
+                          const char* error = nullptr) {
+    rapidjson::Document d;
+    d.SetObject();
+    auto& alloc = d.GetAllocator();
+    d.AddMember("success", success, alloc);
+
+    if (output) {
+        rapidjson::Value data(rapidjson::kObjectType);
+        data.AddMember("output", rapidjson::Value(output->c_str(), alloc), alloc);
+        d.AddMember("data", data, alloc);
+    } else {
+        d.AddMember("data", rapidjson::Value(rapidjson::kNullType), alloc);
+    }
+
+    if (error) {
+        d.AddMember("error", rapidjson::Value(error, alloc), alloc);
+    } else {
+        d.AddMember("error", rapidjson::Value(rapidjson::kNullType), alloc);
+    }
+
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    d.Accept(writer);
+    return buffer.GetString();
+}
+} // namespace
 
 CommandHandler::CommandHandler() : shell_running_(false) {}
 
@@ -11,33 +43,57 @@ std::string CommandHandler::handle(const std::string& commandJson) {
     rapidjson::Document doc;
     if (doc.Parse(commandJson.c_str()).HasParseError() || !doc.IsObject()) {
         getLogger().log("Invalid JSON", Logger::Level::Warning);
-        return "";
+        return make_response(false, nullptr, "invalid json");
     }
 
-    if (!doc.HasMember("action") || !doc["action"].IsInt()) {
+    int action = 0;
+    if (doc.HasMember("action_id") && doc["action_id"].IsInt())
+        action = doc["action_id"].GetInt();
+    else if (doc.HasMember("action") && doc["action"].IsInt())
+        action = doc["action"].GetInt();
+    else {
         getLogger().log("No action provided", Logger::Level::Warning);
-        return "";
+        return make_response(false, nullptr, "missing action");
     }
-
-    int action = doc["action"].GetInt();
 
     if (action == START_SHELL_INSTANCE) {
+#ifdef _WIN32
+        if (!shell_)
+            shell_ = std::make_unique<win32::Shell>();
+        shell_running_ = shell_->create_by_sid(L"CURRENT_USER");
+#else
         shell_running_ = true;
+#endif
+        if (!shell_running_) {
+            return make_response(false, nullptr, "failed to start shell");
+        }
         getLogger().log("Start shell instance requested", Logger::Level::Info);
-        return "output";
+        return make_response(true);
     } else if (action == RUN_COMMAND) {
         if (!shell_running_) {
             getLogger().log("Run command but shell not running", Logger::Level::Warning);
-            return "output";
+            return make_response(false, nullptr, "Shell is not running");
         }
-        if (doc.HasMember("command") && doc["command"].IsString()) {
-            std::string cmd = doc["command"].GetString();
-            getLogger().log("Run command: " + cmd, Logger::Level::Debug);
+
+        std::string cmd;
+        if (doc.HasMember("command")) {
+            auto& c = doc["command"];
+            if (c.IsObject() && c.HasMember("command") && c["command"].IsString())
+                cmd = c["command"].GetString();
+            else if (c.IsString())
+                cmd = c.GetString();
         }
-        return "output";
+
+        getLogger().log("Run command: " + cmd, Logger::Level::Debug);
+#ifdef _WIN32
+        std::string output = shell_->run_command(cmd);
+#else
+        std::string output = cmd; // placeholder
+#endif
+        return make_response(true, &output);
     }
 
     getLogger().log("Unknown action: " + std::to_string(action), Logger::Level::Warning);
-    return "output";
+    return make_response(false, nullptr, "unknown action");
 }
 
