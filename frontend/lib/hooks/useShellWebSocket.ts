@@ -20,7 +20,7 @@ export function useShellWebSocket({
     const socketRef = useRef<WebSocket | null>(null);
 
     useEffect(() => {
-        const socketUrl = `${process.env.NEXT_PUBLIC_WS_URL}/shell/${agent_id}/?token=${accessToken}`;
+        const socketUrl = `${process.env.NEXT_PUBLIC_WS_URL}/shell/${agent_id}?token=${accessToken}`;
 
         setConnectionStatus("Connecting");
         const ws = new WebSocket(socketUrl);
@@ -33,7 +33,8 @@ export function useShellWebSocket({
         ws.onmessage = (event) => {
           
             const data = JSON.parse(event.data)
-            onMessage(data.message.result.output || "");
+            console.log(data);
+            onMessage(data.message.output || "");
         };
         ws.onerror = (err) => {
             console.error("WebSocket error:", err);

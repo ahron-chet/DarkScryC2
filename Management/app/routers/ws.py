@@ -13,13 +13,9 @@ from ..schemas.modules.execution import RunCommand
 router = APIRouter()
 
 
-
 async def _authenticate_ws(websocket: WebSocket) -> bool:
     token = websocket.query_params.get("token")
-    print(str(websocket.query_params))
-
     if not token:
-        print("WebSocket authentication failed: No token provided")
         return False
     settings = get_app_settings()
     try:
@@ -31,20 +27,20 @@ async def _authenticate_ws(websocket: WebSocket) -> bool:
             audience=settings.jwt_audience,
         )
         return True
-    except JWTError as exc:
-        print(f"WebSocket authentication failed: JWT error: {exc}")
+    except JWTError:
         return False
-
 
 
 @router.websocket("/ws/shell/{agent_id}")
 async def shell_websocket(websocket: WebSocket, agent_id: uuid.UUID) -> None:
-    print("✅ WebSocket handler reached")
+    if not await _authenticate_ws(websocket):
+        await websocket.close(code=1008)
+        return
+
     await websocket.accept()
     try:
         while True:
             data = await websocket.receive_json()
-            print(f"Received data: {data}")
             command = data.get("command")
             if command is None:
                 await websocket.send_json({"error": "No command"})
@@ -56,6 +52,4 @@ async def shell_websocket(websocket: WebSocket, agent_id: uuid.UUID) -> None:
             )
             await websocket.send_json({"message": result.data})
     except WebSocketDisconnect:
-        print("❌ WebSocket disconnected")
         return
-
