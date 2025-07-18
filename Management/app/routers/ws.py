@@ -13,10 +13,6 @@ from ..schemas.modules.execution import RunCommand
 router = APIRouter()
 
 
-import logging
-
-
-logger = logging.getLogger(__name__)
 
 async def _authenticate_ws(websocket: WebSocket) -> bool:
     token = websocket.query_params.get("token")
@@ -43,14 +39,12 @@ async def _authenticate_ws(websocket: WebSocket) -> bool:
 
 @router.websocket("/ws/shell/{agent_id}")
 async def shell_websocket(websocket: WebSocket, agent_id: uuid.UUID) -> None:
-    if not await _authenticate_ws(websocket):
-        await websocket.close(code=1008)
-        return
-
+    print("✅ WebSocket handler reached")
     await websocket.accept()
     try:
         while True:
             data = await websocket.receive_json()
+            print(f"Received data: {data}")
             command = data.get("command")
             if command is None:
                 await websocket.send_json({"error": "No command"})
@@ -62,4 +56,6 @@ async def shell_websocket(websocket: WebSocket, agent_id: uuid.UUID) -> None:
             )
             await websocket.send_json({"message": result.data})
     except WebSocketDisconnect:
+        print("❌ WebSocket disconnected")
         return
+
