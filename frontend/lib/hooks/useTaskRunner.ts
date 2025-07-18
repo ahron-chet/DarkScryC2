@@ -66,7 +66,6 @@ export default function useTaskRunner() {
             setResult(data);
             clearTimer();
 
-            // ✅ Corrected data extraction:
             return resolve(data.result.data as T);
           }
 

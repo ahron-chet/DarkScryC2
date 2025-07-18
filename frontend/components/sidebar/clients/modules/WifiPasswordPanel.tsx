@@ -37,9 +37,9 @@ export default function WifiPasswordsPanel({ agent }: WifiPasswordsPanelProps) {
       const response = await authAxios.get<any>(
         `/agents/${agent.agent_id}/modules/collection/passwords/wifi_basic_info`
       );
-      const data: WifiPasswordRecord[] = await getTaskResults(response.data.task_id);
+      const data: any = await getTaskResults(response.data.task_id);
 
-      setWifiList(data || []);
+      setWifiList(data.wifi_profiles || []);
       setLoading(false);
     } catch (err) {
       console.error("Failed to fetch Wi-Fi passwords:", err);

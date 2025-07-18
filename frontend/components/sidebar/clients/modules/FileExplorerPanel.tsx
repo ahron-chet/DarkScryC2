@@ -70,7 +70,7 @@ export default function FileExplorerPanel({ agent }: FileExplorerPanelProps) {
       );
 
       
-      const newData = JSON.parse(response.data);
+      const newData = response.data;
       // Convert server's RootPath to segments
       const newSegs = pathToSegments(newData.RootPath);
 
