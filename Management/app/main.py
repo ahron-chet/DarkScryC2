@@ -35,3 +35,16 @@ app.include_router(agents.router)
 app.include_router(tasks.router)
 app.include_router(modules.router)
 app.include_router(ws.router)
+
+
+@app.websocket("/ws/simple")
+async def simple_websocket(websocket):
+    print("✅ Simple handler reached")
+    await websocket.accept()
+    await websocket.send_text("Hello WebSocket!")
+    try:
+        while True:
+            data = await websocket.receive_text()
+            await websocket.send_text(f"Echo: {data}")
+    except:
+        print("Client disconnected")
