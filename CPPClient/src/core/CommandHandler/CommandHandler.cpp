@@ -4,6 +4,8 @@
 #include "Logger/GlobalLogger.h"
 #ifdef _WIN32
 #include "collection/system_information/windows_basic_info.hpp"
+#else
+#include "collection/system_information/linux_basic_info.hpp"
 #endif
 #include <algorithm>
 #include <rapidjson/document.h>
@@ -106,6 +108,9 @@ std::string CommandHandler::handle(const std::string& commandJson) {
 #ifdef _WIN32
     else if (action == GET_BASIC_MACHINE_INFO) {
         auto info = win32::sysinfo::get_basic_machine_info();
+#else
+    else if (action == GET_BASIC_MACHINE_INFO) {
+        auto info = linux_os::sysinfo::get_basic_machine_info();
 
         rapidjson::Document d;
         d.SetObject();
