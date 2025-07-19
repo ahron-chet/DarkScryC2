@@ -7,4 +7,4 @@ namespace CppAgent {
     Logger& getLogger();
 }
 
-#define DARKSCR_LOG(msg, level) CppAgent::getLogger().log(msg, level)
+#define DARKSCRY_LOG(msg, level) CppAgent::getLogger().log(msg, level)

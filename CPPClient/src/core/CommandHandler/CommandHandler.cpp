@@ -44,9 +44,10 @@ namespace {
 CommandHandler::CommandHandler() : shell_running_(false) {}
 
 std::string CommandHandler::handle(const std::string& commandJson) {
+	DARKSCRY_LOG("Received command: " + commandJson, Logger::Level::Debug);
     rapidjson::Document doc;
     if (doc.Parse(commandJson.c_str()).HasParseError() || !doc.IsObject()) {
-        DARKSCR_LOG("Invalid JSON", Logger::Level::Warning);
+        DARKSCRY_LOG("Invalid JSON", Logger::Level::Warning);
         return make_response(false, nullptr, "invalid json");
     }
 
@@ -56,7 +57,7 @@ std::string CommandHandler::handle(const std::string& commandJson) {
     else if (doc.HasMember("action") && doc["action"].IsInt())
         action = doc["action"].GetInt();
     else {
-        DARKSCR_LOG("No action provided", Logger::Level::Warning);
+        DARKSCRY_LOG("No action provided", Logger::Level::Warning);
         return make_response(false, nullptr, "missing action");
     }
 
@@ -71,12 +72,12 @@ std::string CommandHandler::handle(const std::string& commandJson) {
         if (!shell_running_) {
             return make_response(false, nullptr, "failed to start shell");
         }
-        DARKSCR_LOG("Start shell instance requested", Logger::Level::Info);
+        DARKSCRY_LOG("Start shell instance requested", Logger::Level::Info);
         return make_response(true);
     }
     else if (action == RUN_COMMAND) {
         if (!shell_running_) {
-            DARKSCR_LOG("Run command but shell not running", Logger::Level::Warning);
+            DARKSCRY_LOG("Run command but shell not running", Logger::Level::Warning);
             return make_response(false, nullptr, "Shell is not running");
         }
 
@@ -89,7 +90,7 @@ std::string CommandHandler::handle(const std::string& commandJson) {
                 cmd = c.GetString();
         }
 
-        DARKSCR_LOG("Run command: " + cmd, Logger::Level::Debug);
+        DARKSCRY_LOG("Run command: " + cmd, Logger::Level::Debug);
 #ifdef _WIN32
         std::string output = shell_->run_command(cmd);
 #else
@@ -98,7 +99,7 @@ std::string CommandHandler::handle(const std::string& commandJson) {
         return make_response(true, &output);
     }
 
-    DARKSCR_LOG("Unknown action: " + std::to_string(action), Logger::Level::Warning);
+    DARKSCRY_LOG("Unknown action: " + std::to_string(action), Logger::Level::Warning);
     return make_response(false, nullptr, "unknown action");
 }
 

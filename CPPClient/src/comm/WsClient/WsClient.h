@@ -20,6 +20,7 @@ namespace CppAgent {
         bool start();
         void stop();
         bool send(const std::string& msg);
+		void wait_close();
         const std::string& get_uri() const { return uri_; }
 
     private:
@@ -35,6 +36,7 @@ namespace CppAgent {
 
         void on_open(websocketpp::connection_hdl hdl);
         void on_message(websocketpp::connection_hdl hdl, client::message_ptr msg);
+
         void run();
         CommandHandler cmd_handler_;
     };
