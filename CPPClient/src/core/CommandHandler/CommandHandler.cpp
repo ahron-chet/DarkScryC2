@@ -2,6 +2,9 @@
 
 #include "CommandHandler.h"
 #include "Logger/GlobalLogger.h"
+#ifdef _WIN32
+#include "collection/system_information/windows_basic_info.hpp"
+#endif
 #include <algorithm>
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
@@ -100,6 +103,46 @@ std::string CommandHandler::handle(const std::string& commandJson) {
 #endif
         return make_response(true, &output);
     }
+#ifdef _WIN32
+    else if (action == GET_BASIC_MACHINE_INFO) {
+        auto info = win32::sysinfo::get_basic_machine_info();
+
+        rapidjson::Document d;
+        d.SetObject();
+        auto& alloc = d.GetAllocator();
+        d.AddMember("success", true, alloc);
+
+        rapidjson::Value machine(rapidjson::kObjectType);
+        machine.AddMember("HostName", rapidjson::Value(info.host_name.c_str(), alloc), alloc);
+        machine.AddMember("OperatingSystem", rapidjson::Value(info.operating_system.c_str(), alloc), alloc);
+        machine.AddMember("OSVersionDetail", rapidjson::Value(info.os_version_detail.c_str(), alloc), alloc);
+        machine.AddMember("CPU", rapidjson::Value(info.cpu.c_str(), alloc), alloc);
+        machine.AddMember("RAM", rapidjson::Value(info.ram.c_str(), alloc), alloc);
+        machine.AddMember("Disk", rapidjson::Value(info.disk.c_str(), alloc), alloc);
+        machine.AddMember("PrimaryIP", rapidjson::Value(info.primary_ip.c_str(), alloc), alloc);
+        machine.AddMember("GPU", rapidjson::Value(info.gpu.c_str(), alloc), alloc);
+        machine.AddMember("AgentStatus", rapidjson::Value("Active and Monitoring", alloc), alloc);
+        if (!info.logged_on_sessions.empty())
+            machine.AddMember("LastLogin", rapidjson::Value(info.logged_on_sessions.front().c_str(), alloc), alloc);
+        else
+            machine.AddMember("LastLogin", rapidjson::Value("", alloc), alloc);
+
+        rapidjson::Value sessions(rapidjson::kArrayType);
+        for (auto& s : info.logged_on_sessions)
+            sessions.PushBack(rapidjson::Value(s.c_str(), alloc), alloc);
+        machine.AddMember("LogedInSessions", sessions, alloc);
+
+        rapidjson::Value data(rapidjson::kObjectType);
+        data.AddMember("machine_info", machine, alloc);
+        d.AddMember("data", data, alloc);
+        d.AddMember("error", rapidjson::Value(rapidjson::kNullType), alloc);
+
+        rapidjson::StringBuffer buffer;
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+        d.Accept(writer);
+        return buffer.GetString();
+    }
+#endif
 
     DARKSCRY_LOG("Unknown action: " + std::to_string(action), Logger::Level::Warning);
     return make_response(false, nullptr, "unknown action");
