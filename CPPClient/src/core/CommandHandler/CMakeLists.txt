@@ -9,3 +9,5 @@ target_include_directories(CommandHandler PUBLIC
 )
 
 target_link_libraries(CommandHandler PUBLIC Execution)
+target_link_libraries(CommandHandler PUBLIC Collection)
+

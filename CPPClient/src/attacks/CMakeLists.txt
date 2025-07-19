@@ -1,3 +1,6 @@
 add_library(Attacks INTERFACE)
+
 add_subdirectory(execution)
-target_link_libraries(Attacks INTERFACE Execution)
+add_subdirectory(collection)
+
+target_link_libraries(Attacks INTERFACE Execution Collection)
