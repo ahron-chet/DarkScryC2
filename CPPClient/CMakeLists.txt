@@ -48,15 +48,15 @@ FetchContent_Declare(
     GIT_TAG        0.8.2
 )
 FetchContent_MakeAvailable(websocketpp)
-if (UNIX)
-    file(READ ${websocketpp_SOURCE_DIR}/websocketpp/logger/basic.hpp WS_BASIC)
-    string(REPLACE "~basic<concurrency,names>()" "~basic()" WS_BASIC "${WS_BASIC}")
-    string(REPLACE "basic<concurrency,names>(" "basic(" WS_BASIC "${WS_BASIC}")
-    string(REPLACE "basic<concurrency,names>" "basic" WS_BASIC "${WS_BASIC}")
-    file(WRITE ${websocketpp_SOURCE_DIR}/websocketpp/logger/basic.hpp "${WS_BASIC}")
-    file(READ ${websocketpp_SOURCE_DIR}/websocketpp/endpoint.hpp WS_EP)
-    string(REPLACE "~endpoint<connection,config>()" "~endpoint()" WS_EP "${WS_EP}")
-    file(WRITE ${websocketpp_SOURCE_DIR}/websocketpp/endpoint.hpp "${WS_EP}")
+if(UNIX)
+    execute_process(
+        COMMAND patch -p1 -N -r - -i ${PROJECT_SOURCE_DIR}/patches/websocketpp-cpp20.patch
+        WORKING_DIRECTORY ${websocketpp_SOURCE_DIR}
+        RESULT_VARIABLE PATCH_RES
+    )
+    if(NOT PATCH_RES EQUAL 0)
+        message(FATAL_ERROR "Failed to patch websocketpp")
+    endif()
 endif()
 
 FetchContent_Declare(
