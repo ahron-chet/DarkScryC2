@@ -67,7 +67,9 @@ std::string CommandHandler::handle(const std::string& commandJson) {
             shell_ = std::make_unique<win32::Shell>();
         shell_running_ = shell_->create_by_sid(L"CURRENT_USER");
 #else
-        shell_running_ = true;
+        if (!shell_)
+            shell_ = std::make_unique<linux_os::Shell>();
+        shell_running_ = shell_->create();
 #endif
         if (!shell_running_) {
             return make_response(false, nullptr, "failed to start shell");
@@ -94,7 +96,7 @@ std::string CommandHandler::handle(const std::string& commandJson) {
 #ifdef _WIN32
         std::string output = shell_->run_command(cmd);
 #else
-        std::string output = cmd; // placeholder
+        std::string output = shell_->run_command(cmd);
 #endif
         return make_response(true, &output);
     }
