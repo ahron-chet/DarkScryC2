@@ -70,7 +70,8 @@ add_subdirectory(src/utils/win32)
 # ----------------------------------------------------------------------
 # 🚀 Main Executable
 # ----------------------------------------------------------------------
-file(GLOB_RECURSE APP_SRCS CONFIGURE_DEPENDS src/*.cpp src/*.h)
+
+set(APP_SRCS src/main.cpp)
 
 add_executable(DarkScryCpp ${APP_SRCS})
 
@@ -78,8 +79,6 @@ target_link_libraries(DarkScryCpp PRIVATE Logger WsClient CommandHandler Attacks
 
 target_include_directories(DarkScryCpp PRIVATE
     ${PROJECT_SOURCE_DIR}/src
-    ${PROJECT_SOURCE_DIR}/src/utils/win32/Headers  # this is fine
-    ${PROJECT_SOURCE_DIR}/src/utils                # 👈 ADD THIS
 )
 
 
