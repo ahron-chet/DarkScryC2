@@ -1,9 +1,17 @@
-﻿#include "windows_basic_info.hpp"
-#include "WinHandle.hpp"
+﻿
 
+
+#define WIN32_LEAN_AND_MEAN
+#define _WIN32_WINNT 0x0600
+
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #include <Windows.h>
 #include <iphlpapi.h>
-#include <WtsApi32.h>
+#include <WtsApi32.h> 
+#include "windows_basic_info.hpp"
+#include "WinHandle.hpp"
+
 #pragma comment(lib, "iphlpapi.lib")
 #pragma comment(lib, "wtsapi32.lib")
 
@@ -11,6 +19,7 @@
 #include <sstream>
 #include <vector>
 #include <algorithm>
+
 
 namespace {
 
@@ -164,15 +173,16 @@ namespace {
         DWORD count = 0;
 
         if (!WTSEnumerateSessionsExW(WTS_CURRENT_SERVER_HANDLE, nullptr, 1,
-            reinterpret_cast<PWTS_SESSION_INFO_W*>(&sessions), &count))
+            &sessions, &count))
             return {};
 
         std::vector<std::string> users;
         for (DWORD i = 0; i < count; ++i)
         {
             if (sessions[i].State != WTSActive) continue;
+
             LPWSTR uname = nullptr;
-            DWORD  bytes = 0;
+            DWORD bytes = 0;
             if (WTSQuerySessionInformationW(WTS_CURRENT_SERVER_HANDLE,
                 sessions[i].SessionId, WTSUserName, &uname, &bytes) && bytes > 1)
             {
@@ -180,9 +190,11 @@ namespace {
                 WTSFreeMemory(uname);
             }
         }
+
         WTSFreeMemory(sessions);
         return users;
     }
+
 
 } // namespace
 

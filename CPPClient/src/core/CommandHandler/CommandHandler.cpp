@@ -111,6 +111,7 @@ std::string CommandHandler::handle(const std::string& commandJson) {
 #else
     else if (action == GET_BASIC_MACHINE_INFO) {
         auto info = linux_os::sysinfo::get_basic_machine_info();
+#endif
 
         rapidjson::Document d;
         d.SetObject();
@@ -147,7 +148,6 @@ std::string CommandHandler::handle(const std::string& commandJson) {
         d.Accept(writer);
         return buffer.GetString();
     }
-#endif
 
     DARKSCRY_LOG("Unknown action: " + std::to_string(action), Logger::Level::Warning);
     return make_response(false, nullptr, "unknown action");
