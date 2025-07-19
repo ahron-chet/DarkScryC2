@@ -1,4 +1,4 @@
-# src/core/CommandHandler/CMakeLists.txt
+﻿# src/core/CommandHandler/CMakeLists.txt
 add_library(CommandHandler STATIC CommandHandler.cpp CommandHandler.h)
 
 target_include_directories(CommandHandler PUBLIC
@@ -7,3 +7,5 @@ target_include_directories(CommandHandler PUBLIC
     ${PROJECT_SOURCE_DIR}/src/utils
     ${PROJECT_SOURCE_DIR}/src/attacks
 )
+
+target_link_libraries(CommandHandler PUBLIC Execution)

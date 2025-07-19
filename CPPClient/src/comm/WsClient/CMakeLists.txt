@@ -1,4 +1,7 @@
-add_library(WsClient STATIC WsClient.cpp WsClient.h)
+﻿add_library(WsClient STATIC
+    WsClient.cpp
+    WsClient.h
+)
 
 target_include_directories(WsClient PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -8,12 +11,20 @@ target_include_directories(WsClient PUBLIC
     ${PROJECT_SOURCE_DIR}/src/utils
 )
 
+# ----------------------------------------------------------------------
+# NEW – WsClient uses CommandHandler, so link to it PUBLICLY.
+# This propagates CommandHandler’s PUBLIC include path
+# (which already contains ${PROJECT_SOURCE_DIR}/src/attacks}).
+# ----------------------------------------------------------------------
+target_link_libraries(WsClient PUBLIC CommandHandler)
+
 if (WIN32)
     target_link_libraries(WsClient PUBLIC ws2_32)
-endif()
+endif ()
 
-# Explicitly reinforce standalone definitions
-target_compile_definitions(WsClient PUBLIC ASIO_STANDALONE _WEBSOCKETPP_CPP11_STL_)
-
+target_compile_definitions(WsClient PUBLIC
+    ASIO_STANDALONE
+    _WEBSOCKETPP_CPP11_STL_
+)
 
 enable_compiler_warnings(WsClient)
