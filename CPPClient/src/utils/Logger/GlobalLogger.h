@@ -6,3 +6,5 @@ namespace CppAgent {
     void initLogger(bool toConsole = false, bool toFile = false, const std::string& path = "log.txt");
     Logger& getLogger();
 }
+
+#define DARKSCR_LOG(msg, level) CppAgent::getLogger().log(msg, level)

@@ -1,6 +1,5 @@
 #pragma once
-
-#include "WsClient/WsClient.h"
+#include "comm/WsClient/WsClient.h"
 #include "Logger/GlobalLogger.h"
 #include "Config.h"
 

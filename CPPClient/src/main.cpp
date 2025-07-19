@@ -1,4 +1,6 @@
+#define NOMINMAX
 #include "Agent.h"
+
 
 int main() {
     CppAgent::Agent agent;

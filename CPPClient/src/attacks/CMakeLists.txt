@@ -1,5 +1,3 @@
 add_library(Attacks INTERFACE)
-
-target_include_directories(Attacks INTERFACE
-    ${CMAKE_CURRENT_SOURCE_DIR}
-)
+add_subdirectory(execution)
+target_link_libraries(Attacks INTERFACE Execution)

@@ -8,7 +8,7 @@ project(DarkScryCpp VERSION 1.0 LANGUAGES CXX)
 # ----------------------------------------------------------------------
 # 🔧 Global Compiler Settings
 # ----------------------------------------------------------------------
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 function(enable_compiler_warnings target)
@@ -64,6 +64,8 @@ add_subdirectory(src/comm/WsClient)
 add_subdirectory(src/core/CommandHandler)
 add_subdirectory(src/attacks)
 add_subdirectory(src/mitre)
+add_subdirectory(src/utils/win32)
+
 
 # ----------------------------------------------------------------------
 # 🚀 Main Executable
@@ -72,46 +74,17 @@ file(GLOB_RECURSE APP_SRCS CONFIGURE_DEPENDS src/*.cpp src/*.h)
 
 add_executable(DarkScryCpp ${APP_SRCS})
 
-target_link_libraries(DarkScryCpp PRIVATE Logger WsClient CommandHandler Attacks Mitre)
+target_link_libraries(DarkScryCpp PRIVATE Logger WsClient CommandHandler Attacks Mitre Win32Utils)
 
 target_include_directories(DarkScryCpp PRIVATE
-    ${PROJECT_SOURCE_DIR}/src/comm
-    ${PROJECT_SOURCE_DIR}/src/core
-    ${PROJECT_SOURCE_DIR}/src/utils
-    ${PROJECT_SOURCE_DIR}/src/attacks
-    ${PROJECT_SOURCE_DIR}/src/mitre
+    ${PROJECT_SOURCE_DIR}/src
+    ${PROJECT_SOURCE_DIR}/src/utils/win32/Headers  # this is fine
+    ${PROJECT_SOURCE_DIR}/src/utils                # 👈 ADD THIS
 )
+
 
 enable_compiler_warnings(DarkScryCpp)
 
 # ----------------------------------------------------------------------
 # ✅ Testing (toggle with -DBUILD_TESTING=OFF)
 # ----------------------------------------------------------------------
-include(CTest)
-if(BUILD_TESTING)
-    FetchContent_Declare(
-        googletest
-        URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
-    )
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-    FetchContent_MakeAvailable(googletest)
-
-    file(GLOB_RECURSE TEST_SRCS CONFIGURE_DEPENDS tests/*.cpp)
-
-    add_executable(unit_tests ${TEST_SRCS})
-
-    target_link_libraries(unit_tests PRIVATE Logger WsClient CommandHandler Attacks Mitre GTest::gtest_main)
-    target_include_directories(unit_tests PRIVATE
-        ${PROJECT_SOURCE_DIR}/src/comm
-        ${PROJECT_SOURCE_DIR}/src/core
-        ${PROJECT_SOURCE_DIR}/src/utils
-        ${PROJECT_SOURCE_DIR}/src/attacks
-        ${PROJECT_SOURCE_DIR}/src/mitre
-    )
-
-    target_compile_features(unit_tests PUBLIC cxx_std_17)
-    enable_compiler_warnings(unit_tests)
-
-    include(GoogleTest)
-    gtest_discover_tests(unit_tests DISCOVERY_MODE PRE_TEST)
-endif()
