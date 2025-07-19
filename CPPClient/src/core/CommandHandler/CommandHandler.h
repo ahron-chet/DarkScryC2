@@ -25,7 +25,8 @@ private:
 #endif
         enum CommandIdentifier {
             START_SHELL_INSTANCE = 1,
-            RUN_COMMAND = 2
+            RUN_COMMAND = 2,
+            GET_BASIC_MACHINE_INFO = 3
         };
     };
 }
