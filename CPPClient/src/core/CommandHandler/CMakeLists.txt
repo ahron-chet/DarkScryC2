@@ -7,5 +7,6 @@ target_include_directories(CommandHandler PUBLIC
     ${PROJECT_SOURCE_DIR}/src/attacks
 )
 
+target_include_directories(CommandHandler PRIVATE "${CMAKE_SOURCE_DIR}/src/attacks")
 
 enable_compiler_warnings(CommandHandler)
