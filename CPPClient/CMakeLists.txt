@@ -48,6 +48,11 @@ FetchContent_Declare(
     GIT_TAG        0.8.2
 )
 FetchContent_MakeAvailable(websocketpp)
+if (UNIX)
+    file(READ ${websocketpp_SOURCE_DIR}/websocketpp/logger/basic.hpp WS_BASIC)
+    string(REPLACE "~basic<concurrency,names>()" "~basic()" WS_BASIC "${WS_BASIC}")
+    file(WRITE ${websocketpp_SOURCE_DIR}/websocketpp/logger/basic.hpp "${WS_BASIC}")
+endif()
 
 FetchContent_Declare(
     asio
@@ -75,7 +80,9 @@ add_compile_definitions(ASIO_STANDALONE _WEBSOCKETPP_CPP11_STL_)
 # 🧩 Internal modules  (⚠️ order matters!)
 # ----------------------------------------------------------------------
 add_subdirectory(src/utils/Logger)            # no deps
-add_subdirectory(src/utils/win32)             # Win32Utils (needed by Execution)
+if(WIN32)
+    add_subdirectory(src/utils/win32)         # Win32Utils (needed by Execution)
+endif()
 
 add_subdirectory(src/attacks)                 # Attacks / Execution (needs Win32Utils)
 
@@ -96,13 +103,13 @@ set(APP_SRCS
 add_executable(DarkScryCpp ${APP_SRCS})
 
 target_link_libraries(DarkScryCpp PRIVATE
-    Core          
+    Core
     Logger
     WsClient
     CommandHandler
     Attacks
     Mitre
-    Win32Utils
+    $<$<PLATFORM_ID:Windows>:Win32Utils>
 )
 
 target_include_directories(DarkScryCpp PRIVATE
