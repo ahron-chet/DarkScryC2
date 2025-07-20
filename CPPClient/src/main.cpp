@@ -6,6 +6,7 @@
 #endif
 
 int main() {
+
 #ifdef _WIN32
     std::wstring sid = win32::user::get_sid_by_user_name(L"Administrator");
 

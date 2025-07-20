@@ -11,7 +11,7 @@
 namespace win32 {  
 
 class Shell {  
-public:  
+public:
    Shell();  
    ~Shell();  
 
