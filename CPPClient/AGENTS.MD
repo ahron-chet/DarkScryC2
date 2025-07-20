@@ -163,8 +163,8 @@ Use existing CMake presets (`CMakePresets.json`):
 * Configure & Build Example:
 
 ```bash
-cmake --preset x64-debug
-cmake --build --preset x64-debug
+cmake -S CPPClient -B build
+cmake --build CPPClient/build
 ```
 
 This workflow supports easy iteration and testing, allowing you to focus on continuous improvement.
