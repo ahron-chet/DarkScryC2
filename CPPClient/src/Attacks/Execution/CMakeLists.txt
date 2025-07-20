@@ -2,12 +2,13 @@ add_library(Execution STATIC)
 
 if(WIN32)
     target_sources(Execution PRIVATE
-        shell_service/Shell.cpp
-        shell_service/Shell.hpp
+        Windows/Shell.cpp
+        Windows/Shell.hpp
     )
 
     target_include_directories(Execution PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/shell_service
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/Windows
         ${PROJECT_SOURCE_DIR}/src/utils
     )
 
@@ -15,11 +16,12 @@ if(WIN32)
 
 elseif(UNIX)
     target_sources(Execution PRIVATE
-        linux_shell_service/Shell.cpp
-        linux_shell_service/Shell.hpp
+        Linux/Shell.cpp
+        Linux/Shell.hpp
     )
 
     target_include_directories(Execution PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/linux_shell_service
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/Linux
     )
 endif()

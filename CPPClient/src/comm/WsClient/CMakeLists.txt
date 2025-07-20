@@ -14,7 +14,7 @@ target_include_directories(WsClient PUBLIC
 # ----------------------------------------------------------------------
 # NEW – WsClient uses CommandHandler, so link to it PUBLICLY.
 # This propagates CommandHandler’s PUBLIC include path
-# (which already contains ${PROJECT_SOURCE_DIR}/src/attacks}).
+# (which already contains ${PROJECT_SOURCE_DIR}/src/Attacks}).
 # ----------------------------------------------------------------------
 target_link_libraries(WsClient PUBLIC CommandHandler)
 

