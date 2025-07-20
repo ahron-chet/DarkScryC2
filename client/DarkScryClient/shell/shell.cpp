@@ -1,6 +1,7 @@
 #include "pch.h"
 #include <TlHelp32.h>
 #include "sddl.h"
+#include <GenericUtils/General.hpp>
 
 static bool EnablePrivilege(const wchar_t* priv) {
     HANDLE hToken = nullptr;
@@ -186,7 +187,7 @@ void Shell::Start(std::function<void(const char*)> outputHandler) {
 }
 
 void Shell::SendCommand(const std::string& cmd) {
-    std::string line = cmd + "\n";
+    std::string line = GenericUtils::toLower(cmd) + "\n";
     WriteFile(hStdinWrite, line.c_str(), (DWORD)line.size(), nullptr, nullptr);
 }
 
