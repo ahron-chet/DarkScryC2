@@ -2,6 +2,7 @@
 #define NOMINMAX
 
 #include <string_view>
+#include <string>
 #include <functional>
 #include <unordered_map>
 #include <memory>

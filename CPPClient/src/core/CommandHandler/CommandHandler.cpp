@@ -66,9 +66,19 @@ std::string CommandHandler::onStartShell(const Document& req)
             sid = win32::charToWchar(sid_str.c_str());
         }
     }
+
+    if (shellRunning_) {
+        if (_wcsicmp(shell_->get_current_sid().c_str(), sid.c_str()) == 0)
+            return makeSuccess(Value(rapidjson::kNullType));
+
+        shell_->stop();
+        shellRunning_ = false;
+    }
+
     shellRunning_ = shell_->create_by_sid(sid);
 #else
-    shellRunning_ = shell_->create();
+    if (!shellRunning_)
+        shellRunning_ = shell_->create();
 #endif
     return shellRunning_ ? makeSuccess(Value(rapidjson::kNullType))
                          : makeError("Shell start failed");

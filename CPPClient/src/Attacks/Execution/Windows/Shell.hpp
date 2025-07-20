@@ -11,11 +11,12 @@
 namespace win32 {  
 
 class Shell {  
-public:  
-   Shell();  
-   ~Shell();  
+public:
+   Shell();
+   ~Shell();
 
-   bool create_by_sid(const std::wstring& sid = L"CURRENT_USER");  
+   bool create_by_sid(const std::wstring& sid = L"CURRENT_USER");
+   const std::wstring& get_current_sid() const { return current_sid_; }
 
    std::string run_command(std::string_view cmd);  
    void start(const std::function<void(const char*)>& cb);  
@@ -36,8 +37,9 @@ private:
    PROCESS_INFORMATION pi_{};  
    STARTUPINFOW        si_{};  
    std::thread         th_;  
-   std::atomic_bool    running_{false};  
-   bool                echo_off_{false};  
-};  
+   std::atomic_bool    running_{false};
+   bool                echo_off_{false};
+   std::wstring        current_sid_{};
+};
 
 } // namespace win32

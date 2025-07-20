@@ -33,8 +33,11 @@ bool Shell::create_by_sid(const std::wstring& sid) {
             : ::CreateProcessW(CMD, nullptr, nullptr, nullptr, TRUE, CREATE_NO_WINDOW, nullptr, nullptr, &si_, &pi_);  
    };  
 
-   if (_wcsicmp(sid.c_str(), L"CURRENT_USER") == 0)  
-       return spawn(nullptr);  
+    if (_wcsicmp(sid.c_str(), L"CURRENT_USER") == 0) {
+        bool ok = spawn(nullptr);
+        if (ok) current_sid_ = sid;
+        return ok;
+    }
 
    if (!enable_privilege(L"SeDebugPrivilege")) return false;  
 
@@ -54,8 +57,10 @@ bool Shell::create_by_sid(const std::wstring& sid) {
        return false;  
    unique_handle dup(hDup);  
 
-   return spawn(dup.get());  
-}  
+    bool ok = spawn(dup.get());
+    if (ok) current_sid_ = sid;
+    return ok;
+}
 
 void Shell::write_line(std::string_view sv) {  
    std::string s(sv);  
@@ -133,16 +138,18 @@ void Shell::start(const std::function<void(const char*)>& cb) {
 
 void Shell::send(std::string_view cmd) { write_line(cmd); }  
 
-void Shell::stop() {  
-   if (!pi_.hProcess) return;  
-   if (running_) {  
-       running_ = false; write_line("exit");  
-       if (th_.joinable()) th_.join();  
-   }  
-   ::TerminateProcess(pi_.hProcess, 0);  
-   ::CloseHandle(pi_.hThread);  
-   ::CloseHandle(pi_.hProcess);  
-   pi_ = {};  
-   out_rd_.reset(); out_wr_.reset();  
-   in_rd_.reset(); in_wr_.reset();  
+void Shell::stop() {
+   if (!pi_.hProcess) return;
+   if (running_) {
+       running_ = false; write_line("exit");
+       if (th_.joinable()) th_.join();
+   }
+   ::TerminateProcess(pi_.hProcess, 0);
+   ::CloseHandle(pi_.hThread);
+   ::CloseHandle(pi_.hProcess);
+   pi_ = {};
+   out_rd_.reset(); out_wr_.reset();
+   in_rd_.reset(); in_wr_.reset();
+   current_sid_.clear();
+   echo_off_ = false;
 }
