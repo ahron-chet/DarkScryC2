@@ -15,6 +15,8 @@ public:
 
     bool create();
 
+    std::string get_current_sid() const { return {}; }
+
     std::string run_command(std::string_view cmd);
     void start(const std::function<void(const char*)>& cb);
     void send(std::string_view cmd);
