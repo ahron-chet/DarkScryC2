@@ -1,11 +1,12 @@
 if(WIN32)
     add_library(Collection STATIC
-        system_information/windows_basic_info.cpp
-        system_information/windows_basic_info.hpp
+        Windows/basic_info.cpp
+        Windows/basic_info.hpp
     )
 
     target_include_directories(Collection PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/system_information
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/Windows
         ${PROJECT_SOURCE_DIR}/src/utils
     )
 
@@ -13,11 +14,12 @@ if(WIN32)
 
 elseif(UNIX)
     add_library(Collection STATIC
-        system_information/linux_basic_info.cpp
-        system_information/linux_basic_info.hpp
+        Linux/basic_info.cpp
+        Linux/basic_info.hpp
     )
 
     target_include_directories(Collection PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/system_information
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/Linux
     )
 endif()
