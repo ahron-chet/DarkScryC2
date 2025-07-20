@@ -55,8 +55,6 @@ std::string CommandHandler::handle(const std::string& commandJson) {
     int action = 0;
     if (doc.HasMember("action_id") && doc["action_id"].IsInt())
         action = doc["action_id"].GetInt();
-    else if (doc.HasMember("action") && doc["action"].IsInt())
-        action = doc["action"].GetInt();
     else {
         DARKSCRY_LOG("No action provided", Logger::Level::Warning);
         return make_response(false, nullptr, "missing action");
