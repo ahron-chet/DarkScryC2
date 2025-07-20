@@ -4,6 +4,8 @@
 #include <sstream>  
 #include <algorithm>   
 #include "Security.hpp"
+#include "UserUtils.hpp"
+#include "GeneralUtils.hpp"
 
 using namespace win32;  
 using namespace win32::security;  
@@ -33,7 +35,7 @@ bool Shell::create_by_sid(const std::wstring& sid) {
             : ::CreateProcessW(CMD, nullptr, nullptr, nullptr, TRUE, CREATE_NO_WINDOW, nullptr, nullptr, &si_, &pi_);  
    };  
 
-    if (_wcsicmp(sid.c_str(), L"CURRENT_USER") == 0) {
+    if (utils::iequals(sid, user::get_current_user_sid())) {
         bool ok = spawn(nullptr);
         if (ok) current_sid_ = sid;
         return ok;

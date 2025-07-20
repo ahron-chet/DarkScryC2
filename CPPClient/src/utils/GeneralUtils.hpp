@@ -3,6 +3,10 @@
 #include <sstream>
 #include <cstdint>
 
+#include <string_view>
+#include <algorithm>
+#include <cwctype>
+
 namespace utils {
 
 inline std::string bytes_to_gb(std::uint64_t bytes, int precision = 0) {
@@ -13,5 +17,9 @@ inline std::string bytes_to_gb(std::uint64_t bytes, int precision = 0) {
     oss << gb << " GB";
     return oss.str();
 }
-
+inline bool iequals(const std::wstring_view lhs, const std::wstring_view rhs) {
+    return std::ranges::equal(lhs, rhs, [](wchar_t a, wchar_t b) {
+        return std::towlower(a) == std::towlower(b);
+    });
+}
 } // namespace utils

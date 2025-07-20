@@ -11,6 +11,7 @@
 #ifdef _WIN32
 #include "utils/win32/include/WinUtils.hpp"
 #include "utils/win32/include/UserUtils.hpp"
+#include "utils/GeneralUtils.hpp"
 #endif
 
 using namespace CppAgent;
@@ -52,7 +53,7 @@ std::string CommandHandler::onStartShell(const Document& req)
 {
     if (!shell_) shell_ = std::make_unique<execution::Shell>();
 #ifdef _WIN32
-    std::wstring sid = L"CURRENT_USER";
+    std::wstring sid = win32::user::get_current_user_sid();
     const Value* cmd_obj = nullptr;
     if (json::getObject(req, "command", cmd_obj)) {
         std::string user_name;
@@ -68,19 +69,21 @@ std::string CommandHandler::onStartShell(const Document& req)
     }
 
     if (shellRunning_) {
-        if (_wcsicmp(shell_->get_current_sid().c_str(), sid.c_str()) == 0)
-            return makeSuccess(Value(rapidjson::kNullType));
+        if (utils::iequals(shell_->get_current_sid(), sid)) {
+			DARKSCRY_LOG("Shell session already running for SID: " + win32::narrow(sid), Logger::Level::Debug);
+			return makeSuccess(Value(rapidjson::kNullType));
+        }
 
         shell_->stop();
         shellRunning_ = false;
     }
 
     shellRunning_ = shell_->create_by_sid(sid);
-    if (shellRunning_) current_sid_ = sid;
 #else
     if (!shellRunning_)
         shellRunning_ = shell_->create();
 #endif
+    DARKSCRY_LOG("Shell session initiated for SID: " + win32::narrow(sid) + (shellRunning_ ? " true" : " false"), Logger::Level::Debug);
     return shellRunning_ ? makeSuccess(Value(rapidjson::kNullType))
                          : makeError("Shell start failed");
 }
