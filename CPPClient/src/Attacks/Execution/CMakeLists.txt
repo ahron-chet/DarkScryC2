@@ -23,5 +23,6 @@ elseif(UNIX)
     target_include_directories(Execution PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/Linux
+        ${PROJECT_SOURCE_DIR}/src/utils
     )
 endif()

@@ -15,6 +15,8 @@ public:
 
     bool create();
 
+    bool is_running() const { return pid_ != -1; }
+
     std::string get_current_sid() const { return {}; }
 
     std::string run_command(std::string_view cmd);

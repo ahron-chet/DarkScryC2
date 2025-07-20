@@ -6,19 +6,29 @@
 #include "Security.hpp"
 #include "UserUtils.hpp"
 #include "GeneralUtils.hpp"
+#include "Logger/GlobalLogger.h"
 
-using namespace win32;  
-using namespace win32::security;  
-using namespace win32::process;  
+using namespace win32;
+using namespace win32::security;
+using namespace win32::process;
+using namespace CppAgent;
 
-Shell::Shell() { si_.cb = sizeof si_; }  
-Shell::~Shell() { stop(); }  
+Shell::Shell() { si_.cb = sizeof si_; }
+Shell::~Shell() { stop(); }
 
-bool Shell::create_by_sid(const std::wstring& sid) {  
-   SECURITY_ATTRIBUTES sa{sizeof sa, nullptr, TRUE};  
-   HANDLE r{}, w{}, ir{}, iw{};  
-   if (!::CreatePipe(&r, &w, &sa, 0) || !::CreatePipe(&ir, &iw, &sa, 0))  
-       return false;  
+bool Shell::create_by_sid(const std::wstring& sid) {
+    if (is_running()) {
+        if (utils::iequals(current_sid_, sid)) {
+            DARKSCRY_LOG("Shell session already running for SID: " + win32::narrow(sid), Logger::Level::Debug);
+            return true;
+        }
+        stop();
+    }
+
+    SECURITY_ATTRIBUTES sa{sizeof sa, nullptr, TRUE};
+    HANDLE r{}, w{}, ir{}, iw{};
+    if (!::CreatePipe(&r, &w, &sa, 0) || !::CreatePipe(&ir, &iw, &sa, 0))
+        return false;
 
    out_rd_.reset(r);  out_wr_.reset(w);  
    in_rd_.reset(ir);  in_wr_.reset(iw);  

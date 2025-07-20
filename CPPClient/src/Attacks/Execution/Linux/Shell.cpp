@@ -4,13 +4,20 @@
 #include <signal.h>
 #include <cstdio>
 #include <cstring>
+#include "Logger/GlobalLogger.h"
 
 using namespace linux_os;
+using namespace CppAgent;
 
 Shell::Shell() = default;
 Shell::~Shell() { stop(); }
 
 bool Shell::create() {
+    if (is_running()) {
+        DARKSCRY_LOG("Shell session already running", Logger::Level::Debug);
+        return true;
+    }
+
     int in_pipe[2];
     int out_pipe[2];
     if (pipe(in_pipe) == -1 || pipe(out_pipe) == -1)
