@@ -163,8 +163,8 @@ Use existing CMake presets (`CMakePresets.json`):
 * Configure & Build Example:
 
 ```bash
-cmake -S CPPClient -B build
-cmake --build CPPClient/build
+cmake -B build
+cmake --build build
 ```
 
 This workflow supports easy iteration and testing, allowing you to focus on continuous improvement.
