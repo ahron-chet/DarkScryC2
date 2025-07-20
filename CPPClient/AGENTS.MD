@@ -22,9 +22,13 @@ src/
 ├── comm/               # Communication protocols, WebSocket client implementations
 │   └── WsClient/
 │
-├── attacks/            # Attack simulation modules
-│   ├── execution/      # Shell execution & interactive sessions (Windows/Linux specific)
-│   └── collection/     # System information & data gathering modules (Windows/Linux specific)
+├── Attacks/            # Attack simulation modules
+│   ├── Execution/
+│   │   ├── Windows/    # Shell execution for Windows
+│   │   └── Linux/      # Shell execution for Linux
+│   └── Collection/
+│       ├── Windows/    # System info gathering on Windows
+│       └── Linux/      # System info gathering on Linux
 │
 ├── mitre/              # Mapping functionalities to MITRE ATT&CK framework techniques
 │
@@ -58,7 +62,7 @@ Follow this guide when adding new functionality:
 
   * `WsClient`
 
-### ⚔️ **Attacks (`src/attacks/`)**
+### ⚔️ **Attacks (`src/Attacks/`)**
 
 * **`execution/`**: Modules for executing commands or scripts, shell interactions (e.g., interactive shells, remote command execution).
 * **`collection/`**: Modules for gathering system information, files, processes, users, and more.
@@ -97,7 +101,7 @@ Follow this guide when adding new functionality:
 * **General utilities** (like parsing or conversions) must go to `utils` and should be reusable across the project.
 * **Module interaction**:
 
-  * `CommandHandler` calls → `attacks` modules (e.g., `Shell`)
+  * `CommandHandler` calls → `Attacks` modules (e.g., `Shell`)
   * `Attacks` modules call → `utils` (for helpers/logging)
   * `comm` calls → `core` (`CommandHandler`) to handle incoming commands
 
@@ -116,7 +120,7 @@ Follow this guide when adding new functionality:
 
 * Always ensure **modularity** when developing new capabilities.
 * If you're implementing common or reusable logic, **place it directly in the `utils/` module**.
-* **`CommandHandler`** should **only call** modules inside the **`attacks/`** directory.
-* Attack modules (`attacks/`) may freely use utilities from the **`utils/`** directory.
+* **`CommandHandler`** should **only call** modules inside the **`Attacks/`** directory.
+* Attack modules (`Attacks/`) may freely use utilities from the **`utils/`** directory.
 
 **Happy coding! 🐱‍💻**

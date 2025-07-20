@@ -9,7 +9,7 @@
 #include <Windows.h>
 #include <iphlpapi.h>
 #include <WtsApi32.h> 
-#include "windows_basic_info.hpp"
+#include "basic_info.hpp"
 #include "WinHandle.hpp"
 
 #pragma comment(lib, "iphlpapi.lib")

@@ -1,4 +1,4 @@
-#include "linux_basic_info.hpp"
+#include "basic_info.hpp"
 
 #include <unistd.h>
 #include <sys/utsname.h>

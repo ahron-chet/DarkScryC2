@@ -24,7 +24,7 @@ if(WIN32)
     add_subdirectory(src/utils/win32)         # Win32Utils (needed by Execution)
 endif()
 
-add_subdirectory(src/attacks)                 # Attacks / Execution (needs Win32Utils)
+add_subdirectory(src/Attacks)                 # Attacks / Execution (needs Win32Utils)
 
 add_subdirectory(src/core/CommandHandler)     # CommandHandler (needs Attacks)
 
