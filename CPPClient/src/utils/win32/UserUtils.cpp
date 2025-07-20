@@ -21,6 +21,5 @@ std::wstring user::get_sid_by_user_name(const std::wstring& name) {
         return {};
 
     domain.resize(domain_size);
-
     return security::sid_to_string(static_cast<PSID>(sid_buf.data()));
 }
