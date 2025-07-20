@@ -11,6 +11,7 @@
 #include <WtsApi32.h> 
 #include "basic_info.hpp"
 #include "WinHandle.hpp"
+#include "WinUtils.hpp"
 #include "RegistryUtils.hpp"
 
 #pragma comment(lib, "iphlpapi.lib")
@@ -25,6 +26,7 @@
 
 namespace {
     using namespace win32::registry;
+    using win32::narrow;
 
 
     // ------------------------------------------------------------------
@@ -169,6 +171,8 @@ namespace {
 // public façade
 // ----------------------------------------------------------------------
 namespace win32::sysinfo {
+
+    using win32::narrow;
 
     BasicMachineInfo get_basic_machine_info()
     {
