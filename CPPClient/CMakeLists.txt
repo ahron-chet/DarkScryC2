@@ -26,6 +26,8 @@ endif()
 
 add_subdirectory(src/Attacks)                 # Attacks / Execution (needs Win32Utils)
 
+add_subdirectory(src/serialization)           # header-only helpers
+
 add_subdirectory(src/core/CommandHandler)     # CommandHandler (needs Attacks)
 
 add_subdirectory(src/comm/WsClient)           # WsClient (needs CommandHandler)

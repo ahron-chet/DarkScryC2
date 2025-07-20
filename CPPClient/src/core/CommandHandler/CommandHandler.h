@@ -1,24 +1,67 @@
-#pragma once 
+#pragma once
 #define NOMINMAX
-#include <string>  
-#include <memory>  
-#include <Execution/Shell.hpp>
 
+#include <string_view>
+#include <functional>
+#include <unordered_map>
+#include <memory>
 
+#include <rapidjson/document.h>
+#include "serialization/JsonUtils.h"
 
+#ifdef _WIN32
+  #include "Attacks/Execution/Windows/Shell.hpp"
+#else
+  #include "Attacks/Execution/Linux/Shell.hpp"
+#endif
 
 namespace CppAgent {
-    class CommandHandler {
-    public:
-        CommandHandler();
-        std::string handle(const std::string& commandJson);
+
+class CommandHandler
+{
+public:
+    CommandHandler();
+
+    /// Parse, validate and dispatch. Returns a full JSON string.
+    [[nodiscard]]
+    std::string handle(std::string_view requestJson);
+
 private:
-        bool shell_running_;
-        std::unique_ptr<execution::Shell> shell_;
-        enum CommandIdentifier {
-            START_SHELL_INSTANCE = 1,
-            RUN_COMMAND = 2,
-            GET_BASIC_MACHINE_INFO = 3
-        };
+    // ---------------------------------------------------------------------
+    // Dispatch table
+    // ---------------------------------------------------------------------
+    using HandlerFn = std::string (CommandHandler::*)(const rapidjson::Document&);
+    std::unordered_map<int, HandlerFn> registry_;
+
+    // ---------------------------------------------------------------------
+    // Concrete handlers
+    // ---------------------------------------------------------------------
+    std::string onStartShell(const rapidjson::Document& req);
+    std::string onRunCommand(const rapidjson::Document& req);
+    std::string onGetBasicMachineInfo(const rapidjson::Document& req);
+
+    // ---------------------------------------------------------------------
+    // Small helpers
+    // ---------------------------------------------------------------------
+    std::string makeSuccess(const rapidjson::Value& data);
+    std::string makeError  (const char* msg);
+
+    // ---------------------------------------------------------------------
+    // State
+    // ---------------------------------------------------------------------
+    bool shellRunning_{false};
+
+#ifdef _WIN32
+    std::unique_ptr<win32::Shell>   shell_;
+#else
+    std::unique_ptr<linux_os::Shell> shell_;
+#endif
+
+    enum Command : int {
+        StartShell          = 1,
+        RunCommand          = 2,
+        GetBasicMachineInfo = 3
     };
-}
+};
+
+} // namespace CppAgent
