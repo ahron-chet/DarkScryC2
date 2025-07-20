@@ -19,6 +19,7 @@
 #include <sstream>
 #include <vector>
 #include <algorithm>
+#include "../../../utils/GeneralUtils.hpp"
 
 
 namespace {
@@ -50,15 +51,6 @@ namespace {
         return s;
     }
 
-    std::string bytes_to_gb(std::uint64_t bytes, int precision = 0)
-    {
-        double gb = static_cast<double>(bytes) / (1024.0 * 1024.0 * 1024.0);
-        std::ostringstream oss;
-        oss.setf(std::ios::fixed, std::ios::floatfield);
-        oss.precision(precision);
-        oss << gb << " GB";
-        return oss.str();
-    }
 
     // ------------------------------------------------------------------
     // Individual collectors
@@ -99,7 +91,7 @@ namespace {
     {
         MEMORYSTATUSEX m{ sizeof(MEMORYSTATUSEX) };
         if (!GlobalMemoryStatusEx(&m)) return "Unknown RAM";
-        return bytes_to_gb(m.ullTotalPhys, 1);
+        return utils::bytes_to_gb(m.ullTotalPhys, 1);
     }
 
     std::string get_system_drive_size()
@@ -116,7 +108,7 @@ namespace {
             GetVolumeInformationW(sys_root, nullptr, 0, nullptr, nullptr, nullptr,
                 fs.data(), (DWORD)fs.size());
             fs.resize(wcslen(fs.data()));
-            return bytes_to_gb(total.QuadPart, 0) + " " + narrow(fs);
+            return utils::bytes_to_gb(total.QuadPart, 0) + " " + narrow(fs);
         }
         return "Unknown Disk";
     }

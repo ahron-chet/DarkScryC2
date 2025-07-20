@@ -12,6 +12,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include "../../../utils/GeneralUtils.hpp"
 
 namespace {
 
@@ -52,14 +53,6 @@ std::string get_cpu_name() {
     return "Unknown CPU";
 }
 
-std::string bytes_to_gb(unsigned long long bytes, int precision = 0) {
-    double gb = static_cast<double>(bytes) / (1024.0 * 1024.0 * 1024.0);
-    std::ostringstream oss;
-    oss.setf(std::ios::fixed, std::ios::floatfield);
-    oss.precision(precision);
-    oss << gb << " GB";
-    return oss.str();
-}
 
 std::string get_total_ram() {
     std::ifstream f("/proc/meminfo");
@@ -69,7 +62,7 @@ std::string get_total_ram() {
             std::istringstream iss(line.substr(9));
             unsigned long kb;
             iss >> kb;
-            return bytes_to_gb(kb * 1024ULL, 1);
+            return utils::bytes_to_gb(kb * 1024ULL, 1);
         }
     }
     return "Unknown RAM";
@@ -79,7 +72,7 @@ std::string get_disk_size() {
     struct statvfs sv{};
     if (statvfs("/", &sv) == 0) {
         unsigned long long bytes = static_cast<unsigned long long>(sv.f_frsize) * sv.f_blocks;
-        return bytes_to_gb(bytes, 0);
+        return utils::bytes_to_gb(bytes, 0);
     }
     return "Unknown Disk";
 }
