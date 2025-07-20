@@ -1,126 +1,192 @@
-﻿Here's a clearer, structured **`AGENTS.MD`** to guide developers effectively when working with your existing project layout:
+﻿# 🚀 DarkScry C++ Agent – Developer & Contributor Guide
+
+Welcome to the **DarkScry C++ Agent** project! This document provides guidelines and best practices for contributing, extending, and maintaining the agent. This is an **actively evolving project**, with new commands, attacks, and features continually being integrated.
+
+Contributors are highly encouraged to expand and enhance the capabilities following these instructions.
 
 ---
 
-# 🚀 DarkScry C++ Agent Development Guidelines
+## 📂 Project Structure (Ongoing)
 
-This document explains the project layout, coding conventions, and best practices for contributing or extending the **DarkScry C++ Agent**. Follow these guidelines closely to ensure code consistency, ease of maintenance, and smooth integration.
-
----
-
-## 📂 Project Directory Layout
-
-The project is structured into clearly defined modules, each with specific responsibilities:
+The project currently follows this organized layout, but it will **expand as new modules and capabilities are added**:
 
 ```
-src/
-├── core/               # Core agent orchestration, lifecycle management, and command handling
-│   ├── Agent.cpp
-│   ├── Agent.h
-│   └── CommandHandler/ # JSON command parsing, task execution, interfaces with attack modules
+CPPClient/
+├── src/
+│   ├── core/                 # Core agent logic, lifecycle, command handling
+│   │   ├── Agent.{h,cpp}
+│   │   ├── Config.h
+│   │   └── CommandHandler/   # JSON-driven command dispatcher (extensible)
+│   │
+│   ├── comm/                 # Networking modules, e.g., WebSocket client
+│   │   └── WsClient/
+│   │
+│   ├── Attacks/              # Attack & simulation modules (open for extension)
+│   │   ├── Execution/        # Shell interactions, execution modules
+│   │   └── Collection/       # System info collection modules
+│   │
+│   ├── serialization/        # JSON serialization & helpers
+│   │
+│   ├── mitre/                # MITRE ATT&CK mappings
+│   │
+│   └── utils/                # Shared utilities, logging, platform-specific code
+│       ├── Logger/
+│       └── win32/
 │
-├── comm/               # Communication protocols, WebSocket client implementations
-│   └── WsClient/
-│
-├── Attacks/            # Attack simulation modules
-│   ├── Execution/
-│   │   ├── Windows/    # Shell execution for Windows
-│   │   └── Linux/      # Shell execution for Linux
-│   └── Collection/
-│       ├── Windows/    # System info gathering on Windows
-│       └── Linux/      # System info gathering on Linux
-│
-├── mitre/              # Mapping functionalities to MITRE ATT&CK framework techniques
-│
-├── utils/              # Common utilities, logging, configuration management, platform-specific helpers
-│   ├── Logger/         # Global logging utilities
-│   └── win32/          # Windows-specific helpers (process handling, security utilities)
-│
-└── main.cpp            # Agent entry point (instantiate and run core agent)
+├── tests/                    # Unit tests (actively maintained & growing)
+├── scripts/                  # Build scripts (placeholders for now)
+├── docs/                     # Documentation (actively evolving)
+├── cmake/                    # CMake helpers and configuration scripts
+└── main.cpp                  # Entry point (instantiates Agent class)
 ```
 
 ---
 
-## 🛠️ How to Choose Where to Place Your Code
+## 🛠️ Adding New Commands & Attacks
 
-Follow this guide when adding new functionality:
+The **DarkScry Agent** is intentionally structured to easily incorporate new capabilities:
 
-### 🟢 **Core (`src/core/`)**
+* **To add a new command:**
 
-* **Agent orchestration**, startup, shutdown, and general lifecycle management.
-* **Command parsing and task handling**: interpreting JSON commands and invoking attack or utility modules.
+  * Implement handling logic inside the `CommandHandler`.
+  * Add your command ID clearly in the existing command enumeration.
+  * Use provided serialization helpers.
 
-  Example classes:
+* **To add a new attack module:**
 
-  * `Agent`, `CommandHandler`
+  * Create platform-specific implementations under `Attacks/Execution` or `Attacks/Collection`.
+  * Ensure the new module integrates cleanly with the existing command-handling workflow.
 
-### 📡 **Communication (`src/comm/`)**
+New attack modules are always welcome. Use the existing structure as a reference point:
 
-* Network communication logic, WebSocket interactions, server-client protocols.
-
-  Example classes:
-
-  * `WsClient`
-
-### ⚔️ **Attacks (`src/Attacks/`)**
-
-* **`execution/`**: Modules for executing commands or scripts, shell interactions (e.g., interactive shells, remote command execution).
-* **`collection/`**: Modules for gathering system information, files, processes, users, and more.
-
-  Example files/classes:
-
-  * `Shell`, `windows_basic_info`
-
-  > Attack modules should have no direct knowledge of networking or command handling. Instead, they are invoked by `CommandHandler`.
-
-### 📊 **MITRE (`src/mitre/`)**
-
-* Logic specifically related to mapping agent capabilities to the MITRE ATT\&CK techniques and sub-techniques.
-
-  Example classes:
-
-  * `MitreMapper`
-
-### 🔧 **Utils (`src/utils/`)**
-
-* General-purpose **helper functions**, logging utilities.
-* Platform-specific utilities (**Windows-specific utilities go into `win32` subdirectory**).
-
-  Example classes:
-
-  * `Logger`, `Config`, `Security`, `Process`, `WinHandle`
+```
+Attacks/
+├── Execution/
+│   ├── Windows/      # Windows-specific execution logic
+│   └── Linux/        # Linux-specific execution logic
+│
+└── Collection/
+    ├── Windows/      # Windows-specific collection modules
+    └── Linux/        # Linux-specific collection modules
+```
 
 ---
 
-## 📜 General Coding Conventions
+## 📌 Where to Implement Your Features?
 
-* **File naming**: Match the class name (e.g., `CommandHandler.hpp` and `CommandHandler.cpp`).
-* **Class naming**: Use PascalCase (e.g., `WsClient`, `Agent`, `WinHandle`).
-* **Function naming**: Use snake\_case (e.g., `run_command`, `load_config`).
-* **Include paths**: Clearly reflect the module's directory structure for predictability (e.g., `#include "utils/Logger/Logger.h"`).
-* **General utilities** (like parsing or conversions) must go to `utils` and should be reusable across the project.
-* **Module interaction**:
+Here are some ongoing recommendations when adding new code:
 
-  * `CommandHandler` calls → `Attacks` modules (e.g., `Shell`)
-  * `Attacks` modules call → `utils` (for helpers/logging)
-  * `comm` calls → `core` (`CommandHandler`) to handle incoming commands
+* **Core (`core/`)**:
+
+  * Command parsing, orchestration, and dispatch logic.
+  * Extendable command registry allows straightforward integration of future commands.
+
+* **Communication (`comm/`)**:
+
+  * Add networking enhancements here.
+  * Ensure communication modules delegate command execution to the `CommandHandler`.
+
+* **Attacks (`Attacks/`)**:
+
+  * Implement new payloads, shell executions, or system information collection.
+  * Keep logic isolated for ease of testing and integration.
+
+* **Serialization (`serialization/`)**:
+
+  * JSON serialization utilities and helpers.
+  * Extend as needed for complex data structures.
+
+* **Utils (`utils/`)**:
+
+  * Place commonly shared and reusable functionality here (e.g., logging, platform utilities).
+  * Encouraged to grow organically as more capabilities are developed.
 
 ---
 
-## 🚦 Recommended Workflow
+## ✅ Recommended Practices (Always Evolving)
 
-1. Identify clearly where new functionality belongs (core logic, communication, attack, utility, or MITRE mapping).
-2. Follow the directory and class layout conventions strictly.
-3. Implement logic within isolated classes to ensure easy unit testing.
-4. Ensure all modules are loosely coupled, interacting primarily via clearly defined interfaces.
-5. Ensure code modularity when creating new capabilites if you think somthing should go to utils place it in their 
+The project adopts these conventions, but **feedback and improvements** are continuously welcome:
+
+| Aspect              | Recommendation                   | Example             |
+| ------------------- | -------------------------------- | ------------------- |
+| **Classes/Structs** | Use PascalCase                   | `CommandHandler`    |
+| **Functions**       | snake\_case                      | `execute_command()` |
+| **Variables**       | snake\_case with trailing `_`    | `shell_running_`    |
+| **Files**           | Match associated classes/structs | `Shell.{cpp,h}`     |
+
+Always use provided utilities and helpers:
+
+* **Logging**: Utilize global logging utilities (`Logger`).
+* **JSON Parsing**: Prefer existing `serialization/JsonUtils.h` helpers.
+* **Platform Checks**: Keep platform-specific code clearly separated (`#ifdef _WIN32`, etc.).
 
 ---
-**⚠️ Important:**
 
-* Always ensure **modularity** when developing new capabilities.
-* If you're implementing common or reusable logic, **place it directly in the `utils/` module**.
-* **`CommandHandler`** should **only call** modules inside the **`Attacks/`** directory.
-* Attack modules (`Attacks/`) may freely use utilities from the **`utils/`** directory.
+## 🚦 Ongoing Commands & Extensions
 
-**Happy coding! 🐱‍💻**
+The existing set of commands is just the starting point. The command dispatcher (`CommandHandler`) is designed to seamlessly incorporate future commands:
+
+| ID | Command Name            | Current Purpose (extendable)           |
+| -- | ----------------------- | -------------------------------------- |
+| 1  | **StartShell**          | Launches an interactive command shell. |
+| 2  | **RunCommand**          | Executes shell commands remotely.      |
+| 3  | **GetBasicMachineInfo** | Retrieves basic system information.    |
+| …  | **YourCommandHere**     | Your future commands here!             |
+
+*This table will expand as the project grows.*
+
+---
+
+## 🧪 Testing and Quality Assurance (Always Ongoing)
+
+Unit tests (`tests/`) should always be expanded with each new feature or module:
+
+* Use GoogleTest framework consistently.
+* Keep tests organized according to modules they're testing:
+
+  ```
+  tests/
+  ├── core/
+  ├── Attacks/
+  └── comm/
+  ```
+* Writing tests is encouraged and **expected** for new contributions.
+
+---
+
+## 🚀 Building, Running, and Extending the Project
+
+### Building with CMake:
+
+Use existing CMake presets (`CMakePresets.json`):
+
+* Configure & Build Example:
+
+```bash
+cmake --preset x64-debug
+cmake --build --preset x64-debug
+```
+
+This workflow supports easy iteration and testing, allowing you to focus on continuous improvement.
+
+---
+
+## 📖 Documentation & Communication (Keep Updated)
+
+* **Continuously** document your modules (`README.md` within respective folders).
+* Clearly comment your code and interfaces.
+* Update this file (**`AGENTS.MD`**) periodically as project structure evolves.
+
+---
+
+## 🌟 The Project Is Never Finished
+
+DarkScry Agent is an **ongoing effort**. Contributors and agents are encouraged to:
+
+* Propose new commands and attacks regularly.
+* Improve existing modules.
+* Suggest structural improvements or new coding practices.
+
+Your contributions shape the project’s direction and success.
+
+
