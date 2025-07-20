@@ -6,13 +6,13 @@ This directory contains the experimental C++ client for the DarkScry project. Th
 /src
     /core            # Core agent logic
     /comm            # Communication modules
-    /attacks         # Attack simulation modules
+    /Attacks         # Attack simulation modules
     /mitre           # MITRE ATT&CK mappings
     /utils           # Logging, configuration, helpers
     main.cpp         # Entry point
 /tests
     /core
-    /attacks
+    /Attacks
     /mitre
 /scripts
     build.cake
@@ -24,4 +24,4 @@ Build with CMake as usual. The `scripts` folder contains a placeholder Cake buil
 
 The entry point simply instantiates the `Agent` class located in `src/core` and
 invokes `run()`. Extend the `Agent` implementation to add new capabilities as
-modules under `attacks` or `mitre`.
+modules under `Attacks` or `mitre`.

