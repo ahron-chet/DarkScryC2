@@ -6,6 +6,7 @@
 #include "Security.hpp"
 #include "UserUtils.hpp"
 #include "GeneralUtils.hpp"
+#include "WinUtils.hpp"
 #include "Logger/GlobalLogger.h"
 
 using namespace win32;
@@ -53,8 +54,8 @@ bool Shell::create_by_sid(const std::wstring& sid) {
 
    if (!enable_privilege(L"SeDebugPrivilege")) return false;  
 
-   DWORD pid{};  
-   if (!find_by_sid(sid, pid)) return false;  
+   DWORD pid{};
+   if (!find_by_sid(sid, pid)) return false;
 
    unique_handle hProc(::OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid));  
    if (!hProc) return false;  
