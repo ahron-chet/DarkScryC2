@@ -15,8 +15,9 @@ public:
    Shell();
    ~Shell();
 
-   bool create_by_sid(const std::wstring& sid = L"CURRENT_USER");
-   const std::wstring& get_current_sid() const { return current_sid_; }
+    bool create_by_sid(const std::wstring& sid = L"CURRENT_USER");
+    const std::wstring& get_current_sid() const { return current_sid_; }
+    bool is_running() const { return pi_.hProcess != nullptr; }
 
    std::string run_command(std::string_view cmd);  
    void start(const std::function<void(const char*)>& cb);  
