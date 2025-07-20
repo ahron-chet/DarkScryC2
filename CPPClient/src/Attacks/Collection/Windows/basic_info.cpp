@@ -11,6 +11,7 @@
 #include <WtsApi32.h> 
 #include "basic_info.hpp"
 #include "WinHandle.hpp"
+#include "RegistryUtils.hpp"
 
 #pragma comment(lib, "iphlpapi.lib")
 #pragma comment(lib, "wtsapi32.lib")
@@ -22,33 +23,7 @@
 
 
 namespace {
-
-    template<std::size_t N>
-    std::wstring reg_query_string(
-        HKEY root, const wchar_t* sub_key, const wchar_t* value,
-        const wchar_t(&fallback)[N])
-    {
-        DWORD type = 0, bytes = 0;
-        if (RegGetValueW(root, sub_key, value, RRF_RT_REG_SZ, &type, nullptr, &bytes) != ERROR_SUCCESS)
-            return std::wstring{ fallback };
-
-        std::wstring buffer(bytes / sizeof(wchar_t), L'\0');
-        if (RegGetValueW(root, sub_key, value, RRF_RT_REG_SZ, nullptr, buffer.data(), &bytes) != ERROR_SUCCESS)
-            return std::wstring{ fallback };
-        buffer.resize((bytes / sizeof(wchar_t)) - 1);        // drop trailing NUL
-        return buffer;
-    }
-
-    std::string narrow(const std::wstring& ws)
-    {
-        if (ws.empty()) return {};
-        int len = WideCharToMultiByte(CP_UTF8, 0, ws.data(), (int)ws.size(),
-            nullptr, 0, nullptr, nullptr);
-        std::string s(len, '\0');
-        WideCharToMultiByte(CP_UTF8, 0, ws.data(), (int)ws.size(),
-            s.data(), len, nullptr, nullptr);
-        return s;
-    }
+    using namespace win32::registry;
 
     std::string bytes_to_gb(std::uint64_t bytes, int precision = 0)
     {
