@@ -26,4 +26,37 @@ inline bool getString(const rapidjson::Value& obj, const char* key, std::string&
     return false;
 }
 
+inline bool getBool(const rapidjson::Value& obj, const char* key,
+                    bool& out)
+{
+    auto it = obj.FindMember(key);
+    if (it != obj.MemberEnd() && it->value.IsBool()) {
+        out = it->value.GetBool();
+        return true;
+    }
+    return false;
+}
+
+inline bool getArray(const rapidjson::Value& obj, const char* key,
+                     const rapidjson::Value*& out)
+{
+    auto it = obj.FindMember(key);
+    if (it != obj.MemberEnd() && it->value.IsArray()) {
+        out = &it->value;
+        return true;
+    }
+    return false;
+}
+
+inline bool getObject(const rapidjson::Value& obj, const char* key,
+                      const rapidjson::Value*& out)
+{
+    auto it = obj.FindMember(key);
+    if (it != obj.MemberEnd() && it->value.IsObject()) {
+        out = &it->value;
+        return true;
+    }
+    return false;
+}
+
 } // namespace CppAgent::json
