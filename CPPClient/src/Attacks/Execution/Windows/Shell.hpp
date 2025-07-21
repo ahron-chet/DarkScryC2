@@ -1,13 +1,12 @@
 #pragma once  
 #include <Windows.h>  
-#include <string>  
-#include <string_view>  
-#include <thread>  
-#include <functional>  
-#include <atomic>  
-#include "win32/include/WinHandle.hpp" 
-#include "win32/include/Process.hpp"
-#include "win32/include/ProcessLauncher.hpp"
+#include <atomic>
+#include <functional>
+#include <string_view>
+#include <thread>
+
+#include "win32/include/WinHandle.hpp"
+#include "ShellLaunchDesc.hpp"
 
 namespace win32 {  
 
@@ -16,8 +15,8 @@ public:
    Shell();
    ~Shell();
 
-    bool create_by_sid(const std::wstring& sid = L"CURRENT_USER");
-    const std::wstring& get_current_sid() const { return current_sid_; }
+    /// Create a cmd.exe session according to `desc`.
+    bool        create(const ShellLaunchDesc& desc);
     bool is_running() const { return pi_.hProcess != nullptr; }
 
    std::string run_command(std::string_view cmd);  
@@ -35,12 +34,11 @@ private:
    std::string make_sentinel();  
    void thread_loop(const std::function<void(const char*)>& cb);  
 
-   unique_handle       out_rd_, out_wr_, in_rd_, in_wr_;
-   PROCESS_INFORMATION pi_{};
-   std::thread         th_;  
-   std::atomic_bool    running_{false};
-   bool                echo_off_{false};
-   std::wstring        current_sid_{};
+    unique_handle       out_rd_, out_wr_, in_rd_, in_wr_;
+    PROCESS_INFORMATION pi_{};
+    std::thread         th_;
+    std::atomic_bool    running_{false};
+    bool                echo_off_{false};
 };
 
 } // namespace win32
