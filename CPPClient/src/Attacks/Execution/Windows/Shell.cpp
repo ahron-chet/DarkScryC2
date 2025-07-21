@@ -1,32 +1,22 @@
-#include "Shell.hpp"  
-#include <array>  
-#include <random>  
-#include <sstream>  
-#include <algorithm>   
-#include "Logger/GlobalLogger.h"
+#include "Shell.hpp"
 #include "win32/include/ProcessLauncher.hpp"
-#include "win32/include/UserUtils.hpp"
-#include "win32/include/WinUtils.hpp"
+#include "Logger/GlobalLogger.h"
 #include "GeneralUtils.hpp"
+#include <array>
+#include <random>
+#include <sstream>
+#include <algorithm>
 
 using namespace win32;
-using namespace win32::security;
-using namespace win32::process;
-using namespace CppAgent;
+using process::LaunchOptions;
+using process::CreationMethod;
 
-Shell::Shell() {}
+Shell::Shell()  {}
 Shell::~Shell() { stop(); }
 
-bool Shell::create_by_sid(const std::wstring& sid)
+bool Shell::create(const ShellLaunchDesc& desc)
 {
-    if (is_running()) {
-        if (utils::iequals(current_sid_, sid)) {
-            DARKSCRY_LOG("Shell session already running for SID: "
-                         + win32::narrow(sid), Logger::Level::Debug);
-            return true;
-        }
-        stop();
-    }
+    stop();   // tear down previous session if any
 
     // ── 1. Build anonymous pipes
     SECURITY_ATTRIBUTES sa{ sizeof sa, nullptr, TRUE };
@@ -37,20 +27,37 @@ bool Shell::create_by_sid(const std::wstring& sid)
     out_rd_.reset(r);  out_wr_.reset(w);
     in_rd_.reset(ir);  in_wr_.reset(iw);
 
-    // ── 2. Fill STARTUPINFO via LaunchOptions
-    LaunchOptions opt = LaunchOptions::impersonate_sid(sid);
+    // 2 ── prepare LaunchOptions
+    LaunchOptions opt;
     opt.si.cb         = sizeof(opt.si);
     opt.si.dwFlags    = STARTF_USESTDHANDLES;
     opt.si.hStdOutput = out_wr_.get();
     opt.si.hStdError  = out_wr_.get();
     opt.si.hStdInput  = in_rd_.get();
 
-    // ── 3. Ask the helper to launch the process
-    if (!launch(opt))
-        return false;
-    pi_ = opt.pi;
+    switch (desc.kind)
+    {
+        case ShellLaunchKind::CurrentUser:
+            opt.method = CreationMethod::CurrentToken;
+            break;
 
-    current_sid_ = sid;
+        case ShellLaunchKind::ImpersonateSid:
+            opt.method = CreationMethod::ImpersonateDuplicateToken;
+            opt.params = process::ImpersonateDuplicateTokenParam{ desc.sid };
+            break;
+
+        case ShellLaunchKind::Credentials:
+            opt.method = CreationMethod::Credentials;
+            opt.params = process::CredentialsParam{
+                            desc.username, desc.password };
+            break;
+    }
+
+    // 3 ── launch
+    if (!process::launch(opt))
+        return false;
+
+    pi_ = opt.pi;
     return true;
 }
 
@@ -142,6 +149,5 @@ void Shell::stop() {
    pi_ = {};
    out_rd_.reset(); out_wr_.reset();
    in_rd_.reset(); in_wr_.reset();
-   current_sid_.clear();
    echo_off_ = false;
 }
