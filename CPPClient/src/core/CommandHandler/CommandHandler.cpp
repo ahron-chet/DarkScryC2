@@ -53,7 +53,7 @@ std::string CommandHandler::onStartShell(const Document& req)
 {
     if (!shell_) shell_ = std::make_unique<execution::Shell>();
 #ifdef _WIN32
-    ShellLaunchDesc desc;                      // default = CurrentUser
+    ShellLaunchDesc desc;
 
     const Value* cmd = nullptr;
     if (json::getObject(req, "command", cmd))
@@ -78,12 +78,11 @@ std::string CommandHandler::onStartShell(const Document& req)
             desc.username = win32::charToWchar(user.c_str());
             desc.password = win32::charToWchar(pwd.c_str());
         }
-        /* else keep CurrentUser */
     }
 
     bool ok = shell_->create(desc);
 #else
-    bool ok = shell_->create();                // Linux / macOS path
+    bool ok = shell_->create()
 #endif
     return ok ? makeSuccess(rapidjson::Value(rapidjson::kNullType))
               : makeError("Shell start failed");
