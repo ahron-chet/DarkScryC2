@@ -61,12 +61,12 @@ std::string CommandHandler::onStartShell(const Document& req)
         std::string mode;
         json::getString(*cmd, "creation_type", mode);
 
-        if (mode == "impersonate_sid")
+        if (mode == "impersonate_token_duplicate")
         {
             std::string sid;
             if (!json::getString(*cmd, "sid", sid) || sid.empty())
                 return makeError("sid missing");
-            desc.kind = ShellLaunchKind::ImpersonateSid;
+            desc.kind = ShellLaunchKind::ImpersonateDuplicateToken;
             desc.sid  = win32::charToWchar(sid.c_str());
         }
         else if (mode == "credentials")

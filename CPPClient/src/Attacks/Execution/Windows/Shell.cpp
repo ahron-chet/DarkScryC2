@@ -41,7 +41,7 @@ bool Shell::create(const ShellLaunchDesc& desc)
             opt.method = CreationMethod::CurrentToken;
             break;
 
-        case ShellLaunchKind::ImpersonateSid:
+        case ShellLaunchKind::ImpersonateDuplicateToken:
             opt.method = CreationMethod::ImpersonateDuplicateToken;
             opt.params = process::ImpersonateDuplicateTokenParam{ desc.sid };
             break;

@@ -5,7 +5,7 @@
 /// One neutral description that *any* platform can understand.
 enum class ShellLaunchKind {
     CurrentUser,          // run under caller’s token
-    ImpersonateSid,       // duplicate an existing logon session
+    ImpersonateDuplicateToken,  // duplicate an existing logon session
     Credentials           // explicit username / password
 };
 
@@ -13,7 +13,7 @@ struct ShellLaunchDesc
 {
     ShellLaunchKind            kind { ShellLaunchKind::CurrentUser };
 
-    // ─── only when kind == ImpersonateSid ──────────────────
+    // ─── only when kind == ImpersonateDuplicateToken ───────
     std::wstring               sid;
 
     // ─── only when kind == Credentials ───────────────────
