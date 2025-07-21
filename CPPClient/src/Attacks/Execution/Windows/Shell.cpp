@@ -3,76 +3,55 @@
 #include <random>  
 #include <sstream>  
 #include <algorithm>   
-#include "Security.hpp"
-#include "UserUtils.hpp"
-#include "GeneralUtils.hpp"
-#include "WinUtils.hpp"
 #include "Logger/GlobalLogger.h"
+#include "win32/include/ProcessLauncher.hpp"
+#include "win32/include/UserUtils.hpp"
+#include "win32/include/WinUtils.hpp"
+#include "GeneralUtils.hpp"
 
 using namespace win32;
 using namespace win32::security;
 using namespace win32::process;
 using namespace CppAgent;
 
-Shell::Shell() { si_.cb = sizeof si_; }
+Shell::Shell() {}
 Shell::~Shell() { stop(); }
 
-bool Shell::create_by_sid(const std::wstring& sid) {
+bool Shell::create_by_sid(const std::wstring& sid)
+{
     if (is_running()) {
         if (utils::iequals(current_sid_, sid)) {
-            DARKSCRY_LOG("Shell session already running for SID: " + win32::narrow(sid), Logger::Level::Debug);
+            DARKSCRY_LOG("Shell session already running for SID: "
+                         + win32::narrow(sid), Logger::Level::Debug);
             return true;
         }
         stop();
     }
 
-    SECURITY_ATTRIBUTES sa{sizeof sa, nullptr, TRUE};
+    // ── 1. Build anonymous pipes
+    SECURITY_ATTRIBUTES sa{ sizeof sa, nullptr, TRUE };
     HANDLE r{}, w{}, ir{}, iw{};
     if (!::CreatePipe(&r, &w, &sa, 0) || !::CreatePipe(&ir, &iw, &sa, 0))
         return false;
 
-   out_rd_.reset(r);  out_wr_.reset(w);  
-   in_rd_.reset(ir);  in_wr_.reset(iw);  
+    out_rd_.reset(r);  out_wr_.reset(w);
+    in_rd_.reset(ir);  in_wr_.reset(iw);
 
-   si_.dwFlags    = STARTF_USESTDHANDLES;  
-   si_.hStdOutput = out_wr_.get();  
-   si_.hStdError  = out_wr_.get();  
-   si_.hStdInput  = in_rd_.get();  
+    // ── 2. Fill STARTUPINFO via LaunchOptions
+    LaunchOptions opt = LaunchOptions::impersonate_sid(sid);
+    opt.si.cb         = sizeof(opt.si);
+    opt.si.dwFlags    = STARTF_USESTDHANDLES;
+    opt.si.hStdOutput = out_wr_.get();
+    opt.si.hStdError  = out_wr_.get();
+    opt.si.hStdInput  = in_rd_.get();
 
-   constexpr wchar_t CMD[] = L"C:\\Windows\\System32\\cmd.exe";  
-   auto spawn = [&](HANDLE tok) {  
-       return tok  
-            ? ::CreateProcessWithTokenW(tok, 0, CMD, nullptr, CREATE_NO_WINDOW, nullptr, nullptr, &si_, &pi_)  
-            : ::CreateProcessW(CMD, nullptr, nullptr, nullptr, TRUE, CREATE_NO_WINDOW, nullptr, nullptr, &si_, &pi_);  
-   };  
+    // ── 3. Ask the helper to launch the process
+    if (!launch(opt))
+        return false;
+    pi_ = opt.pi;
 
-    if (utils::iequals(sid, user::get_current_user_sid())) {
-        bool ok = spawn(nullptr);
-        if (ok) current_sid_ = sid;
-        return ok;
-    }
-
-   if (!enable_privilege(L"SeDebugPrivilege")) return false;  
-
-   DWORD pid{};
-   if (!find_by_sid(sid, pid)) return false;
-
-   unique_handle hProc(::OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid));  
-   if (!hProc) return false;  
-
-   HANDLE hTok{};  
-   if (!::OpenProcessToken(hProc.get(), TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY | TOKEN_QUERY, &hTok))  
-       return false;  
-   unique_handle tok(hTok);  
-
-   HANDLE hDup{};  
-   if (!::DuplicateTokenEx(tok.get(), MAXIMUM_ALLOWED, nullptr, SecurityIdentification, TokenPrimary, &hDup))  
-       return false;  
-   unique_handle dup(hDup);  
-
-    bool ok = spawn(dup.get());
-    if (ok) current_sid_ = sid;
-    return ok;
+    current_sid_ = sid;
+    return true;
 }
 
 void Shell::write_line(std::string_view sv) {  

@@ -7,6 +7,7 @@
 #include <atomic>  
 #include "win32/include/WinHandle.hpp" 
 #include "win32/include/Process.hpp"
+#include "win32/include/ProcessLauncher.hpp"
 
 namespace win32 {  
 
@@ -34,9 +35,8 @@ private:
    std::string make_sentinel();  
    void thread_loop(const std::function<void(const char*)>& cb);  
 
-   unique_handle       out_rd_, out_wr_, in_rd_, in_wr_;  
-   PROCESS_INFORMATION pi_{};  
-   STARTUPINFOW        si_{};  
+   unique_handle       out_rd_, out_wr_, in_rd_, in_wr_;
+   PROCESS_INFORMATION pi_{};
    std::thread         th_;  
    std::atomic_bool    running_{false};
    bool                echo_off_{false};

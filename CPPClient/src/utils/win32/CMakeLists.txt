@@ -4,6 +4,7 @@ add_library(Win32Utils STATIC
     RegistryUtils.cpp
     WinUtils.cpp
     UserUtils.cpp
+    ProcessLauncher.cpp
 )
 
 target_include_directories(Win32Utils
