@@ -121,6 +121,20 @@ Store the `migrations/` directory at the project root alongside `alembic.ini`.
 * In tests, patch `app.utils.tasks.get_task_executor` to return a fake executor instead of connecting to Redis.
 
 
+Absolutely — here’s the addition you can include in your guidelines to enforce **strict documentation for all API endpoints**:
+
+---
+
+## 📚 Endpoint Documentation Requirement
+
+> **Every new API endpoint must be thoroughly documented. No exceptions.**
+
+### 📌 Where to Document
+
+* **For authentication-related endpoints** → `docs/auth.md`
+* **For role-protected routes** → `docs/roles.md`
+* **For core resources (e.g. users, environments, statistics, mitre)** → dedicated file under `docs/`
+
 ---
 
 ## 🧪 Testing Guidelines
