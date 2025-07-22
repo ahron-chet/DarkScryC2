@@ -125,18 +125,6 @@ Absolutely — here’s the addition you can include in your guidelines to enfor
 
 ---
 
-## 📚 Endpoint Documentation Requirement
-
-> **Every new API endpoint must be thoroughly documented. No exceptions.**
-
-### 📌 Where to Document
-
-* **For authentication-related endpoints** → `docs/auth.md`
-* **For role-protected routes** → `docs/roles.md`
-* **For core resources (e.g. users, environments, statistics, mitre)** → dedicated file under `docs/`
-
----
-
 ## 🧪 Testing Guidelines
 
 Navigate to the `Management` directory, then run:
